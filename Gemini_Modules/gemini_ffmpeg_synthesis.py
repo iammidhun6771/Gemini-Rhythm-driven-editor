@@ -561,7 +561,7 @@ class FFmpegCommandGenerator:
         cmd.append(output_path)
         return {"cmd_list": cmd, "terminal_command": self.cmd_list_to_string(cmd), "operation": "delogo_blur", "bounding_box": {"x": x, "y": y, "w": w, "h": h}, "input": input_path, "output": output_path}
 
-    def build_drawtext_command(self, input_path, output_path, text="AMTCE", fontsize=36, fontcolor="white@0.8", position="bottom_center", x=None, y=None, enable_box=True, boxcolor="black@0.4", fontfile=None, encoding_cfg=None):
+    def build_drawtext_command(self, input_path, output_path, text="AMTCE", fontsize=36, fontcolor="white@0.8", position="bottom_center", x=None, y=None, w=None, h=None, enable_box=True, boxcolor="black@0.6", fontfile=None, encoding_cfg=None):
         global _CACHED_FONT_PATH
         if fontfile:
             font_path = fontfile
@@ -575,25 +575,32 @@ class FFmpegCommandGenerator:
             except Exception:
                 font_path = None
 
-        if x is not None and y is not None:
-            coords = f"x={x}:y={y}"
-        else:
-            pos_map = {
-                "top_left": "x=50:y=50",
-                "top_right": "x=w-tw-50:y=50",
-                "bottom_left": "x=50:y=h-th-100",
-                "bottom_right": "x=w-tw-50:y=h-th-100",
-                "bottom_center": "x=(w-tw)/2:y=h-th-120",
-                "center": "x=(w-tw)/2:y=(h-th)/2"
-            }
-            coords = pos_map.get(position, pos_map["bottom_center"])
-
         font_arg = f"fontfile='{font_path.replace(os.sep, '/')}'" if font_path else ""
         text_arg = text.replace("'", "'\\''")
-        box_arg = f":box=1:boxcolor={boxcolor}:boxborderw=6" if enable_box else ""
-        drawtext_filter = f"drawtext={font_arg}:text='{text_arg}':fontsize={fontsize}:fontcolor={fontcolor}{box_arg}:{coords}"
 
-        cmd = [self.ffmpeg_path, "-y", "-i", input_path, "-vf", drawtext_filter]
+        if x is not None and y is not None and w is not None and h is not None:
+            # 2-Tier Shield: drawbox fill exact (w x h) rectangle + centered drawtext
+            drawbox_str = f"drawbox=x={x}:y={y}:w={w}:h={h}:color={boxcolor}:t=fill"
+            drawtext_str = f"drawtext={font_arg}:text='{text_arg}':fontsize={fontsize}:fontcolor={fontcolor}:x={x}+({w}-tw)/2:y={y}+({h}-th)/2"
+            vf_filter = f"{drawbox_str},{drawtext_str}"
+        else:
+            if x is not None and y is not None:
+                coords = f"x={x}:y={y}"
+            else:
+                pos_map = {
+                    "top_left": "x=50:y=50",
+                    "top_right": "x=w-tw-50:y=50",
+                    "bottom_left": "x=50:y=h-th-100",
+                    "bottom_right": "x=w-tw-50:y=h-th-100",
+                    "bottom_center": "x=(w-tw)/2:y=h-th-120",
+                    "center": "x=(w-tw)/2:y=(h-th)/2"
+                }
+                coords = pos_map.get(position, pos_map["bottom_center"])
+
+            box_arg = f":box=1:boxcolor={boxcolor}:boxborderw=6" if enable_box else ""
+            vf_filter = f"drawtext={font_arg}:text='{text_arg}':fontsize={fontsize}:fontcolor={fontcolor}{box_arg}:{coords}"
+
+        cmd = [self.ffmpeg_path, "-y", "-i", input_path, "-vf", vf_filter]
         cmd.extend(self._get_encoder_flags(encoding_cfg=encoding_cfg))
         if self._has_audio_stream(input_path):
             cmd.extend(["-c:a", "copy"])
@@ -764,10 +771,13 @@ class FFmpegCommandGenerator:
             except (TypeError, ValueError):
                 pass
 
-        if dt_op:
-            if dt_op.get("text"): brand_text = dt_op.get("text")
-            if dt_op.get("fontsize"): brand_fontsize = int(dt_op.get("fontsize"))
-            if dt_op.get("fontcolor"): brand_fontcolor = dt_op.get("fontcolor")
+        env_brand = os.getenv("BRAND_WATERMARK_TEXT", "").strip()
+        if env_brand:
+            brand_text = env_brand
+        elif dt_op and dt_op.get("text"):
+            brand_text = dt_op.get("text")
+        elif not brand_text:
+            brand_text = os.getenv("BRAND_WATERMARK_TEXT", "").strip() or None
 
         # ── Step A: Trim segments ────────────────────────────────────────────────
         shots = micro_shots or []
@@ -845,6 +855,22 @@ class FFmpegCommandGenerator:
         # ── Step E: Optional drawtext brand watermark (MASKING INPAINT RESIDUE) ──
         brand_overlay_data = None
         if brand_text:
+            font_arg = ""
+            if brand_fontfile and os.path.exists(brand_fontfile):
+                safe_path = brand_fontfile.replace("\\", "/").replace(":", "\\:")
+                font_arg = f"fontfile='{safe_path}':"
+            else:
+                try:
+                    from Text_Modules.Font_manager import ensure_montserrat_font
+                    fp = ensure_montserrat_font()
+                    if fp:
+                        safe_path = fp.replace("\\", "/").replace(":", "\\:")
+                        font_arg = f"fontfile='{safe_path}':"
+                except Exception:
+                    pass
+
+            safe_text = brand_text.replace("'", "\\'")
+
             # Position over detected watermark box if coordinates available
             if watermark_boxes:
                 box0 = watermark_boxes[0]
@@ -879,50 +905,54 @@ class FFmpegCommandGenerator:
                 ty = max(10, min(th - th_box - 10, ty))
 
                 bg_texture = str(op_vecs.get("background_texture") or box0.get("semantic_vectors", {}).get("background_texture", "")).lower()
-                auto_fontsize = max(20, min(42, int(th_box * 0.65)))
-                boxcolor = "black@0.65" if any(k in bg_texture for k in ["complex", "hair", "foliage", "busy"]) else "black@0.45"
-                boxborderw_val = max(6, int(op_vecs.get("mask_padding_y", 8)))
-                pos_expr = f"x={tx}:y={ty}"
+                boxcolor = "black@0.75" if any(k in bg_texture for k in ["complex", "hair", "foliage", "busy"]) else "black@0.60"
+                
+                # Proportional font sizing constrained by both box height and width
+                max_text_len = max(1, len(brand_text))
+                max_fontsize_by_w = int((tw_box * 0.85) / (max_text_len * 0.58))
+                auto_fontsize = max(16, min(42, int(th_box * 0.60), max_fontsize_by_w))
+
+                # ── 2-TIER MATHEMATICAL SHIELD ──
+                # Tier 1: drawbox fills the EXACT (tw_box × th_box) inpaint rectangle so 0% residue is exposed
+                drawbox_node = "[vbox]"
+                drawbox_filter = f"{current_label}drawbox=x={tx}:y={ty}:w={tw_box}:h={th_box}:color={boxcolor}:t=fill{drawbox_node}"
+                filter_parts.append(drawbox_filter)
+                current_label = drawbox_node
+
+                # Tier 2: drawtext mathematically centered inside the exact plate
+                pos_expr = f"x={tx}+({tw_box}-tw)/2:y={ty}+({th_box}-th)/2"
+                drawtext_filter = (
+                    f"{current_label}drawtext={font_arg}"
+                    f"text='{safe_text}':"
+                    f"fontsize={auto_fontsize}:"
+                    f"fontcolor={brand_fontcolor}:"
+                    f"{pos_expr}[vout]"
+                )
+                filter_parts.append(drawtext_filter)
+                current_label = "[vout]"
+
                 brand_overlay_data = {"text": brand_text, "x": tx, "y": ty, "w": tw_box, "h": th_box, "opencv_vectors": op_vecs}
                 logger.info(
-                    f"🎯 [OPENCV MATH ALIGNMENT] Mapped effective inpaint patch ({x_raw},{y_raw},{w_raw},{h_raw}) → "
-                    f"9:16 frame ({tx},{ty},{tw_box},{th_box}) [padding={boxborderw_val}px, opacity={boxcolor}]"
+                    f"🎯 [2-TIER BRAND MASK SHIELD] Inpaint footprint ({x_raw},{y_raw},{w_raw},{h_raw}) → "
+                    f"9:16 drawbox shield ({tx},{ty},{tw_box},{th_box}) [fill={boxcolor}] + centered text [fontsize={auto_fontsize}]"
                 )
 
             else:
                 auto_fontsize = brand_fontsize
-                boxcolor = "black@0.35"
-                pos_expr = f"x=(w-tw)/2:y=h-th-120"
-                # Bottom-center defaults on 1080x1920: x~390, y~1760
+                boxcolor = "black@0.45"
+                pos_expr = "x=(w-tw)/2:y=h-th-120"
                 brand_overlay_data = {"text": brand_text, "x": (tw - 300) // 2, "y": th - 160, "w": 320, "h": 70}
 
-
-            font_arg = ""
-            if brand_fontfile and os.path.exists(brand_fontfile):
-                safe_path = brand_fontfile.replace("\\", "/").replace(":", "\\:")
-                font_arg = f"fontfile='{safe_path}':"
-            else:
-                # Try ensure_montserrat_font
-                try:
-                    from Text_Modules.Font_manager import ensure_montserrat_font
-                    fp = ensure_montserrat_font()
-                    if fp:
-                        safe_path = fp.replace("\\", "/").replace(":", "\\:")
-                        font_arg = f"fontfile='{safe_path}':"
-                except Exception:
-                    pass
-
-            safe_text = brand_text.replace("'", "\\'")
-            drawtext_filter = (
-                f"{current_label}drawtext={font_arg}"
-                f"text='{safe_text}':"
-                f"fontsize={auto_fontsize}:"
-                f"fontcolor={brand_fontcolor}:"
-                f"{pos_expr}:"
-                f"box=1:boxcolor={boxcolor}:boxborderw=6[vout]"
-            )
-            filter_parts.append(drawtext_filter)
-            current_label = "[vout]"
+                drawtext_filter = (
+                    f"{current_label}drawtext={font_arg}"
+                    f"text='{safe_text}':"
+                    f"fontsize={auto_fontsize}:"
+                    f"fontcolor={brand_fontcolor}:"
+                    f"{pos_expr}:"
+                    f"box=1:boxcolor={boxcolor}:boxborderw=6[vout]"
+                )
+                filter_parts.append(drawtext_filter)
+                current_label = "[vout]"
         else:
             # No brand text — rename final node
             filter_parts.append(f"{current_label}copy[vout]")

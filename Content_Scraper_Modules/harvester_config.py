@@ -1,4 +1,4 @@
-﻿"""
+"""
 actress_config.py — AMTCE Actress Account Router
 =================================================
 Loads source_accounts.json (v2 format: key=name, value={id, route})

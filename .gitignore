@@ -1,8 +1,6 @@
 # Environment variables & secrets
 .env
 *.env
-Credentials/
-Credentials
 
 # Python cache & virtual environments
 __pycache__/
@@ -10,25 +8,13 @@ __pycache__/
 .venv/
 venv/
 
-# Downloaded raw media, temporary frames & databases
+# Downloaded raw media & temporary frames
 downloads/
-Audio_Modules/Original_audio/
-Processed Shorts/
-tmp/
-cache/
-debug_frames/
-temp_watermark/
-*.mp4
-*.wav
 *.aac
 *.m4a
 *.png
 *.jpg
 *.jpeg
-*.db
-publish_queue.json
-rag/chroma_store/
-rag/creator_fingerprints/
 
 # Logs
 logs/

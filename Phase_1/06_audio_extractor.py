@@ -32,14 +32,32 @@ def extract_clip_audio(
     stem = os.path.splitext(os.path.basename(video_path))[0]
     wav_path = os.path.join(clip_dir, f"{stem}_extracted.wav")
 
-    if os.path.exists(wav_path):
-        logger.info(f"🎵 [STEP 06] Extracted audio WAV already exists: {wav_path}")
+    # ── 1. PRIMARY: Telegram Storage Vault Hydration ─────────────────────────
+    try:
+        from Publishing_Modules.telegram_vault_indexer import TelegramVaultIndexer
+        vault = TelegramVaultIndexer()
+        social_url = os.path.basename(clip_dir).replace("manual_", "")
+        vault_wav, _ = vault.hydrate_audio_and_math_from_vault(social_url, clip_dir)
+        if vault_wav and os.path.exists(vault_wav) and os.path.getsize(vault_wav) > 1024:
+            logger.info(f"🎵 [STEP 06 - PRIMARY] Hydrated extracted audio WAV directly from Telegram Storage Group Vault: {os.path.basename(vault_wav)}")
+            if callback:
+                callback("step_06", "success", {
+                    "message": "Extracted audio WAV hydrated directly from Telegram Storage Vault.",
+                    "wav_path": vault_wav
+                })
+            return {"step": "step_06", "status": "success", "wav_path": vault_wav, "reused": True, "source": "telegram_storage_vault"}
+    except Exception as _ave:
+        logger.debug(f"[STEP 06] Vault audio primary hydration notice: {_ave}")
+
+    # ── 2. SECONDARY: Local Disk Presence Check ──────────────────────────────
+    if os.path.exists(wav_path) and os.path.getsize(wav_path) > 1024:
+        logger.info(f"⚡ [STEP 06 - SECONDARY] Extracted audio WAV already exists locally: {wav_path}")
         if callback:
             callback("step_06", "success", {
-                "message": "Extracted audio WAV file already exists.",
+                "message": "Extracted audio WAV file already exists locally.",
                 "wav_path": wav_path
             })
-        return {"step": "step_06", "status": "success", "wav_path": wav_path, "reused": True}
+        return {"step": "step_06", "status": "success", "wav_path": wav_path, "reused": True, "source": "local_disk"}
 
     try:
         from Audio_Modules.audio_extractor import extract_audio

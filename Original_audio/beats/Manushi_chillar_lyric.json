@@ -1,0 +1,197 @@
+{
+  "has_vocals": true,
+  "language": "Hindi",
+  "tempo_bpm": 120.0,
+  "bar_duration_sec": 2.0,
+  "dominant_emotion": "hype",
+  "energy_profile": "high",
+  "sections": [
+    {
+      "start": 0.0,
+      "end": 2.5,
+      "type": "intro",
+      "energy": 0.7,
+      "mood": "hype",
+      "recommended_cut_pace": "fast"
+    },
+    {
+      "start": 2.5,
+      "end": 23.5,
+      "type": "chorus",
+      "energy": 0.9,
+      "mood": "party",
+      "recommended_cut_pace": "rapid_fire"
+    }
+  ],
+  "tension_arc": [
+    {
+      "time": 0.0,
+      "tension": 0.6
+    },
+    {
+      "time": 1.0,
+      "tension": 0.7
+    },
+    {
+      "time": 2.0,
+      "tension": 0.8
+    },
+    {
+      "time": 3.0,
+      "tension": 0.9
+    },
+    {
+      "time": 4.0,
+      "tension": 0.9
+    },
+    {
+      "time": 5.0,
+      "tension": 0.9
+    },
+    {
+      "time": 6.0,
+      "tension": 0.9
+    },
+    {
+      "time": 7.0,
+      "tension": 0.9
+    },
+    {
+      "time": 8.0,
+      "tension": 0.9
+    },
+    {
+      "time": 9.0,
+      "tension": 0.9
+    },
+    {
+      "time": 10.0,
+      "tension": 0.9
+    },
+    {
+      "time": 11.0,
+      "tension": 0.9
+    },
+    {
+      "time": 12.0,
+      "tension": 0.9
+    },
+    {
+      "time": 13.0,
+      "tension": 0.9
+    },
+    {
+      "time": 14.0,
+      "tension": 0.9
+    },
+    {
+      "time": 15.0,
+      "tension": 0.9
+    },
+    {
+      "time": 16.0,
+      "tension": 0.9
+    },
+    {
+      "time": 17.0,
+      "tension": 0.9
+    },
+    {
+      "time": 18.0,
+      "tension": 0.9
+    },
+    {
+      "time": 19.0,
+      "tension": 0.9
+    },
+    {
+      "time": 20.0,
+      "tension": 0.9
+    },
+    {
+      "time": 21.0,
+      "tension": 0.9
+    },
+    {
+      "time": 22.0,
+      "tension": 0.9
+    },
+    {
+      "time": 23.0,
+      "tension": 0.9
+    }
+  ],
+  "lyrics": [
+    {
+      "time": 0.0,
+      "end": 2.5,
+      "text": "Stutter intro",
+      "emotion_weight": 0.5,
+      "emotion_tag": "hype",
+      "section": "intro"
+    },
+    {
+      "time": 2.5,
+      "end": 12.0,
+      "text": "Hare shikari ankhein... gal vich jala ve juriya teri",
+      "emotion_weight": 0.8,
+      "emotion_tag": "hype",
+      "section": "chorus"
+    },
+    {
+      "time": 12.0,
+      "end": 23.5,
+      "text": "Nagin si hai zulfen, kali ghatayein zulfein...",
+      "emotion_weight": 0.9,
+      "emotion_tag": "hype",
+      "section": "chorus"
+    }
+  ],
+  "emotional_peak_moments": [
+    2.5,
+    8.5,
+    12.5,
+    18.5
+  ],
+  "shot_directives": [
+    {
+      "time": 0.0,
+      "duration": 2.5,
+      "directive": "fast_action",
+      "priority": 3,
+      "reason": "Building anticipation"
+    },
+    {
+      "time": 2.5,
+      "duration": 10.0,
+      "directive": "face_closeup",
+      "priority": 5,
+      "reason": "Lyric mentions eyes/gaze"
+    },
+    {
+      "time": 12.0,
+      "duration": 11.5,
+      "directive": "fast_action",
+      "priority": 4,
+      "reason": "High-emotion lyric: 'Nagin si hai zulfen, kali ghatayein zulfein...' (hype)"
+    },
+    {
+      "time": 12.5,
+      "duration": 11.0,
+      "directive": "wide_energetic",
+      "priority": 4,
+      "reason": "Energy peak for choreography"
+    }
+  ],
+  "vibe_tags": [
+    "punjabi",
+    "dance",
+    "high_energy",
+    "club",
+    "upbeat"
+  ],
+  "instrumental_sections": [],
+  "is_unusable": false,
+  "unusable_reason": "",
+  "_source": "gemini"
+}

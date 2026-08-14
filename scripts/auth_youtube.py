@@ -242,54 +242,65 @@ def _try_device_flow(client_id, client_secret, tg_token, tg_admin, token_path):
     return True  # Handled (just timed out)
 
 
-# ── Fallback: URL + manual code paste flow ────────────────────────────────────
+# ── Fallback: URL + Telegram code exchange flow ───────────────────────────────
 
 def _fallback_url_flow(secret_path, token_path, tg_token, tg_admin):
-    """Used when device flow is unavailable (app type = Desktop)."""
+    """
+    URL + Telegram code exchange flow.
+    1. Generates authorization URL immediately.
+    2. Sends it to Telegram chat with a direct 'Tap to Authorize' button and HTML link.
+    3. Opens browser locally on the host machine.
+    4. Waits for code either via:
+       - Telegram bot (/ytcode command dropping code in Credentials/yt_auth_code.txt)
+       - Direct URL paste into Telegram bot chat
+    5. Exchanges code for token.json, saves it, and syncs to GitHub Secrets via GH PAT.
+    """
     from google_auth_oauthlib.flow import InstalledAppFlow
-
-    is_headless = (
-        os.getenv("GITHUB_ACTIONS") == "true"
-        or os.getenv("CI") == "true"
-        or not sys.stdin.isatty()
-    )
+    import webbrowser
 
     flow = InstalledAppFlow.from_client_secrets_file(secret_path, SCOPES)
     flow.redirect_uri = "http://localhost"
 
-    if not is_headless:
-        try:
-            creds = flow.run_local_server(port=0, access_type="offline", prompt="consent", open_browser=True)
-            with open(token_path, "w", encoding="utf-8") as f:
-                f.write(creds.to_json())
-            print(f"✅ Token saved to {token_path}")
-            sync_token_to_github_secret(token_path, creds.to_json())
-            return
-        except Exception as e:
-            print(f"ℹ️ Browser flow failed: {e}")
-
-    # Headless — send link, wait for user to paste code back via /ytcode
     auth_url, _ = flow.authorization_url(prompt="consent", access_type="offline")
     print(f"\n🔗 AUTH URL:\n{auth_url}\n")
 
+    # 1. Immediately notify user on Telegram with the authorization link & instructions
     if tg_token and tg_admin:
         msg = (
-            f"🔐 <b>YouTube Re-Auth Required</b>\n\n"
-            f"⚠️ <i>Your Google app type is 'Desktop' — one extra step needed:</i>\n\n"
-            f"1️⃣ Tap <b>Tap to Authorize</b> below.\n"
-            f"2️⃣ Sign in with Google and grant permissions.\n"
-            f"3️⃣ Google will redirect your browser to a page starting with <code>http://localhost</code>. "
-            f"<b>This page will fail to load (e.g. 'localhost refused to connect'). THIS IS NORMAL and expected!</b>\n"
-            f"4️⃣ Do NOT click reload. Instead, <b>copy the entire URL</b> from your browser's address bar (it starts with http://localhost and contains <code>code=</code>).\n"
-            f"5️⃣ Send the copied URL back to this bot (either paste it directly or send it as: <code>/ytcode PASTE_URL</code>).\n\n"
-            f"<b>To make this fully automatic (no code needed):</b>\n"
-            f"Change your Google Cloud app type to <b>TV and Limited Input Devices</b>."
+            f"🔐 <b>YouTube Authorization Required</b>\n\n"
+            f"1️⃣ Tap <b>Tap to Authorize</b> below (or click the link) to sign in with Google:\n"
+            f"<a href='{auth_url}'>👉 Click here to Sign in with Google</a>\n\n"
+            f"2️⃣ Grant the requested YouTube permissions.\n\n"
+            f"3️⃣ Google will redirect your browser to a page starting with <code>http://localhost/?code=...</code>.\n"
+            f"<i>(This page may show 'site cannot be reached' — this is 100% normal!)</i>\n\n"
+            f"4️⃣ Copy the entire URL from your browser's address bar and reply to this bot with:\n"
+            f"<code>/ytcode YOUR_COPIED_URL</code>\n"
+            f"<i>(or simply paste the URL directly into this chat)</i>"
         )
         _send_telegram(msg, tg_token, tg_admin, button_url=auth_url)
-        _send_telegram(f"🔗 Auth URL:\n{auth_url}", tg_token, tg_admin)
+        print("📲 Dispatched YouTube Authorization link to Telegram admin chat.")
 
-    # Poll for code dropped by /ytcode bot command
-    print("⏳ Waiting for /ytcode code (5 min)...")
+    # 2. Open browser locally only on desktop systems (skip in GitHub Actions / headless CI)
+    is_headless = (
+        os.getenv("GITHUB_ACTIONS") == "true"
+        or os.getenv("CI") == "true"
+        or (sys.platform != "win32" and not os.environ.get("DISPLAY"))
+    )
+    if not is_headless:
+        try:
+            webbrowser.open(auth_url)
+        except Exception:
+            pass
+
+    # 3. Clean up any stale auth code file before starting polling
+    if os.path.exists(AUTH_CODE_FILE):
+        try:
+            os.remove(AUTH_CODE_FILE)
+        except Exception:
+            pass
+
+    # 4. Poll for code dropped by /ytcode Telegram bot command
+    print("⏳ Waiting for authorization code via Telegram /ytcode or localhost URL (5 min)...")
     deadline = time.time() + 300
     while time.time() < deadline:
         if os.path.exists(AUTH_CODE_FILE):
@@ -298,32 +309,47 @@ def _fallback_url_flow(secret_path, token_path, tg_token, tg_admin):
                     raw = f.read().strip()
                 os.remove(AUTH_CODE_FILE)
 
-                # Auto-extract from full URL
-                if raw.startswith("http"):
-                    parsed = urllib.parse.urlparse(raw)
-                    qs = urllib.parse.parse_qs(parsed.query)
-                    raw = qs.get("code", [raw])[0]
+                if raw:
+                    # Auto-extract code parameter if full URL was pasted
+                    if raw.startswith("http"):
+                        parsed = urllib.parse.urlparse(raw)
+                        qs = urllib.parse.parse_qs(parsed.query)
+                        raw = qs.get("code", [raw])[0]
 
-                flow.fetch_token(code=raw)
-                creds = flow.credentials
-                os.makedirs(os.path.dirname(token_path) or ".", exist_ok=True)
-                with open(token_path, "w", encoding="utf-8") as f:
-                    f.write(creds.to_json())
-                print(f"✅ Token saved to {token_path}")
-                sync_token_to_github_secret(token_path, creds.to_json())
-                if tg_token and tg_admin:
-                    _send_telegram("✅ <b>YouTube Authorized!</b>\nToken saved. Uploads resume automatically.", tg_token, tg_admin)
-                return
+                    print(f"🔑 Exchanging authorization code for OAuth token...")
+                    flow.fetch_token(code=raw)
+                    creds = flow.credentials
+                    os.makedirs(os.path.dirname(token_path) or ".", exist_ok=True)
+                    token_json_str = creds.to_json()
+                    with open(token_path, "w", encoding="utf-8") as f:
+                        f.write(token_json_str)
+                    print(f"✅ Token saved to {token_path}")
+
+                    # Sync to GitHub Secrets using GitHub PAT
+                    synced = sync_token_to_github_secret(token_path, token_json_str)
+                    sync_msg = " and synced to GitHub Repository Secrets! 🔒" if synced else " (saved locally)."
+
+                    if tg_token and tg_admin:
+                        _send_telegram(
+                            f"✅ <b>YouTube Authorized Successfully!</b>\n\n"
+                            f"📁 Token saved to <code>{os.path.basename(token_path)}</code>{sync_msg}\n\n"
+                            f"🚀 Uploads will resume automatically.",
+                            tg_token,
+                            tg_admin
+                        )
+                    return True
             except Exception as e:
                 print(f"❌ Code exchange failed: {e}")
                 if tg_token and tg_admin:
-                    _send_telegram(f"❌ Code exchange failed:\n<code>{e}</code>\n\nSend /ytcode to try again.", tg_token, tg_admin)
-                deadline = time.time() + 300
-        time.sleep(5)
+                    _send_telegram(f"❌ <b>Code exchange failed:</b>\n<code>{e}</code>\n\nSend /ytcode to try again.", tg_token, tg_admin)
+                deadline = time.time() + 180
 
-    print("❌ Timed out.")
+        time.sleep(2)
+
+    print("❌ Timed out waiting for auth code.")
     if tg_token and tg_admin:
-        _send_telegram("⏱️ Auth timed out. Send /ytcode to start again.", tg_token, tg_admin)
+        _send_telegram("⏱️ <b>Auth timed out.</b> Send /ytcode to start again.", tg_token, tg_admin)
+    return False
 
 
 # ── Main entry point ──────────────────────────────────────────────────────────

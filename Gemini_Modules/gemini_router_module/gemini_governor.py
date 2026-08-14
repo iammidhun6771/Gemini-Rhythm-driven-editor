@@ -24,6 +24,21 @@ from datetime import datetime, timedelta
 
 from typing import Any, Optional, Dict, List
 
+try:
+    from .list_models import get_active_models_and_ratings, refresh_gemini_models_cache
+except ImportError:
+    try:
+        from Gemini_Modules.gemini_router_module.list_models import get_active_models_and_ratings, refresh_gemini_models_cache
+    except ImportError:
+        try:
+            from Tools.Gemini_Modules.gemini_router_module.list_models import get_active_models_and_ratings, refresh_gemini_models_cache
+        except ImportError:
+            try:
+                from list_models import get_active_models_and_ratings, refresh_gemini_models_cache
+            except ImportError:
+                get_active_models_and_ratings = None
+                refresh_gemini_models_cache = None
+
 
 
 # ── LOAD ENV EARLY ────────────────────────────────────────────────────────────
@@ -36,11 +51,22 @@ try:
 
     from dotenv import load_dotenv as _load_dotenv
 
-    _env_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "Credentials", ".env")
+    _load_dotenv(override=False)
 
-    if os.path.exists(_env_path):
+    _governor_dir = os.path.dirname(os.path.abspath(__file__))
+    _env_candidates = [
+        os.path.join(os.getcwd(), ".env"),
+        os.path.join(os.getcwd(), "Credentials", ".env"),
+        os.path.join(_governor_dir, ".env"),
+        os.path.join(os.path.dirname(_governor_dir), ".env"),
+        os.path.join(os.path.dirname(_governor_dir), "Credentials", ".env"),
+        os.path.join(os.path.dirname(os.path.dirname(_governor_dir)), ".env"),
+        os.path.join(os.path.dirname(os.path.dirname(_governor_dir)), "Credentials", ".env"),
+    ]
 
-        _load_dotenv(_env_path, override=False)
+    for _cand_path in _env_candidates:
+        if os.path.exists(_cand_path):
+            _load_dotenv(_cand_path, override=False)
 
 except Exception:
 
@@ -61,7 +87,10 @@ except ImportError:
         genai = None
         types = None
 
-import requests
+try:
+    import requests
+except ImportError:
+    requests = None
 
 try:
     from Diagnostics_Modules.gemini_trace import GeminiTrace
@@ -366,29 +395,34 @@ class GeminiGovernor:
 
         """Compute a non-reversible hash of the API key for change detection."""
 
-        key = os.getenv("GEMINI_API_KEY")
+        key = os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY")
 
         if not key:
 
-            env_path = os.path.join("Credentials", ".env")
+            governor_dir = os.path.dirname(os.path.abspath(__file__))
+            candidates = [
+                os.path.join(os.getcwd(), ".env"),
+                os.path.join(os.getcwd(), "Credentials", ".env"),
+                os.path.join(governor_dir, ".env"),
+                os.path.join(os.path.dirname(governor_dir), ".env"),
+                os.path.join(os.path.dirname(governor_dir), "Credentials", ".env"),
+                os.path.join(os.path.dirname(os.path.dirname(governor_dir)), ".env"),
+                os.path.join(os.path.dirname(os.path.dirname(governor_dir)), "Credentials", ".env"),
+            ]
 
-            if os.path.exists(env_path):
-
-                try:
-
-                    with open(env_path, "r", encoding="utf-8") as f:
-
-                        for line in f:
-
-                            if line.startswith("GEMINI_API_KEY="):
-
-                                key = line.split("=", 1)[1].strip().strip("'").strip('"')
-
-                                break
-
-                except Exception:
-
-                    pass
+            for env_path in candidates:
+                if os.path.exists(env_path):
+                    try:
+                        with open(env_path, "r", encoding="utf-8") as f:
+                            for line in f:
+                                line_clean = line.strip()
+                                if line_clean.startswith("GEMINI_API_KEY=") or line_clean.startswith("GOOGLE_API_KEY="):
+                                    key = line_clean.split("=", 1)[1].strip().strip("'").strip('"')
+                                    break
+                        if key:
+                            break
+                    except Exception:
+                        pass
 
         key = key or ""
 
@@ -455,57 +489,43 @@ class GeminiGovernor:
 
 
     def _initialize_models(self):
-
-        """Pre-initialize supported models with default states."""
-
-        # Categorized available models (VANGUARD STRICT LIST)
-
+        """Pre-initialize supported models with dynamic discovery and default states."""
         models = [
-            # High-Intelligence (Pro/Master) — VERIFIED PRODUCTION MODELS ONLY
             "gemini-2.5-pro",
             "gemini-pro-latest",
-
-            # High-Speed (Flash)
             "gemini-2.5-flash",
             "gemini-2.0-flash",
             "gemini-2.0-flash-001",
             "gemini-flash-latest",
-
-            # Ultra-Low-Token (Lite) — highest quota
             "gemini-2.5-flash-lite",
             "gemini-2.0-flash-lite",
             "gemini-2.0-flash-lite-001",
             "gemini-flash-lite-latest",
         ]
+        if get_active_models_and_ratings:
+            try:
+                disc_models, ratings = get_active_models_and_ratings()
+                if disc_models:
+                    models = disc_models
+                if ratings:
+                    self.TASK_MODEL_RATINGS = ratings
+            except Exception as exc:
+                logger.warning(f"Dynamic model rating lookup failed: {exc}")
 
         with self.state_lock:
-
             for m in models:
-
                 if m not in self.model_states:
-
                     self.model_states[m] = {
-
                         "status": "ACTIVE",
-
                         "ban_remaining_seconds": 0,
-
                         "success_count": 5.0, # optimistic start
-
                         "total_calls": 5.0,
-
                         "429_count": 0,
-
                         "fail_count": 0,
-
                         "avg_latency": 0.5,
-
                         "last_used_at": 0,
-
                         "last_success_at": 0,
-
                         "warmup_calls": 0
-
                     }
 
 
@@ -556,6 +576,13 @@ class GeminiGovernor:
 
         )
 
+        # Ensure models and task ratings are kept current if TTL expired
+        if get_active_models_and_ratings:
+            try:
+                self._initialize_models()
+            except Exception:
+                pass
+
 
 
     def _load_states(self):
@@ -580,7 +607,7 @@ class GeminiGovernor:
 
                 if stored_hash and stored_hash != self.current_key_hash:
 
-                    logger.info("🔑 New API Key detected! Wiping penalty states.")
+                    logger.info("🔑 New API Key detected! Wiping penalty states and refreshing live model roster.")
 
                     with self.state_lock:
 
@@ -597,6 +624,13 @@ class GeminiGovernor:
                                 "429_count": 0
 
                             })
+
+                    if refresh_gemini_models_cache:
+                        try:
+                            refresh_gemini_models_cache(force=True)
+                            self._initialize_models()
+                        except Exception:
+                            pass
 
                     # Do not load old states from json
 
@@ -737,8 +771,20 @@ class GeminiGovernor:
             self._tick_ban_timers_unlocked()
 
             state = self.model_states.get(model_name)
-
-            if not state: return
+            if not state:
+                self.model_states[model_name] = {
+                    "status": "ACTIVE",
+                    "ban_remaining_seconds": 0,
+                    "success_count": 0,
+                    "total_calls": 0,
+                    "429_count": 0,
+                    "fail_count": 0,
+                    "avg_latency": 1.0,
+                    "last_used_at": time.time(),
+                    "last_success_at": 0,
+                    "warmup_calls": 0
+                }
+                state = self.model_states[model_name]
 
 
 
@@ -794,6 +840,16 @@ class GeminiGovernor:
 
                 logger.warning(f"🔥 Model {model_name} isolated for 90s due to Server Error.")
 
+            elif error_type in ("404", "400", "not_found", "model_deprecated"):
+                state["status"] = "BANNED"
+                state["ban_remaining_seconds"] = 86400  # 24-hour ban for deprecated/missing model
+                logger.warning(f"🚫 Model {model_name} PERMANENTLY BANNED due to 404/400 Deprecation error.")
+                if refresh_gemini_models_cache:
+                    try:
+                        refresh_gemini_models_cache(force=True)
+                        self._initialize_models()
+                    except Exception as ref_err:
+                        logger.warning(f"Failed to auto-refresh model cache: {ref_err}")
             elif error_type == "safety":
 
                 state["status"] = "BANNED"
@@ -870,153 +926,8 @@ class GeminiGovernor:
 
             self._tick_ban_timers_unlocked()
 
-            # Task Boosting (V4.0 — Full Roster, High-Quota-First)
-            boosts = {
-
-                # ── CREATIVE ─────────────────────────────────────────────────
-                # High-quota models first for speed & throughput.
-                # Preview models (3-flash-preview) score highest for prose quality.
-                "creative": {
-                    # Tier 1: High Quota (Lite — fastest, most RPM)
-                    "gemini-2.5-flash-lite": 3.0,
-                    "gemini-flash-lite-latest": 2.9,
-                    "gemini-2.0-flash-lite": 2.8,
-                    # Tier 2: Standard Flash
-                    "gemini-2.5-flash": 2.7,
-                    "gemini-2.0-flash": 2.6,
-                    "gemini-flash-latest": 2.5,
-                    # Tier 3: Pro — overkill for creative
-                    "gemini-2.5-pro": 1.5,
-                    "gemini-pro-latest": 1.1,
-                },
-
-                # ── REASONING ─────────────────────────────────────────────────
-                # Logic tasks: use high-quota Flash first, Pro only as fallback.
-                "reasoning": {
-                    # Tier 1: High Quota
-                    "gemini-2.5-flash-lite": 3.0,
-                    "gemini-2.0-flash-lite": 2.9,
-                    "gemini-2.5-flash": 2.8,
-                    "gemini-2.0-flash": 2.7,
-                    "gemini-flash-latest": 2.6,
-                    # Tier 2: Pro — best logic, lowest quota
-                    "gemini-2.5-pro": 1.7,
-                    "gemini-pro-latest": 1.1,
-                },
-
-                # ── CHEAP (Bulk / Low-Cost Tasks) ─────────────────────────────
-                "cheap": {
-                    # Tier 1: Lite models dominate (ultra-high RPM)
-                    "gemini-2.5-flash-lite": 3.9,
-                    "gemini-flash-lite-latest": 3.8,
-                    "gemini-2.0-flash-lite": 3.7,
-                    "gemini-2.0-flash-lite-001": 3.6,
-                    # Tier 2: Standard Flash (fallback)
-                    "gemini-2.5-flash": 2.0,
-                    "gemini-2.0-flash": 1.8,
-                    "gemini-flash-latest": 1.6,
-                },
-
-                # ── MASTER (High-IQ Quality Check) ───────────────────────────
-                # Use Flash first for speed, escalate to Pro only for deep analysis.
-                "master": {
-                    # Tier 1: High Quota Flash
-                    "gemini-2.5-flash": 3.2,
-                    "gemini-2.0-flash": 3.0,
-                    "gemini-flash-latest": 2.9,
-                    "gemini-2.5-flash-lite": 2.7,
-                    "gemini-2.0-flash-lite": 2.6,
-                    # Tier 2: Pro (reserve for hardest tasks)
-                    "gemini-2.5-pro": 1.7,
-                    "gemini-pro-latest": 1.1,
-                },
-
-                # ── WATERMARK (Vision: High-Quota-First) ──────────────────────
-                "watermark": {
-                    # Tier 1: STANDARD FLASH — Best vision accuracy for forensics
-                    # (Lite models consistently timeout/fail on multi-image vision tasks)
-                    "gemini-2.5-flash": 4.0,
-                    "gemini-2.0-flash": 3.8,
-                    "gemini-flash-latest": 3.6,
-                    # Tier 2: Lite — high quota but weaker vision, use only as fallback
-                    "gemini-2.5-flash-lite": 2.5,
-                    "gemini-2.0-flash-lite": 2.4,
-                    "gemini-2.0-flash-lite-001": 2.3,
-                    "gemini-flash-lite-latest": 2.2,
-                    # Tier 3: Pro — absolute last resort
-                    "gemini-2.5-pro": 1.5,
-                    "gemini-pro-latest": 1.1,
-                },
-
-                # ── VISION (Semantic Scene Analysis) ─────────────────────────
-                "vision": {
-                    # Tier 1: High Quota
-                    "gemini-2.5-flash-lite": 3.8,
-                    "gemini-2.0-flash-lite": 3.7,
-                    "gemini-2.5-flash": 3.5,
-                    "gemini-2.0-flash": 3.3,
-                    "gemini-flash-latest": 3.2,
-                    # Tier 2: Pro
-                    "gemini-2.5-pro": 1.5,
-                    "gemini-pro-latest": 1.1,
-                },
-
-                # ── CAPTION ───────────────────────────────────────────────────
-                "caption": {
-                    # Tier 1: High Quota Flash
-                    "gemini-2.5-flash": 3.5,
-                    "gemini-2.0-flash": 3.3,
-                    "gemini-flash-latest": 3.2,
-                    "gemini-2.5-flash-lite": 3.0,
-                    "gemini-2.0-flash-lite": 2.9,
-                    "gemini-flash-lite-latest": 2.8,
-                    # Tier 2: Pro (overkill but available)
-                    "gemini-2.5-pro": 1.4,
-                    "gemini-pro-latest": 1.0,
-                },
-
-                # ── NARRATIVE ─────────────────────────────────────────────────
-                "narrative": {
-                    # Tier 1: High Quota
-                    "gemini-2.5-flash": 3.3,
-                    "gemini-2.0-flash": 3.1,
-                    "gemini-flash-latest": 3.0,
-                    "gemini-2.5-flash-lite": 2.8,
-                    "gemini-2.0-flash-lite": 2.7,
-                    # Tier 2: Pro
-                    "gemini-2.5-pro": 1.6,
-                    "gemini-pro-latest": 1.1,
-                },
-
-                # ── PRICE (Monetization / Price Tag) ─────────────────────────
-                "price": {
-                    # Tier 1: High Quota (simple extraction task)
-                    "gemini-2.5-flash-lite": 3.8,
-                    "gemini-2.0-flash-lite": 3.7,
-                    "gemini-flash-lite-latest": 3.6,
-                    "gemini-2.5-flash": 3.3,
-                    "gemini-2.0-flash": 3.1,
-                    # Tier 2: Pro
-                    "gemini-2.5-pro": 1.4,
-                    "gemini-pro-latest": 1.1,
-                },
-
-                # ── ANALYSIS ──────────────────────────────────────────────────
-                "analysis": {
-                    # Tier 1: High Quota
-                    "gemini-2.5-flash-lite": 3.7,
-                    "gemini-2.0-flash-lite": 3.6,
-                    "gemini-2.5-flash": 3.4,
-                    "gemini-2.0-flash": 3.2,
-                    "gemini-flash-latest": 3.0,
-                    # Tier 2: Pro
-                    "gemini-2.5-pro": 1.5,
-                    "gemini-pro-latest": 1.0,
-                },
-
-            }
-
-
+            # Task Boosting (V4.0 — Dynamic JSON & Full Roster Matrix)
+            boosts = getattr(self, "TASK_MODEL_RATINGS", {})
             task_boost = boosts.get(task_type, {})
 
 
@@ -1055,8 +966,8 @@ class GeminiGovernor:
                 if name in exclude_set:
                     continue
 
-                # 🛡️ STRICT 1.5 BLACKLIST
-                if "1.5" in name:
+                # 🛡️ 1.5 Filter (Configurable: skipped only if GEMINI_BLOCK_1_5 is explicitly True)
+                if os.getenv("GEMINI_BLOCK_1_5", "0").lower() in ("1", "true", "yes") and "1.5" in name:
                     continue
 
                 # 🛡️ FATAL FLAW FIX (REMOVED LITE RESTRICTION FOR MULTI-MODEL ROTATION)
@@ -1389,8 +1300,8 @@ class GeminiGovernor:
         """
 
         self.stats["logical_requests"] += 1
-
         self.stats["calls_per_module"][module_name] = self.stats["calls_per_module"].get(module_name, 0) + 1
+        logger.info(f"🤖 [GEMINI CALL] Module: '{module_name}' | Task: '{task_type}'")
 
 
 
@@ -1433,7 +1344,7 @@ class GeminiGovernor:
 
         # Vision tasks → Orchestra returns None → falls through to Gemini loop below
 
-        TEXT_TASKS = {"reasoning", "narrative", "price", "analysis", "caption", "master", "creative"}
+        TEXT_TASKS = {"reasoning", "narrative", "price", "analysis", "caption", "master", "creative", "seo_generation", "seo", "viral_metadata"}
 
         is_escalated = False
 
@@ -1665,7 +1576,7 @@ class GeminiGovernor:
 
            
 
-            logger.info(f"🚀 [VANGUARD] Attempt {attempts+1}: Trying {current_model} ({prompt_tier} tier)...")
+            logger.info(f"🚀 [VANGUARD] [Module: '{module_name}'] Attempt {attempts+1}: Trying {current_model} ({prompt_tier} tier)...")
            
             # Langfuse Generation Start
             generation = None
@@ -1675,47 +1586,97 @@ class GeminiGovernor:
                         name=f"attempt_{attempts+1}",
                         model=current_model,
                         input=active_prompt,
-                        metadata={"prompt_tier": prompt_tier, "attempt": attempts+1}
+                        metadata={"prompt_tier": prompt_tier, "attempt": attempts+1, "module": module_name}
                     )
                 except: pass
 
             try:
 
-                # Configure API — requires google-genai (new SDK)
+                # Configure API — supports modern google-genai with fallback to google-generativeai
                 api_key = os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY")
 
                 if not api_key:
                     raise ValueError("GEMINI_API_KEY not set — add it to your .env file")
 
-                # Verify new SDK is available (has Client attribute)
-                if not hasattr(genai, "Client"):
-                    raise ImportError(
-                        "google-genai package required. Run: pip install google-genai\n"
-                        "The old google-generativeai package does not support genai.Client."
+                # Dual SDK support
+                if hasattr(genai, "Client"):
+                    # Modern google.genai SDK
+                    client = genai.Client(
+                        api_key=api_key,
+                        http_options=types.HttpOptions(timeout=300_000) if (types and hasattr(types, "HttpOptions")) else None
                     )
+                    config_params = {}
+                    if gen_config:
+                        config_params.update(gen_config)
+                    if safety_settings:
+                        config_params["safety_settings"] = safety_settings
 
-                client = genai.Client(
-                    api_key=api_key,
-                    http_options=types.HttpOptions(timeout=300_000)
-                )
-
-               
-
-                # SDK call
-
-                # SDK call
-                config_params = {}
-                if gen_config:
-                    # In v2, generation_config keys are top-level in types.GenerateContentConfig
-                    config_params.update(gen_config)
-                if safety_settings:
-                    config_params["safety_settings"] = safety_settings
-
-                response = client.models.generate_content(
-                    model=current_model,
-                    contents=active_prompt,
-                    config=types.GenerateContentConfig(**config_params) if config_params else None
-                )
+                    response = client.models.generate_content(
+                        model=current_model,
+                        contents=active_prompt,
+                        config=types.GenerateContentConfig(**config_params) if (types and hasattr(types, "GenerateContentConfig") and config_params) else (config_params or None)
+                    )
+                elif hasattr(genai, "GenerativeModel") or hasattr(genai, "configure"):
+                    # Legacy google.generativeai SDK fallback
+                    genai.configure(api_key=api_key)
+                    legacy_model = genai.GenerativeModel(
+                        model_name=current_model,
+                        generation_config=gen_config or None,
+                        safety_settings=safety_settings or None
+                    )
+                    response = legacy_model.generate_content(active_prompt)
+                else:
+                    # Direct Google REST API fallback (Zero SDK dependencies needed)
+                    import urllib.request
+                    target_model = current_model.replace("models/", "")
+                    rest_url = f"https://generativelanguage.googleapis.com/v1beta/models/{target_model}:generateContent?key={api_key}"
+                    
+                    if isinstance(active_prompt, str):
+                        parts = [{"text": active_prompt}]
+                    elif isinstance(active_prompt, list):
+                        parts = []
+                        for item in active_prompt:
+                            if isinstance(item, str):
+                                parts.append({"text": item})
+                            elif isinstance(item, dict):
+                                parts.append(item)
+                            else:
+                                parts.append({"text": str(item)})
+                    else:
+                        parts = [{"text": str(active_prompt)}]
+                        
+                    payload = {"contents": [{"parts": parts}]}
+                    if gen_config:
+                        payload["generationConfig"] = gen_config
+                    if safety_settings:
+                        payload["safetySettings"] = safety_settings
+                        
+                    req_data = json.dumps(payload).encode("utf-8")
+                    req = urllib.request.Request(
+                        rest_url,
+                        data=req_data,
+                        headers={"Content-Type": "application/json", "User-Agent": "AMTCE-Governor/1.0"}
+                    )
+                    with urllib.request.urlopen(req, timeout=300) as resp:
+                        res_json = json.loads(resp.read().decode("utf-8"))
+                        
+                    class _RESTCandidate:
+                        def __init__(self, c_data):
+                            self.raw = c_data
+                            
+                    class _RESTResponse:
+                        def __init__(self, raw):
+                            self.candidates = [_RESTCandidate(c) for c in raw.get("candidates", [])]
+                            self._text = ""
+                            if self.candidates:
+                                raw_parts = raw["candidates"][0].get("content", {}).get("parts", [])
+                                if raw_parts:
+                                    self._text = "".join(p.get("text", "") for p in raw_parts)
+                        @property
+                        def text(self):
+                            return self._text
+                            
+                    response = _RESTResponse(res_json)
 
                
 
@@ -1784,6 +1745,8 @@ class GeminiGovernor:
                 logger.info(json.dumps({
 
                     "vanguard_event": "success",
+
+                    "caller_module": module_name,
 
                     "attempt": attempts + 1,
 
@@ -1864,11 +1827,17 @@ class GeminiGovernor:
 
 
 
-                error_type = "5xx" if ("500" in err_msg) else "timeout"
-
-                if "timeout" in err_msg or "deadline" in err_msg:
-
+                err_lower = err_msg.lower()
+                if "404" in err_lower or "not_found" in err_lower or "not found" in err_lower or "deprecated" in err_lower:
+                    error_type = "404"
+                elif any(code in err_lower for code in ["503", "500", "502", "504", "server error", "internal error", "service unavailable", "bad gateway"]):
+                    error_type = "5xx"
+                elif "timeout" in err_lower or "deadline" in err_lower or "timed out" in err_lower:
                     error_type = "timeout"
+                elif "safety" in err_lower or "blocked" in err_lower:
+                    error_type = "safety"
+                else:
+                    error_type = "5xx" if "5" in err_lower else "timeout"
 
                
 
@@ -1997,32 +1966,57 @@ class GeminiGovernor:
                 logger.error("🔑 [GOVERNOR] GEMINI_API_KEY not set — skipping embed()")
                 return []
 
-            if not hasattr(genai, "Client"):
-                logger.error("❌ [GOVERNOR] google-genai not installed. Run: pip install google-genai")
-                return []
-
-            client = genai.Client(api_key=api_key)
-            # Try the standard gemini-embedding-001 first
-            try:
-                result = client.models.embed_content(
-                    model=model_name,
-                    contents=text
-                )
-                if hasattr(result, 'embeddings') and result.embeddings:
-                    # Depending on SDK version, it might be result.embeddings[0].values or similar
-                    emb = result.embeddings[0]
-                    return emb.values if hasattr(emb, 'values') else emb
-                return result.get('embedding', [])
-            except Exception as inner_e:
-                # Fallback to gemini-embedding-001 if requested model fails (v1beta SDK differences)
-                result = client.models.embed_content(
-                    model="models/gemini-embedding-001",
-                    contents=text
-                )
-                if hasattr(result, 'embeddings') and result.embeddings:
-                    emb = result.embeddings[0]
-                    return emb.values if hasattr(emb, 'values') else emb
-                return result.get('embedding', [])
+            if hasattr(genai, "Client"):
+                client = genai.Client(api_key=api_key)
+                # Try the standard gemini-embedding-001 first
+                try:
+                    result = client.models.embed_content(
+                        model=model_name,
+                        contents=text
+                    )
+                    if hasattr(result, 'embeddings') and result.embeddings:
+                        # Depending on SDK version, it might be result.embeddings[0].values or similar
+                        emb = result.embeddings[0]
+                        return emb.values if hasattr(emb, 'values') else emb
+                    return result.get('embedding', [])
+                except Exception as inner_e:
+                    # Fallback to gemini-embedding-001 if requested model fails (v1beta SDK differences)
+                    result = client.models.embed_content(
+                        model="models/gemini-embedding-001",
+                        contents=text
+                    )
+                    if hasattr(result, 'embeddings') and result.embeddings:
+                        emb = result.embeddings[0]
+                        return emb.values if hasattr(emb, 'values') else emb
+                    return result.get('embedding', [])
+            elif hasattr(genai, "embed_content") or hasattr(genai, "configure"):
+                genai.configure(api_key=api_key)
+                target_model = model_name if model_name.startswith("models/") else f"models/{model_name}"
+                try:
+                    res = genai.embed_content(
+                        model=target_model,
+                        content=text,
+                        task_type="retrieval_document"
+                    )
+                    return res.get('embedding', [])
+                except Exception:
+                    res = genai.embed_content(
+                        model="models/text-embedding-004",
+                        content=text,
+                        task_type="retrieval_document"
+                    )
+                    return res.get('embedding', [])
+            else:
+                # Direct REST API fallback for embed (Zero SDK dependency)
+                import urllib.request
+                target_model = model_name.replace("models/", "")
+                rest_url = f"https://generativelanguage.googleapis.com/v1beta/models/{target_model}:embedContent?key={api_key}"
+                payload = {"content": {"parts": [{"text": str(text)}]}}
+                req_data = json.dumps(payload).encode("utf-8")
+                req = urllib.request.Request(rest_url, data=req_data, headers={"Content-Type": "application/json"})
+                with urllib.request.urlopen(req, timeout=30) as resp:
+                    res_json = json.loads(resp.read().decode("utf-8"))
+                return res_json.get("embedding", {}).get("values", [])
                 
         except Exception as e:
             logger.warning(f"⚠️ [VANGUARD] Embedding generation failed: {e}")

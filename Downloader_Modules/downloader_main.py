@@ -133,7 +133,7 @@ def run_phase1_ingestion(
                 logger.info(f"   ✓ [WORKER 2 SUCCESS] Saved video -> {clip_dir}/video.mp4 & metadata.json")
 
                 try:
-                    from proxy_encoder import encode_proxy
+                    from Main_Modules.proxy_encoder import encode_proxy
                     encode_proxy(out_file)
                 except Exception as pe:
                     logger.warning(f"   ⚠ Proxy encode warning: {pe}")
@@ -227,7 +227,7 @@ def run_phase1_ingestion(
 
                                 # ── Phase 1 Pre-Processing (Proxy 480p & Audio Ingestion) ──────
                                 try:
-                                    from proxy_encoder import encode_proxy
+                                    from Main_Modules.proxy_encoder import encode_proxy
                                     encode_proxy(out_file)
                                 except Exception as proxy_err:
                                     logger.warning(f"   ⚠ Phase 1 proxy 480p encode failed: {proxy_err}")

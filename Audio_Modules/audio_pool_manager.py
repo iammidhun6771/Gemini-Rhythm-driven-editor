@@ -253,20 +253,17 @@ class AudioPoolManager:
 
     def _gemini_enrich_background(self, dest_path: str, filename: str):
         """
-        Daemon thread: analyze one BGM track with Gemini and write the result
-        back into pool_metadata.json.
+        Daemon thread: analyzes a BGM track using unified Faster-Whisper + Gemini
+        via Gemini_Modules.lyric_rhythm_aligner.analyze_music() and saves the complete
+        musical and semantic intelligence report into pool_metadata.json.
 
-        Adds:  gemini_genre, gemini_mood_tags, gemini_energy_level,
-               gemini_has_vocals, gemini_content_match, gemini_avoid_match,
-               gemini_analyzed = True
-
-        Safe to skip:  any exception → track stays unanalyzed, pipeline
-                       falls back to existing BPM/energy scoring.
+        Adds:  gemini_genre, gemini_mood_tags, dominant_emotion, vibe_tags,
+               gemini_energy_level, gemini_has_vocals, sections, tension_arc,
+               lyrics, shot_directives, emotional_peak_moments, gemini_analyzed = True
         """
-        import os, json, re, shutil, subprocess, tempfile
         try:
             # 0. Flag guard
-            if os.getenv("ENABLE_POOL_GEMINI_ENRICH", "no").lower() not in ("yes", "true", "1"):
+            if os.getenv("ENABLE_POOL_GEMINI_ENRICH", "yes").lower() not in ("yes", "true", "1"):
                 return
 
             # 1. Skip if already analyzed
@@ -287,88 +284,21 @@ class AudioPoolManager:
             else:
                 return  # file not found anywhere
 
-            # 3. Trim to 30 s → temp MP3 (keeps Gemini token cost minimal)
-            ffmpeg_bin = os.getenv("FFMPEG_BIN", "ffmpeg")
-            tmp_dir = tempfile.mkdtemp(prefix="gpool_")
-            trimmed = os.path.join(tmp_dir, "trim30.mp3")
+            # 3. Call Unified Musical Intelligence Pipeline
             try:
-                subprocess.run(
-                    [ffmpeg_bin, "-y", "-i", track_path,
-                     "-t", "30", "-vn", "-ac", "1", "-ar", "22050", trimmed],
-                    stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
-                    timeout=30
-                )
-                if not os.path.exists(trimmed) or os.path.getsize(trimmed) < 1024:
-                    return
-                with open(trimmed, "rb") as f:
-                    audio_bytes = f.read()
-            finally:
-                shutil.rmtree(tmp_dir, ignore_errors=True)
-
-            # 4. Gemini call via official google.genai SDK (loads key from Credentials/.env)
-            api_key = os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY")
-            if not api_key:
-                try:
-                    from dotenv import load_dotenv
-                    _env_path = os.path.join(
-                        os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
-                        "Credentials",
-                        ".env",
-                    )
-                    if os.path.exists(_env_path):
-                        load_dotenv(_env_path, override=False)
-                        api_key = os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY")
-                except Exception:
-                    pass
-
-            if not api_key:
-                logger.debug("[GEMINI_POOL] No API key found in .env — skipping enrichment.")
+                from Gemini_Modules.lyric_rhythm_aligner import analyze_music
+                logger.info(f"🧠 [GEMINI_POOL] Running unified Faster-Whisper + Gemini enrichment for: {filename}")
+                report = analyze_music(track_path)
+            except Exception as _call_err:
+                logger.warning(f"⚠️ [GEMINI_POOL] analyze_music call error for {filename}: {_call_err}")
                 return
 
-            from google import genai
-            from google.genai import types
-
-            client = genai.Client(api_key=api_key)
-            audio_part = types.Part.from_bytes(data=audio_bytes, mime_type="audio/mpeg")
-
-            prompt = (
-                "Listen to this audio clip and respond with ONLY a valid JSON object. "
-                "No markdown, no explanation, no code fences.\n"
-                "{\n"
-                '  "genre": "one word — lofi|phonk|hiphop|rnb|pop|edm|cinematic|'
-                'acoustic|motivational|trap|drill|jazz|ambient|unknown",\n'
-                '  "mood_tags": ["max 3 mood words"],\n'
-                '  "energy_level": "low|medium|high",\n'
-                '  "has_vocals": true_or_false,\n'
-                '  "is_unusable": true_or_false,\n'
-                '  "unusable_reason": "brief reason if audio is noisy paparazzi chatter, car traffic noise, stock market trading hall shouting, heavy static/distortion with no music backing",\n'
-                '  "best_content_match": ["max 3 from: fashion|dance|fitness|comedy|'
-                'motivational|aesthetic|food|travel|gaming|luxury|photography|'
-                'sports|nature|educational"],\n'
-                '  "avoid_content_match": ["max 2 categories this music does NOT fit"]\n'
-                "}"
-            )
-
-            response = client.models.generate_content(
-                model="gemini-2.5-flash",
-                contents=[audio_part, prompt],
-                config=types.GenerateContentConfig(
-                    temperature=0.1,
-                    max_output_tokens=256,
-                    response_mime_type="application/json",
-                ),
-            )
-            raw = (response.text or "").strip()
-
-            # 5. Parse JSON safely
-            json_match = re.search(r"\{.*?\}", raw, re.DOTALL)
-            if not json_match:
-                logger.debug(f"[GEMINI_POOL] No JSON in response for {filename}: {raw[:80]}")
+            if not report or report.get("_source") == "fallback":
+                logger.debug(f"[GEMINI_POOL] Fallback report returned for {filename} — skipping pool update.")
                 return
-            data = json.loads(json_match.group())
 
-            is_unusable = bool(data.get("is_unusable", False))
-            unusable_reason = str(data.get("unusable_reason", "")).strip()
+            is_unusable = bool(report.get("is_unusable", False))
+            unusable_reason = str(report.get("unusable_reason", "")).strip()
 
             if is_unusable:
                 quarantine_dir = os.path.join(self.base_dir, "quarantine")
@@ -381,30 +311,36 @@ class AudioPoolManager:
                 except Exception as _qerr:
                     logger.warning(f"⚠️ [GEMINI_POOL] Could not quarantine file '{filename}': {_qerr}")
 
-            # 6. Write back into pool metadata (thread-safe)
+            # 4. Write back full semantic + lyric intelligence into pool metadata
             with self.lock:
                 meta = self._get_file_metadata(filename) or {}
-                meta["gemini_genre"]        = str(data.get("genre", "unknown"))[:32]
-                meta["gemini_mood_tags"]    = list(data.get("mood_tags", []))[:3]
-                meta["gemini_energy_level"] = str(data.get("energy_level", "medium"))
-                meta["gemini_has_vocals"]   = bool(data.get("has_vocals", False))
-                meta["is_unusable"]         = is_unusable
-                meta["unusable_reason"]     = unusable_reason
-                meta["gemini_content_match"] = list(data.get("best_content_match", []))[:3]
-                meta["gemini_avoid_match"]  = list(data.get("avoid_content_match", []))[:2]
-                meta["gemini_analyzed"]     = True
+                meta["gemini_genre"]         = str(report.get("language", "unknown"))[:32]
+                meta["dominant_emotion"]     = str(report.get("dominant_emotion", "neutral"))
+                meta["gemini_mood_tags"]     = list(report.get("vibe_tags", []))[:5]
+                meta["vibe_tags"]            = list(report.get("vibe_tags", []))
+                meta["gemini_energy_level"]  = str(report.get("energy_profile", "medium"))
+                meta["energy_profile"]       = str(report.get("energy_profile", "medium"))
+                meta["gemini_has_vocals"]    = bool(report.get("has_vocals", False))
+                meta["has_vocals"]           = bool(report.get("has_vocals", False))
+                meta["sections"]             = report.get("sections", [])
+                meta["tension_arc"]          = report.get("tension_arc", [])
+                meta["lyrics"]               = report.get("lyrics", [])
+                meta["shot_directives"]      = report.get("shot_directives", [])
+                meta["emotional_peak_moments"] = report.get("emotional_peak_moments", [])
+                meta["is_unusable"]          = is_unusable
+                meta["unusable_reason"]      = unusable_reason
+                meta["gemini_analyzed"]      = True
                 self._set_file_metadata(filename, meta)
             self._save_metadata()
 
             logger.info(
-                f"🎵 [GEMINI_POOL] Enriched: {filename} → "
-                f"genre={data.get('genre')} | energy={data.get('energy_level')} | "
-                f"fits={data.get('best_content_match')}"
+                f"🎵 [GEMINI_POOL SUCCESS] Enriched '{filename}': "
+                f"emotion={report.get('dominant_emotion')} | energy={report.get('energy_profile')} | "
+                f"lyrics={len(report.get('lyrics', []))} | vibe={report.get('vibe_tags')}"
             )
 
         except Exception as _ge:
-            # Non-fatal — track simply stays unenriched
-            logger.debug(f"[GEMINI_POOL] Background enrichment failed for {filename} (non-fatal): {_ge}")
+            logger.debug(f"[GEMINI_POOL] Background enrichment notice for {filename}: {_ge}")
 
     def get_beat_data(self, filename: str) -> Optional[Dict]:
         """Lazy load beat data from cache or disk."""
@@ -578,15 +514,36 @@ class AudioPoolManager:
         best_audio = None
         best_score = -1.0
 
+        # ── 1. PRIMARY: Sync with Telegram Storage Group Vault Audio Index ────
+        try:
+            from Publishing_Modules.telegram_vault_indexer import TelegramVaultIndexer
+            vault = TelegramVaultIndexer()
+            vault_pool = vault.get_vault_audio_pool()
+            if vault_pool:
+                for vname, vmeta in vault_pool.items():
+                    if vname not in self.metadata.get("files", {}):
+                        self._set_file_metadata(vname, vmeta)
+                self._save_metadata()
+        except Exception as _tve:
+            logger.debug(f"[POOL] Vault sync notice: {_tve}")
+
+        # ── 2. SECONDARY: Local active/ Directory Check ───────────────────────
         active_files = os.listdir(self.active_dir)
         if not active_files:
             logger.info("ℹ️ Active audio pool is empty — auto-recycling tracks from cooldown...")
             self.recycle_cooldown(force=True)
             active_files = os.listdir(self.active_dir)
-            if not active_files:
-                return None
 
-        for filename in active_files:
+        # Merge any candidates from metadata that exist in vault
+        candidate_pool_files = set(active_files)
+        for fname in self.metadata.get("files", {}).keys():
+            if fname.lower().endswith((".mp3", ".wav", ".m4a")):
+                candidate_pool_files.add(fname)
+
+        if not candidate_pool_files:
+            return None
+
+        for filename in candidate_pool_files:
             # 1. Exclusion Logic
             if filename in _excluded_basenames:
                 logger.debug(f"[POOL] Skipping self-selected audio: {filename}")
@@ -693,6 +650,17 @@ class AudioPoolManager:
             return None
 
         src = os.path.join(self.active_dir, best_audio)
+        if not os.path.exists(src):
+            try:
+                from Publishing_Modules.telegram_vault_indexer import TelegramVaultIndexer
+                vault = TelegramVaultIndexer()
+                hydrated = vault.hydrate_bgm_track_from_vault(best_audio, self.active_dir)
+                if hydrated and os.path.exists(hydrated):
+                    src = hydrated
+                    logger.info(f"📥 [POOL - PRIMARY] Hydrated selected track '{best_audio}' directly from Telegram Storage Vault.")
+            except Exception as _he:
+                logger.debug(f"[POOL] Hydration notice for '{best_audio}': {_he}")
+
         meta = self._get_file_metadata(best_audio)
         if meta:
             meta["usage_count"] = meta.get("usage_count", 0) + 1

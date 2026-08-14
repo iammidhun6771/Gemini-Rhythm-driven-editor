@@ -32,14 +32,34 @@ def analyze_rhythm_and_beats(
     clip_dir = os.path.dirname(video_path)
     analysis_json_path = os.path.join(clip_dir, "audio_analysis.json")
 
-    if os.path.exists(analysis_json_path):
-        logger.info(f"🥁 [STEP 07] audio_analysis.json already exists: {analysis_json_path}")
+    # ── 1. PRIMARY: Telegram Storage Vault Hydration ─────────────────────────
+    try:
+        from Publishing_Modules.telegram_vault_indexer import TelegramVaultIndexer
+        vault = TelegramVaultIndexer()
+        social_url = os.path.basename(clip_dir).replace("manual_", "")
+        _, audio_math = vault.hydrate_audio_and_math_from_vault(social_url, clip_dir)
+        if audio_math and isinstance(audio_math, dict) and audio_math.get("beats"):
+            with open(analysis_json_path, "w", encoding="utf-8") as af:
+                json.dump(audio_math, af, indent=2, ensure_ascii=False)
+            logger.info(f"🥁 [STEP 07 - PRIMARY] Hydrated beat DSP math & semantic vectors directly from Telegram Storage Group Vault")
+            if callback:
+                callback("step_07", "success", {
+                    "message": "Beat & rhythm math hydrated directly from Telegram Storage Vault.",
+                    "analysis_path": analysis_json_path
+                })
+            return {"step": "step_07", "status": "success", "analysis_path": analysis_json_path, "reused": True, "source": "telegram_storage_vault"}
+    except Exception as _bve:
+        logger.debug(f"[STEP 07] Vault audio math primary hydration notice: {_bve}")
+
+    # ── 2. SECONDARY: Local Disk Presence Check ──────────────────────────────
+    if os.path.exists(analysis_json_path) and os.path.getsize(analysis_json_path) > 50:
+        logger.info(f"⚡ [STEP 07 - SECONDARY] audio_analysis.json already exists locally: {analysis_json_path}")
         if callback:
             callback("step_07", "success", {
-                "message": "audio_analysis.json pre-computed metadata found.",
+                "message": "audio_analysis.json pre-computed metadata found locally.",
                 "analysis_path": analysis_json_path
             })
-        return {"step": "step_07", "status": "success", "analysis_path": analysis_json_path, "reused": True}
+        return {"step": "step_07", "status": "success", "analysis_path": analysis_json_path, "reused": True, "source": "local_disk"}
 
     try:
         from Audio_Modules.audio_extractor import run_phase1_audio_analysis

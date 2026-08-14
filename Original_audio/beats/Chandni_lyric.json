@@ -1,149 +1,136 @@
 {
-  "has_vocals": false,
-  "language": "Instrumental",
+  "has_vocals": true,
+  "language": "Hindi",
   "tempo_bpm": 120.0,
   "bar_duration_sec": 2.0,
-  "dominant_emotion": "joy",
+  "dominant_emotion": "love",
   "energy_profile": "medium",
   "sections": [
     {
       "start": 0.0,
-      "end": 15.0,
-      "type": "verse",
-      "energy": 0.85,
-      "mood": "energetic",
-      "recommended_cut_pace": "fast"
+      "end": 3.7,
+      "type": "intro",
+      "energy": 0.6,
+      "mood": "intimate",
+      "recommended_cut_pace": "slow"
+    },
+    {
+      "start": 3.7,
+      "end": 14.5,
+      "type": "chorus",
+      "energy": 0.8,
+      "mood": "romantic",
+      "recommended_cut_pace": "medium"
     }
   ],
   "tension_arc": [
     {
-      "time": {
-        "time": 0.5,
-        "energy": 0.705
-      },
-      "tension": 0.5
+      "time": 0.0,
+      "tension": 0.2
     },
     {
-      "time": {
-        "time": 0.9500000000000001,
-        "energy": 1.0
-      },
-      "tension": 0.5
+      "time": 1.0,
+      "tension": 0.3
     },
     {
-      "time": {
-        "time": 1.85,
-        "energy": 0.737
-      },
-      "tension": 0.5
+      "time": 2.0,
+      "tension": 0.4
     },
     {
-      "time": {
-        "time": 2.3000000000000003,
-        "energy": 0.802
-      },
-      "tension": 0.5
+      "time": 3.0,
+      "tension": 0.6
     },
     {
-      "time": {
-        "time": 3.1500000000000004,
-        "energy": 0.742
-      },
-      "tension": 0.5
+      "time": 4.0,
+      "tension": 0.7
     },
     {
-      "time": {
-        "time": 3.7,
-        "energy": 0.72
-      },
-      "tension": 0.5
+      "time": 5.0,
+      "tension": 0.8
     },
     {
-      "time": {
-        "time": 4.2,
-        "energy": 0.789
-      },
-      "tension": 0.5
+      "time": 6.0,
+      "tension": 0.7
     },
     {
-      "time": {
-        "time": 4.9,
-        "energy": 0.78
-      },
-      "tension": 0.5
+      "time": 7.0,
+      "tension": 0.7
     },
     {
-      "time": {
-        "time": 6.65,
-        "energy": 0.461
-      },
-      "tension": 0.5
+      "time": 8.0,
+      "tension": 0.7
     },
     {
-      "time": {
-        "time": 7.800000000000001,
-        "energy": 0.773
-      },
-      "tension": 0.5
+      "time": 9.0,
+      "tension": 0.7
     },
     {
-      "time": {
-        "time": 9.5,
-        "energy": 0.732
-      },
-      "tension": 0.5
+      "time": 10.0,
+      "tension": 0.7
     },
     {
-      "time": {
-        "time": 9.950000000000001,
-        "energy": 0.78
-      },
-      "tension": 0.5
+      "time": 11.0,
+      "tension": 0.7
     },
     {
-      "time": {
-        "time": 11.100000000000001,
-        "energy": 0.682
-      },
-      "tension": 0.5
+      "time": 12.0,
+      "tension": 0.7
     },
     {
-      "time": {
-        "time": 11.55,
-        "energy": 0.909
-      },
-      "tension": 0.5
+      "time": 13.0,
+      "tension": 0.6
     },
     {
-      "time": {
-        "time": 13.15,
-        "energy": 0.77
-      },
-      "tension": 0.5
-    },
-    {
-      "time": {
-        "time": 14.05,
-        "energy": 0.776
-      },
-      "tension": 0.5
-    },
-    {
-      "time": {
-        "time": 14.55,
-        "energy": 0.794
-      },
+      "time": 14.0,
       "tension": 0.5
     }
   ],
-  "lyrics": [],
-  "emotional_peak_moments": [],
-  "shot_directives": [],
+  "lyrics": [
+    {
+      "time": 0.0,
+      "end": 2.7,
+      "text": "Picky picky palkein meri udaas tere liye",
+      "emotion_weight": 0.8,
+      "emotion_tag": "intimacy",
+      "section": "intro"
+    }
+  ],
+  "emotional_peak_moments": [
+    3.7,
+    8.0
+  ],
+  "shot_directives": [
+    {
+      "time": 0.0,
+      "duration": 3.7,
+      "directive": "face_closeup",
+      "priority": 5,
+      "reason": "Establishing intimate mood with lyrics about eyes"
+    },
+    {
+      "time": 3.7,
+      "duration": 5.0,
+      "directive": "slow_zoom_in",
+      "priority": 4,
+      "reason": "Building emotional connection during chorus"
+    },
+    {
+      "time": 8.7,
+      "duration": 5.8,
+      "directive": "wide_landscape",
+      "priority": 3,
+      "reason": "Expanding visuals to match the sentiment of longing"
+    }
+  ],
   "vibe_tags": [
-    "cinematic"
+    "romantic",
+    "bollywood",
+    "nostalgia",
+    "intimate",
+    "dreamy"
   ],
   "instrumental_sections": [],
   "is_unusable": false,
   "unusable_reason": "",
-  "_source": "beat_engine_fastpath"
+  "_source": "gemini"
 }

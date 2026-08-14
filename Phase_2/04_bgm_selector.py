@@ -26,6 +26,7 @@ def select_clip_bgm(
     clip_folder: Optional[str] = None,
     audio_dir: Optional[str] = None,
     intent_vector: Optional[Dict[str, Any]] = None,
+    exclude_filenames: Optional[set] = None,
 ) -> Dict[str, Any]:
     """
     Executes Gemini Call 2 BGM Selector.
@@ -42,7 +43,7 @@ def select_clip_bgm(
     preserve_music = _intent.get("preserve_music", False)
 
     # ── STATEFUL CACHE LOCK (Stage 2 Cache-First BGM) ────────────────────────
-    if preserve_music:
+    if preserve_music and not exclude_filenames:
         cached_bgm = _try_load_cached_bgm(clip_id, clip_folder, audio_dir)
         if cached_bgm:
             logger.info(
@@ -60,25 +61,45 @@ def select_clip_bgm(
     # ── STANDARD GEMINI CALL 2 ────────────────────────────────────────────────
     logger.info(f"🎶 [STEP 04] Running Gemini Call 2 BGM Selector for clip '{clip_id}'...")
 
-    res = select_best_audio_for_clip(clip_id=clip_id, clip_folder=clip_folder, audio_dir=audio_dir)
+    res = select_best_audio_for_clip(
+        clip_id=clip_id,
+        clip_folder=clip_folder,
+        audio_dir=audio_dir,
+        exclude_filenames=exclude_filenames
+    )
     selected_track_name = res.get("selected_audio_track")
 
     # Resolve physical path
     resolved_path = None
     if audio_dir is None:
         audio_dir = os.path.join(_REPO_ROOT, "Original_audio")
+    active_dir = os.path.join(audio_dir, "active")
+    os.makedirs(active_dir, exist_ok=True)
 
     if selected_track_name:
-        for candidate_dir in [
-            os.path.join(audio_dir, "active"),
-            audio_dir,
-            os.path.join(audio_dir, "cooldown"),
-        ]:
-            if os.path.isdir(candidate_dir):
-                candidate_path = os.path.join(candidate_dir, selected_track_name)
-                if os.path.isfile(candidate_path):
-                    resolved_path = candidate_path
-                    break
+        # 1. PRIMARY: If present in Telegram Storage Vault and missing locally, hydrate directly from Telegram lake
+        try:
+            from Publishing_Modules.telegram_vault_indexer import TelegramVaultIndexer
+            vault = TelegramVaultIndexer()
+            vault_hydrated = vault.hydrate_bgm_track_from_vault(selected_track_name, active_dir)
+            if vault_hydrated and os.path.isfile(vault_hydrated):
+                resolved_path = vault_hydrated
+                logger.info(f"📥 [STEP 04 - PRIMARY] Hydrated selected BGM track directly from Telegram Storage Vault: {selected_track_name}")
+        except Exception as _vh_err:
+            logger.debug(f"[STEP 04] Vault BGM track hydration notice: {_vh_err}")
+
+        # 2. SECONDARY: Check local directories
+        if not resolved_path:
+            for candidate_dir in [
+                active_dir,
+                audio_dir,
+                os.path.join(audio_dir, "cooldown"),
+            ]:
+                if os.path.isdir(candidate_dir):
+                    candidate_path = os.path.join(candidate_dir, selected_track_name)
+                    if os.path.isfile(candidate_path):
+                        resolved_path = candidate_path
+                        break
 
     # Fallback to pool manager if not found
     if not resolved_path:

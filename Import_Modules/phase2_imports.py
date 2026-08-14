@@ -44,7 +44,7 @@ step07_verify_master_render = m07.verify_master_render
 
 # Master Orchestrators
 from Phase_2.phase2_orchestrator import run_phase2_pipeline as run_phase2_orchestration
-from master_ai_editor import edit_video_master
+from Main_Modules.master_ai_editor import edit_video_master
 
 __all__ = [
     "step01_scan_clip_targets",

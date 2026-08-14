@@ -206,25 +206,54 @@ def _check_quota(needed: int = 1) -> bool:
 def _consume_quota(amount: int = 1) -> None:
     if _SALESMAN_QUOTA_AVAILABLE:
         _get_apify_quota().consume(amount)
-        return
-    # Legacy in-memory fallback
-    global _quota_used
-    _quota_used += amount
-    logger.info("💰 Apify quota used: %d/%d today", _quota_used, DAILY_QUOTA)
+    else:
+        # Legacy in-memory fallback
+        global _quota_used
+        _quota_used += amount
+        logger.info("💰 Apify quota used: %d/%d today", _quota_used, DAILY_QUOTA)
+    
+    # Track usage in API key pool if pooled key was used
+    if _get_client._last_pooled_user:
+        try:
+            from Core_Modules.api_key_pool_manager import record_api_usage
+            record_api_usage("apify_api_token", _get_client._last_pooled_user, success=True)
+            logger.info(f"📊 [API POOL] Recorded usage for user: {_get_client._last_pooled_user}")
+        except ImportError:
+            pass
 
 
-def _get_client():
-    """Lazily initialise the Apify client."""
-    token = os.getenv("APIFY_API_TOKEN") or os.getenv("APIFY_TOKEN") or APIFY_TOKEN
+def _get_client(requesting_user_id: Optional[str] = None):
+    """
+    Lazily initialise the Apify client.
+    Uses API key pool if available, otherwise falls back to env var.
+    """
+    # Try to get token from API key pool first
+    try:
+        from Core_Modules.api_key_pool_manager import get_next_api_key
+        pooled_key = get_next_api_key("apify_api_token", requesting_user_id)
+        if pooled_key:
+            token = pooled_key["api_key"]
+            logger.info(f"🔑 [API POOL] Using pooled token from user: {pooled_key['user_id']}")
+            # Store for usage tracking later
+            _get_client._last_pooled_user = pooled_key["user_id"]
+        else:
+            token = os.getenv("APIFY_API_TOKEN") or os.getenv("APIFY_TOKEN") or APIFY_TOKEN
+            _get_client._last_pooled_user = None
+    except ImportError:
+        token = os.getenv("APIFY_API_TOKEN") or os.getenv("APIFY_TOKEN") or APIFY_TOKEN
+        _get_client._last_pooled_user = None
+    
     if not token:
         raise RuntimeError(
-            "APIFY_API_TOKEN is not set in .env. Add your token to .env and try again."
+            "APIFY_API_TOKEN is not set in .env and no pooled keys available. Add your token to .env or provide user credentials."
         )
     try:
         from apify_client import ApifyClient
         return ApifyClient(token)
     except ImportError:
         raise RuntimeError("apify-client not installed. Run: pip install apify-client")
+
+_get_client._last_pooled_user = None
 
 
 # ─────────────────────────────────────────────────────────────────────────────

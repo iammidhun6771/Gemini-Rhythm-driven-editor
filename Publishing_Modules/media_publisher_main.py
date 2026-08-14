@@ -147,6 +147,8 @@ async def publish_to_telegram(video_path: str, title: str, caption: str = "") ->
     try:
         from telegram import Bot
         from telegram.request import HTTPXRequest
+        from telegram.error import TimedOut, NetworkError, RetryAfter
+        import asyncio
 
         bot_token = os.getenv("TELEGRAM_BOT_TOKEN")
         chat_id = os.getenv("TELEGRAM_CHAT_ID") or os.getenv("TELEGRAM_STORAGE_GROUP_ID") or os.getenv("TELEGRAM_PUBLIC_GROUP_ID")
@@ -161,50 +163,86 @@ async def publish_to_telegram(video_path: str, title: str, caption: str = "") ->
             logger.warning("⚠️ No Telegram Chat ID configured. Skipping Telegram broadcast.")
             return {"status": "skipped", "message": "No chat ID configured"}
 
-        req = HTTPXRequest(connection_pool_size=8, read_timeout=300.0, write_timeout=300.0)
+        req = HTTPXRequest(
+            connection_pool_size=8,
+            connect_timeout=60.0,
+            pool_timeout=60.0,
+            read_timeout=300.0,
+            write_timeout=300.0
+        )
         bot = Bot(token=bot_token, request=req)
 
         full_caption = f"🚀 **[PUBLISHED MULTI-PLATFORM]**\n📌 **Title**: `{title}`\n📁 `{os.path.basename(video_path)}`"
         if caption:
             full_caption += f"\n\n{caption}"
 
-        with open(video_path, "rb") as vf:
-            try:
-                sent_msg = await bot.send_video(
-                    chat_id=int(chat_id),
-                    video=vf,
-                    caption=full_caption
-                )
-            except Exception as send_err:
-                error_str = str(send_err)
-                if "Forbidden" in error_str or "can't initiate conversation" in error_str.lower():
-                    logger.warning(f"⚠️ Cannot send to chat ID {chat_id}: Bot cannot initiate conversation with user. The user must start a conversation with the bot first (send /start), or use a group/channel ID instead.")
-                    return {"status": "failed", "error": f"Bot cannot initiate conversation with user {chat_id}. User must message bot first or use group/channel ID."}
-                raise
+        async def _send_video_safe(target_cid, file_or_id, text_caption, max_retries=3):
+            for attempt in range(1, max_retries + 1):
+                try:
+                    if isinstance(file_or_id, str):
+                        return await bot.send_video(
+                            chat_id=target_cid,
+                            video=file_or_id,
+                            caption=text_caption
+                        )
+                    else:
+                        with open(video_path, "rb") as vf:
+                            return await bot.send_video(
+                                chat_id=target_cid,
+                                video=vf,
+                                caption=text_caption
+                            )
+                except RetryAfter as ra:
+                    logger.warning(f"⏳ Rate-limited by Telegram. Sleeping {ra.retry_after}s (attempt {attempt}/{max_retries})")
+                    await asyncio.sleep(ra.retry_after + 1)
+                except (TimedOut, NetworkError, TimeoutError) as te:
+                    logger.warning(f"🔄 Telegram upload transient timeout/network error (attempt {attempt}/{max_retries}): {te}")
+                    if attempt >= max_retries:
+                        raise
+                    await asyncio.sleep(2 * attempt)
+                except Exception as ex:
+                    err_txt = str(ex)
+                    if "Forbidden" in err_txt or "can't initiate conversation" in err_txt.lower():
+                        logger.warning(f"⚠️ Cannot send to chat ID {target_cid}: Bot cannot initiate conversation with user.")
+                    raise
 
-        # Dispatch to Public Telegram Channel / Group if configured
-        if public_group:
+        # 1. Dispatch to Primary Target Chat
+        try:
+            sent_msg = await _send_video_safe(int(chat_id), None, full_caption)
+        except Exception as send_err:
+            error_str = str(send_err)
+            if "Forbidden" in error_str or "can't initiate conversation" in error_str.lower():
+                logger.warning(f"⚠️ Cannot send to chat ID {chat_id}: Bot cannot initiate conversation with user. The user must start a conversation with the bot first (send /start), or use a group/channel ID instead.")
+                return {"status": "failed", "error": f"Bot cannot initiate conversation with user {chat_id}. User must message bot first or use group/channel ID."}
+            raise
+
+        # Extract cached Telegram file_id for instantaneous, zero-bandwidth secondary dispatches
+        cached_file_id = sent_msg.video.file_id if (sent_msg and sent_msg.video) else None
+
+        # 2. Dispatch to Public Telegram Channel / Group if configured (and not identical to primary chat)
+        if public_group and str(public_group) != str(chat_id):
             try:
-                with open(video_path, "rb") as pvf:
-                    await bot.send_video(
-                        chat_id=int(public_group) if (public_group.startswith("-") or public_group.isdigit()) else public_group,
-                        video=pvf,
-                        caption=f"🔥 **{title}**\n\n{caption or ''}"
-                    )
+                target_public = int(public_group) if (str(public_group).startswith("-") or str(public_group).isdigit()) else public_group
+                video_payload = cached_file_id if cached_file_id else None
+                await _send_video_safe(
+                    target_public,
+                    video_payload,
+                    f"🔥 **{title}**\n\n{caption or ''}"
+                )
                 logger.info("📢 Dispatched approved reel to Public Telegram Group (%s)", public_group)
             except Exception as pg_e:
                 logger.warning("⚠️ Public Telegram Group upload warning: %s", pg_e)
 
-        if storage_group and str(chat_id) != str(storage_group):
+        # 3. Dispatch to Vault Storage Group if configured and distinct
+        if storage_group and str(storage_group) != str(chat_id) and str(storage_group) != str(public_group):
             try:
-                with open(video_path, "rb") as svf:
-                    await bot.send_video(
-                        chat_id=int(storage_group),
-                        video=svf,
-                        caption=f"📦 **[VAULT PUBLISHED BACKUP]**\n📌 `{title}`\n📁 `{os.path.basename(video_path)}`"
-                    )
+                video_payload = cached_file_id if cached_file_id else None
+                await _send_video_safe(
+                    int(storage_group),
+                    video_payload,
+                    f"📦 **[VAULT PUBLISHED BACKUP]**\n📌 `{title}`\n📁 `{os.path.basename(video_path)}`"
+                )
             except Exception as sg_e:
-                # More specific error handling for chat not found
                 if "Chat not found" in str(sg_e) or "chat not found" in str(sg_e).lower():
                     logger.warning("⚠️ Vault storage group backup skipped: Storage group chat not found. Check TELEGRAM_STORAGE_GROUP_ID in .env")
                 else:

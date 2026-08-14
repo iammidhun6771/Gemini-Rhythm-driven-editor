@@ -275,6 +275,31 @@ def _ingest_clip_audio_to_pool(stem: str, wav_path: str, analysis: dict):
         with open(index_path, "w", encoding="utf-8") as f:
             json.dump(index_data, f, indent=2, ensure_ascii=False)
 
+        # Step 5: Upfront Faster-Whisper + Gemini Semantic Enrichment
+        try:
+            from Gemini_Modules.lyric_rhythm_aligner import analyze_music
+            logger.info("🧠 [UPFRONT INTEL] Running unified Faster-Whisper + Gemini analysis for harvested audio: %s", stem)
+            report = analyze_music(target_wav)
+            if report and report.get("_source") != "fallback":
+                analysis["semantic_context"] = {
+                    "dominant_emotion": report.get("dominant_emotion", "neutral"),
+                    "vibe_tags": report.get("vibe_tags", []),
+                    "energy_profile": report.get("energy_profile", "medium"),
+                    "has_vocals": report.get("has_vocals", False),
+                    "language": report.get("language", "Unknown"),
+                    "lyrics_count": len(report.get("lyrics", [])),
+                    "directives_count": len(report.get("shot_directives", [])),
+                }
+                # Re-save enriched audio_analysis.json
+                clip_dir = os.path.dirname(wav_path)
+                analysis_path = os.path.join(clip_dir, "audio_analysis.json")
+                with open(analysis_path, "w", encoding="utf-8") as f:
+                    json.dump(analysis, f, indent=2, ensure_ascii=False)
+                logger.info("✅ [UPFRONT INTEL SUCCESS] Pre-computed and saved semantic audio data for '%s': emotion=%s, vibe=%s",
+                            stem, report.get("dominant_emotion"), report.get("vibe_tags"))
+        except Exception as _up_err:
+            logger.warning("⚠️ Upfront semantic audio enrichment notice for '%s': %s", stem, _up_err)
+
         # Preserve extracted WAV for Telegram Storage Group Vault upload
         analysis["wav_path"] = wav_path if os.path.exists(wav_path) else target_wav
         logger.info("💾 [AUDIO PRESERVED] Extracted WAV preserved in clip dir for Telegram Vault upload: %s", os.path.basename(wav_path))

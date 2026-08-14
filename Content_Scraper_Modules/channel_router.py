@@ -1,4 +1,4 @@
-﻿"""
+"""
 channel_router.py — AMTCE Paparazzi Channel Router
 ====================================================
 Determines which destination channel a scraped reel should go to,

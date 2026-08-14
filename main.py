@@ -67,7 +67,7 @@ for lib in ["httpx", "telegram", "telegram.ext", "httpcore"]:
 # Load environment variables
 try:
     from dotenv import load_dotenv
-    load_dotenv(os.path.join(_REPO_ROOT, ".env"), override=True)
+    load_dotenv(os.path.join(_REPO_ROOT, "Credentials", ".env"), override=True)
 except ImportError:
     pass
 
@@ -75,7 +75,7 @@ except ImportError:
 from Import_Modules.phase1_imports import run_phase1_ingestion
 from Import_Modules.phase2_imports import run_phase2_orchestration
 from Downloader_Modules.scheduled_scraper_manager import run_scheduled_scraper_batch, get_rotated_max_two_accounts
-from master_ai_editor import MasterAIEditor
+from Main_Modules.master_ai_editor import MasterAIEditor
 from Publishing_Modules.queue_publisher import PublishQueue
 from Publishing_Modules.telegram_session_manager import session_manager
 from Publishing_Modules.telegram_vault_indexer import TelegramVaultIndexer
@@ -896,7 +896,7 @@ def run_master_pipeline(
 
     # Phase 2 & 3: Master AI Perception & Render Orchestrator
     try:
-        from phase2_main import run_phase2_orchestration
+        from Main_Modules.phase2_main import run_phase2_orchestration
 
         # ── Scalable Dynamic Multi-User Isolation ─────────────────────────────
         # Every Telegram user (User A, User B, User N) gets their rendered reel
@@ -921,10 +921,11 @@ def run_master_pipeline(
                     async def _send_single():
                         storage_group = os.getenv("TELEGRAM_STORAGE_GROUP_ID") or os.getenv("TELEGRAM_CHAT_ID")
                         req = HTTPXRequest(
-                            connection_pool_size=8,
-                            read_timeout=180.0,
-                            write_timeout=180.0,
-                            connect_timeout=60.0
+                            connection_pool_size=16,
+                            read_timeout=600.0,
+                            write_timeout=600.0,
+                            connect_timeout=120.0,
+                            pool_timeout=120.0
                         )
                         bot = Bot(token=bot_token, request=req)
                         active_reel_path = reel_path
@@ -934,20 +935,48 @@ def run_master_pipeline(
                         # ── PHASE 2.1 WATERMARK GATE (bypass if inpainting occurred upfront) ──
                         watermark_output = os.path.splitext(active_reel_path)[0] + "_wm_cleaned.mp4"
                         _inpainted_upfront = False
-                        intel_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "downloads", real_cid, ".clip_intelligence.json")
-                        if os.path.exists(intel_file):
-                            try:
-                                with open(intel_file, "r", encoding="utf-8") as _f:
-                                    _intel_d = json.load(_f)
+
+                        try:
+                            from Gemini_Modules.clip_intelligence_store import ClipIntelligenceStore
+                            _store = ClipIntelligenceStore()
+                            _intel_d = _store.load(real_cid)
+                            if _intel_d:
                                 _inpainted_upfront = bool(
                                     _intel_d.get("forensic", {}).get("inpainted_upfront") or
-                                    _intel_d.get("output", {}).get("mode") == "SINGLE_PASS"
+                                    _intel_d.get("output", {}).get("mode") == "SINGLE_PASS" or
+                                    _intel_d.get("output", {}).get("status") == "SUCCESS" or
+                                    _intel_d.get("editing_plan")
                                 )
-                            except Exception:
-                                pass
+                        except Exception as _ce:
+                            logger.debug(f"[PHASE 2.1] Store lookup note: {_ce}")
+
+                        if not _inpainted_upfront:
+                            # Fallback to direct path inspection
+                            _possible_intel_paths = [
+                                os.path.join(os.path.dirname(os.path.abspath(__file__)), "downloads", real_cid, ".clip_intelligence.json"),
+                                os.path.join(os.path.dirname(active_reel_path), ".clip_intelligence.json"),
+                                os.path.join(os.path.dirname(active_reel_path).replace("Processed Shorts", "downloads"), real_cid, ".clip_intelligence.json")
+                            ]
+                            for intel_file in _possible_intel_paths:
+                                if os.path.exists(intel_file):
+                                    try:
+                                        with open(intel_file, "r", encoding="utf-8") as _f:
+                                            _id_data = json.load(_f)
+                                        _inpainted_upfront = bool(
+                                            _id_data.get("forensic", {}).get("inpainted_upfront") or
+                                            _id_data.get("output", {}).get("mode") == "SINGLE_PASS" or
+                                            _id_data.get("editing_plan")
+                                        )
+                                        break
+                                    except Exception:
+                                        continue
+
+                        # Master reels (_master.mp4) rendered via Phase 2 single pass are already clean
+                        if "_master.mp4" in os.path.basename(active_reel_path):
+                            _inpainted_upfront = True
 
                         if _inpainted_upfront:
-                            logger.info(f"✅ [PHASE 2.1] Watermark inpainting completed UPFRONT before synthesis — skipping post-render inpainting gate for {os.path.basename(active_reel_path)}.")
+                            logger.info(f"✅ [PHASE 2.1] Watermark handled UPFRONT in Phase 2 — skipping post-render inpainting gate for {os.path.basename(active_reel_path)}.")
                         else:
                             try:
                                 from Watermark_and_Inpainting.watermark_main import run_watermark_removal
@@ -957,6 +986,7 @@ def run_master_pipeline(
                                     output_path=watermark_output,
                                     keywords="",
                                     retry_level=0,
+                                    video_path=active_reel_path
                                 )
                                 if cleaned_video_path and os.path.exists(cleaned_video_path):
                                     active_reel_path = cleaned_video_path
@@ -1041,7 +1071,8 @@ def run_master_pipeline(
                                     session_id=sess_id,
                                     raw_video_path=possible_raw if os.path.exists(possible_raw) else None,
                                     audio_path=possible_audio if os.path.exists(possible_audio) else None,
-                                    beat_math=beat_math
+                                    beat_math=beat_math,
+                                    pin_now=False
                                 )
 
                                 # 2. Record Column 1 Master Reel entry with full intel and pin index
@@ -1068,7 +1099,7 @@ def run_master_pipeline(
 
                     t = threading.Thread(target=_run_in_thread, daemon=True)
                     t.start()
-                    t.join(timeout=360.0)
+                    t.join(timeout=1200.0)
 
                     logger.info(f"📲 [REALTIME TELEGRAM DELIVERY] Delivered '{os.path.basename(reel_path)}' directly to Telegram!")
                 except Exception as _deliv_err:

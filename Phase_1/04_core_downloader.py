@@ -36,15 +36,43 @@ def download_stream(
     out_video_path = os.path.join(destination_dir, "video.mp4")
     meta_path = os.path.join(destination_dir, "metadata.json")
 
-    # If already downloaded, return immediately
-    if os.path.exists(out_video_path) and os.path.exists(meta_path):
-        logger.info(f"⚡ [STEP 04] Video already exists: {out_video_path}")
+    # ── 1. PRIMARY: Telegram Storage Group Vault Hydration ───────────────────
+    try:
+        from Publishing_Modules.telegram_vault_indexer import TelegramVaultIndexer
+        vault = TelegramVaultIndexer()
+        vault_video = vault.hydrate_raw_video_from_vault(url, destination_dir)
+        if vault_video and os.path.exists(vault_video) and os.path.getsize(vault_video) > 1024:
+            if metadata:
+                with open(meta_path, "w", encoding="utf-8") as mf:
+                    json.dump(metadata, mf, indent=2, ensure_ascii=False)
+            logger.info(f"📥 [STEP 04 - PRIMARY] Hydrated raw source video directly from Telegram Storage Group Vault: {os.path.basename(destination_dir)}/video.mp4")
+            res = {
+                "step": "step_04",
+                "status": "success",
+                "video_path": vault_video,
+                "metadata_path": meta_path,
+                "reused_existing": True,
+                "source": "telegram_storage_vault"
+            }
+            if callback:
+                callback("step_04", "success", {
+                    "message": "Raw video hydrated directly from Telegram Storage Group Vault in ~1s.",
+                    "video_path": vault_video
+                })
+            return res
+    except Exception as _ve:
+        logger.debug(f"[STEP 04] Vault primary hydration notice: {_ve}")
+
+    # ── 2. SECONDARY: Local Disk Cache Check ─────────────────────────────────
+    if os.path.exists(out_video_path) and os.path.exists(meta_path) and os.path.getsize(out_video_path) > 1024:
+        logger.info(f"⚡ [STEP 04 - SECONDARY] Video found in local downloads folder: {out_video_path}")
         res = {
             "step": "step_04",
             "status": "success",
             "video_path": out_video_path,
             "metadata_path": meta_path,
-            "reused_existing": True
+            "reused_existing": True,
+            "source": "local_disk"
         }
         if callback:
             callback("step_04", "success", {
@@ -52,6 +80,8 @@ def download_stream(
                 "video_path": out_video_path
             })
         return res
+
+    # ── 3. TERTIARY: External Platform Downloader (yt-dlp / Apify) ───────────
 
     try:
         from Downloader_Modules.downloader import download_video

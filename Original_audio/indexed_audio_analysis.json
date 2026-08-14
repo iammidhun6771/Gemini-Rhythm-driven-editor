@@ -2,21 +2,18 @@
   "video": {
     "video_id": "video",
     "file_name": "video.wav",
-    "file_path": "D:\\AMTCE\\simpler update\\Original_audio\\active\\video.wav",
+    "file_path": "D:\\AMTCE\\Original_audio\\active\\video.wav",
     "tempo_bpm": 0.0,
-    "avg_energy": 0.653,
-    "vibe": "groove",
-    "beat_count": 63,
-    "drop_count": 7,
+    "avg_energy": 0.423,
+    "vibe": "cinematic",
+    "beat_count": 41,
+    "drop_count": 4,
     "drops": [
-      1.6,
-      7.1000000000000005,
-      9.600000000000001,
-      15.100000000000001,
-      19.1,
-      21.1,
-      43.1
+      4.05,
+      23.85,
+      28.6,
+      35.9
     ],
-    "beat_score": 90.53
+    "beat_score": 57.23
   }
 }

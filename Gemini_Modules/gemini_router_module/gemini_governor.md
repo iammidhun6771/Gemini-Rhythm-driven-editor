@@ -68,11 +68,12 @@ Ranks available models dynamically using a multi-factor score:
 
 $$\text{Score} = (\text{SuccessRate} \times \text{TaskBoost}) - (\text{FailCount} \times 10.0) - (\text{AvgLatency} \times 0.4)$$
 
-* **Supported Models**: `gemini-2.5-pro`, `gemini-pro-latest`, `gemini-2.5-flash`, `gemini-2.0-flash`, `gemini-flash-latest`, `gemini-2.5-flash-lite`, `gemini-2.0-flash-lite`.
-* **Strict Blacklist**: Deprecated `1.5` models (`gemini-1.5-pro`, `gemini-1.5-flash`) are hard-blocked (`if "1.5" in name: continue`).
+* **Supported Models**: `gemini-2.5-pro`, `gemini-pro-latest`, `gemini-2.5-flash`, `gemini-2.0-flash`, `gemini-flash-latest`, `gemini-2.5-flash-lite`, `gemini-2.0-flash-lite`, plus `1.5` family (`gemini-1.5-pro`, `gemini-1.5-flash`).
+* **Configurable 1.5 Filter**: 1.5 models can be optionally blocked by setting `GEMINI_BLOCK_1_5=1`.
+* **Dual SDK Engine**: Compatible with both modern `google-genai` and legacy `google-generativeai`.
 
 ### 5. API Key Change Auto-Detection
-* Computes a SHA-256 hash of `GEMINI_API_KEY`.
+* Computes a SHA-256 hash of `GEMINI_API_KEY` or `GOOGLE_API_KEY`.
 * If the API key changes, `_load_states()` automatically wipes all model ban timers and 429 penalty counters.
 
 ---

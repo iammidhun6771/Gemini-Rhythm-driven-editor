@@ -210,6 +210,8 @@ def run_phase2_pipeline(
             forensic_res["lyric_intel"] = timeline_res.get("lyric_intel", {})
             if timeline_res.get("route_params"):
                 forensic_res["route_params"] = timeline_res["route_params"]
+            if timeline_res.get("selected_bgm_path"):
+                selected_bgm_path = timeline_res["selected_bgm_path"]
             _emit("step_05", "success", {"message": f"Built {len(micro_shots)} micro-shot takes (2.0s-3.5s)."})
 
             # Step 6: Gemini Call 3 FFmpeg Synthesis

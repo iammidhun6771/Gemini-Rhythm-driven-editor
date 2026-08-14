@@ -79,7 +79,7 @@ def run_scheduled_scraper_batch(max_accounts: int = 2) -> List[str]:
     logger.info(f"🚀 [SCHEDULED BATCH] Triggering Apify scraper for accounts: {target_accounts}")
 
     from Downloader_Modules.downloader_main import run_phase1_ingestion
-    from phase2_main import run_phase2_orchestration
+    from Main_Modules.phase2_main import run_phase2_orchestration
 
     # Run ingestion for selected accounts
     ingest_res = run_phase1_ingestion(mode="auto", limit_per_account=3)

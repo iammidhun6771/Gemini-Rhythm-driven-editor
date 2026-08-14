@@ -41,7 +41,7 @@ def encode_proxy_video(
         return {"step": "step_05", "status": "success", "proxy_path": proxy_path, "reused": True}
 
     try:
-        from proxy_encoder import encode_proxy
+        from Main_Modules.proxy_encoder import encode_proxy
         res_proxy = encode_proxy(video_path)
         out_proxy = res_proxy if isinstance(res_proxy, str) and os.path.exists(res_proxy) else proxy_path
 

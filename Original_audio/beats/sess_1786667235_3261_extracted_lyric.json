@@ -1,0 +1,99 @@
+{
+  "has_vocals": true,
+  "language": "Hindi",
+  "tempo_bpm": 120.0,
+  "bar_duration_sec": 2.0,
+  "dominant_emotion": "joy",
+  "energy_profile": "medium",
+  "sections": [
+    {
+      "start": 0.0,
+      "end": 7.76,
+      "type": "verse",
+      "energy": 0.6,
+      "mood": "playful",
+      "recommended_cut_pace": "medium"
+    }
+  ],
+  "tension_arc": [
+    {
+      "time": 0.0,
+      "tension": 0.4
+    },
+    {
+      "time": 1.0,
+      "tension": 0.45
+    },
+    {
+      "time": 2.0,
+      "tension": 0.5
+    },
+    {
+      "time": 3.0,
+      "tension": 0.55
+    },
+    {
+      "time": 4.0,
+      "tension": 0.6
+    },
+    {
+      "time": 5.0,
+      "tension": 0.55
+    },
+    {
+      "time": 6.0,
+      "tension": 0.5
+    },
+    {
+      "time": 7.0,
+      "tension": 0.45
+    }
+  ],
+  "lyrics": [
+    {
+      "time": 0.0,
+      "end": 7.76,
+      "text": "\u0924\u094b \u0932\u093f\u0917\u0930\u093f\u0902 \u0914\u0930 \u0924\u094b \u0932\u093f\u0917\u0932 \u0915\u0936\u093f \u0915\u0936\u093f\u0935\u093e\u0926\u0940 \u0924\u094b \u091c\u093e\u0916\u093c \u0932\u093f\u0917\u0932 \u0932\u093f\u0917\u0932 \u0915\u0941\u0937 \u0915\u0930\u094b \u0932\u093f\u0917\u0928\u094d\u0902",
+      "emotion_weight": 0.6,
+      "emotion_tag": "joy",
+      "section": "verse"
+    }
+  ],
+  "emotional_peak_moments": [
+    2.0,
+    5.0
+  ],
+  "shot_directives": [
+    {
+      "time": 0.0,
+      "duration": 2.5,
+      "directive": "face_closeup",
+      "priority": 4,
+      "reason": "Vocal start, engaging facial expression"
+    },
+    {
+      "time": 2.5,
+      "duration": 3.0,
+      "directive": "slow_zoom_in",
+      "priority": 3,
+      "reason": "Building rhythm and playful mood"
+    },
+    {
+      "time": 5.5,
+      "duration": 2.26,
+      "directive": "wide_energetic",
+      "priority": 4,
+      "reason": "Concluding phrase with high energy"
+    }
+  ],
+  "vibe_tags": [
+    "playful",
+    "casual",
+    "upbeat",
+    "dialogue"
+  ],
+  "instrumental_sections": [],
+  "is_unusable": false,
+  "unusable_reason": "",
+  "_source": "gemini"
+}

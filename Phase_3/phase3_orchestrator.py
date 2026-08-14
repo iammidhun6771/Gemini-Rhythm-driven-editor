@@ -30,7 +30,7 @@ logger = logging.getLogger("phase3.orchestrator")
 def notify_tracker(step: str, status: str, details: dict):
     """Emit status updates to live WebSocket tracker server."""
     try:
-        from tracker_server import broadcast_event
+        from Main_Modules.tracker_server import broadcast_event
         broadcast_event({"phase": "phase3", "step": step, "status": status, "details": details})
     except Exception:
         pass

@@ -349,7 +349,7 @@ class ForensicVideoAnalyzer:
                 tmp_dir = tempfile.mkdtemp(prefix="forensic_frames_")
                 own_frames = True
                 try:
-                    from strategic_frame_sampler import extract_strategic_frame_files
+                    from Main_Modules.strategic_frame_sampler import extract_strategic_frame_files
                     res_frames = extract_strategic_frame_files(video_path, tmp_dir, return_meta=True)
                     if isinstance(res_frames, tuple):
                         frames, sample_meta = res_frames

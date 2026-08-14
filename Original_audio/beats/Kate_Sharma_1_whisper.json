@@ -1,0 +1,696 @@
+{
+  "has_speech": true,
+  "language": "hi",
+  "duration_sec": 20.83,
+  "words": [
+    {
+      "word": "Raza",
+      "start": 1.62,
+      "end": 2.08,
+      "confidence": 0.54
+    },
+    {
+      "word": "Mandar",
+      "start": 2.08,
+      "end": 2.62,
+      "confidence": 0.58
+    },
+    {
+      "word": "hai",
+      "start": 2.62,
+      "end": 2.72,
+      "confidence": 0.57
+    },
+    {
+      "word": "to",
+      "start": 2.72,
+      "end": 2.92,
+      "confidence": 0.08
+    },
+    {
+      "word": "bhi",
+      "start": 2.92,
+      "end": 3.16,
+      "confidence": 0.58
+    },
+    {
+      "word": "to",
+      "start": 3.16,
+      "end": 3.3,
+      "confidence": 0.74
+    },
+    {
+      "word": "pandu",
+      "start": 3.3,
+      "end": 3.86,
+      "confidence": 0.45
+    },
+    {
+      "word": "hai",
+      "start": 3.86,
+      "end": 3.98,
+      "confidence": 0.76
+    },
+    {
+      "word": "Urdhe",
+      "start": 3.98,
+      "end": 4.4,
+      "confidence": 0.27
+    },
+    {
+      "word": "Patan",
+      "start": 4.4,
+      "end": 4.78,
+      "confidence": 0.74
+    },
+    {
+      "word": "nao",
+      "start": 4.78,
+      "end": 5.2,
+      "confidence": 0.31
+    },
+    {
+      "word": "Jogi",
+      "start": 5.2,
+      "end": 5.54,
+      "confidence": 0.52
+    },
+    {
+      "word": "Malangu",
+      "start": 5.54,
+      "end": 6.26,
+      "confidence": 0.34
+    },
+    {
+      "word": "Samarthi",
+      "start": 6.26,
+      "end": 6.86,
+      "confidence": 0.38
+    },
+    {
+      "word": "Toobhik",
+      "start": 6.86,
+      "end": 7.54,
+      "confidence": 0.11
+    },
+    {
+      "word": "Lothi",
+      "start": 7.54,
+      "end": 8.06,
+      "confidence": 0.43
+    },
+    {
+      "word": "Pasan",
+      "start": 8.06,
+      "end": 8.48,
+      "confidence": 0.47
+    },
+    {
+      "word": "naatkar",
+      "start": 8.48,
+      "end": 9.02,
+      "confidence": 0.29
+    },
+    {
+      "word": "ye",
+      "start": 9.02,
+      "end": 9.24,
+      "confidence": 0.24
+    },
+    {
+      "word": "Jatan",
+      "start": 9.24,
+      "end": 9.66,
+      "confidence": 0.33
+    },
+    {
+      "word": "naadhe",
+      "start": 9.66,
+      "end": 10.1,
+      "confidence": 0.23
+    },
+    {
+      "word": "kaatul",
+      "start": 10.1,
+      "end": 10.52,
+      "confidence": 0.32
+    },
+    {
+      "word": "batan",
+      "start": 10.52,
+      "end": 11.0,
+      "confidence": 0.56
+    },
+    {
+      "word": "Jaiye",
+      "start": 11.0,
+      "end": 11.58,
+      "confidence": 0.32
+    },
+    {
+      "word": "tari",
+      "start": 11.58,
+      "end": 11.86,
+      "confidence": 0.41
+    },
+    {
+      "word": "sol",
+      "start": 11.86,
+      "end": 12.16,
+      "confidence": 0.38
+    },
+    {
+      "word": "Jaiye",
+      "start": 12.16,
+      "end": 12.84,
+      "confidence": 0.79
+    },
+    {
+      "word": "teraadhe",
+      "start": 12.84,
+      "end": 13.32,
+      "confidence": 0.55
+    },
+    {
+      "word": "lmera",
+      "start": 13.32,
+      "end": 13.72,
+      "confidence": 0.43
+    },
+    {
+      "word": "Akiyakol",
+      "start": 13.72,
+      "end": 14.66,
+      "confidence": 0.37
+    },
+    {
+      "word": "Kallikit",
+      "start": 14.66,
+      "end": 15.48,
+      "confidence": 0.39
+    },
+    {
+      "word": "de",
+      "start": 15.48,
+      "end": 15.62,
+      "confidence": 0.24
+    },
+    {
+      "word": "mil",
+      "start": 15.62,
+      "end": 15.86,
+      "confidence": 0.4
+    },
+    {
+      "word": "Jogi",
+      "start": 15.86,
+      "end": 16.5,
+      "confidence": 0.65
+    },
+    {
+      "word": "tupol",
+      "start": 16.5,
+      "end": 17.1,
+      "confidence": 0.49
+    },
+    {
+      "word": "Basa",
+      "start": 17.1,
+      "end": 17.42,
+      "confidence": 0.61
+    },
+    {
+      "word": "fatne",
+      "start": 17.42,
+      "end": 17.82,
+      "confidence": 0.54
+    },
+    {
+      "word": "de",
+      "start": 17.82,
+      "end": 18.02,
+      "confidence": 0.37
+    },
+    {
+      "word": "bil",
+      "start": 18.02,
+      "end": 18.34,
+      "confidence": 0.31
+    },
+    {
+      "word": "Gets",
+      "start": 18.34,
+      "end": 19.02,
+      "confidence": 0.62
+    },
+    {
+      "word": "tu",
+      "start": 19.02,
+      "end": 19.26,
+      "confidence": 0.22
+    },
+    {
+      "word": "khol",
+      "start": 19.26,
+      "end": 19.58,
+      "confidence": 0.55
+    },
+    {
+      "word": "Baby",
+      "start": 19.58,
+      "end": 20.1,
+      "confidence": 0.41
+    },
+    {
+      "word": "lamiy",
+      "start": 20.1,
+      "end": 20.58,
+      "confidence": 0.38
+    }
+  ],
+  "sentences": [
+    {
+      "text": "Raza Mandar hai to bhi to pandu hai",
+      "start": 1.62,
+      "end": 3.98,
+      "words": [
+        {
+          "word": "Raza",
+          "start": 1.62,
+          "end": 2.08,
+          "confidence": 0.54
+        },
+        {
+          "word": "Mandar",
+          "start": 2.08,
+          "end": 2.62,
+          "confidence": 0.58
+        },
+        {
+          "word": "hai",
+          "start": 2.62,
+          "end": 2.72,
+          "confidence": 0.57
+        },
+        {
+          "word": "to",
+          "start": 2.72,
+          "end": 2.92,
+          "confidence": 0.08
+        },
+        {
+          "word": "bhi",
+          "start": 2.92,
+          "end": 3.16,
+          "confidence": 0.58
+        },
+        {
+          "word": "to",
+          "start": 3.16,
+          "end": 3.3,
+          "confidence": 0.74
+        },
+        {
+          "word": "pandu",
+          "start": 3.3,
+          "end": 3.86,
+          "confidence": 0.45
+        },
+        {
+          "word": "hai",
+          "start": 3.86,
+          "end": 3.98,
+          "confidence": 0.76
+        }
+      ]
+    },
+    {
+      "text": "Urdhe Patan nao",
+      "start": 3.98,
+      "end": 5.2,
+      "words": [
+        {
+          "word": "Urdhe",
+          "start": 3.98,
+          "end": 4.4,
+          "confidence": 0.27
+        },
+        {
+          "word": "Patan",
+          "start": 4.4,
+          "end": 4.78,
+          "confidence": 0.74
+        },
+        {
+          "word": "nao",
+          "start": 4.78,
+          "end": 5.2,
+          "confidence": 0.31
+        }
+      ]
+    },
+    {
+      "text": "Jogi Malangu Samarthi",
+      "start": 5.2,
+      "end": 6.86,
+      "words": [
+        {
+          "word": "Jogi",
+          "start": 5.2,
+          "end": 5.54,
+          "confidence": 0.52
+        },
+        {
+          "word": "Malangu",
+          "start": 5.54,
+          "end": 6.26,
+          "confidence": 0.34
+        },
+        {
+          "word": "Samarthi",
+          "start": 6.26,
+          "end": 6.86,
+          "confidence": 0.38
+        }
+      ]
+    },
+    {
+      "text": "Toobhik Lothi Pasan naatkar ye",
+      "start": 6.86,
+      "end": 9.24,
+      "words": [
+        {
+          "word": "Toobhik",
+          "start": 6.86,
+          "end": 7.54,
+          "confidence": 0.11
+        },
+        {
+          "word": "Lothi",
+          "start": 7.54,
+          "end": 8.06,
+          "confidence": 0.43
+        },
+        {
+          "word": "Pasan",
+          "start": 8.06,
+          "end": 8.48,
+          "confidence": 0.47
+        },
+        {
+          "word": "naatkar",
+          "start": 8.48,
+          "end": 9.02,
+          "confidence": 0.29
+        },
+        {
+          "word": "ye",
+          "start": 9.02,
+          "end": 9.24,
+          "confidence": 0.24
+        }
+      ]
+    },
+    {
+      "text": "Jatan naadhe kaatul batan",
+      "start": 9.24,
+      "end": 11.0,
+      "words": [
+        {
+          "word": "Jatan",
+          "start": 9.24,
+          "end": 9.66,
+          "confidence": 0.33
+        },
+        {
+          "word": "naadhe",
+          "start": 9.66,
+          "end": 10.1,
+          "confidence": 0.23
+        },
+        {
+          "word": "kaatul",
+          "start": 10.1,
+          "end": 10.52,
+          "confidence": 0.32
+        },
+        {
+          "word": "batan",
+          "start": 10.52,
+          "end": 11.0,
+          "confidence": 0.56
+        }
+      ]
+    },
+    {
+      "text": "Jaiye tari sol",
+      "start": 11.0,
+      "end": 12.16,
+      "words": [
+        {
+          "word": "Jaiye",
+          "start": 11.0,
+          "end": 11.58,
+          "confidence": 0.32
+        },
+        {
+          "word": "tari",
+          "start": 11.58,
+          "end": 11.86,
+          "confidence": 0.41
+        },
+        {
+          "word": "sol",
+          "start": 11.86,
+          "end": 12.16,
+          "confidence": 0.38
+        }
+      ]
+    },
+    {
+      "text": "Jaiye teraadhe lmera",
+      "start": 12.16,
+      "end": 13.72,
+      "words": [
+        {
+          "word": "Jaiye",
+          "start": 12.16,
+          "end": 12.84,
+          "confidence": 0.79
+        },
+        {
+          "word": "teraadhe",
+          "start": 12.84,
+          "end": 13.32,
+          "confidence": 0.55
+        },
+        {
+          "word": "lmera",
+          "start": 13.32,
+          "end": 13.72,
+          "confidence": 0.43
+        }
+      ]
+    },
+    {
+      "text": "Akiyakol",
+      "start": 13.72,
+      "end": 14.66,
+      "words": [
+        {
+          "word": "Akiyakol",
+          "start": 13.72,
+          "end": 14.66,
+          "confidence": 0.37
+        }
+      ]
+    },
+    {
+      "text": "Kallikit de mil",
+      "start": 14.66,
+      "end": 15.86,
+      "words": [
+        {
+          "word": "Kallikit",
+          "start": 14.66,
+          "end": 15.48,
+          "confidence": 0.39
+        },
+        {
+          "word": "de",
+          "start": 15.48,
+          "end": 15.62,
+          "confidence": 0.24
+        },
+        {
+          "word": "mil",
+          "start": 15.62,
+          "end": 15.86,
+          "confidence": 0.4
+        }
+      ]
+    },
+    {
+      "text": "Jogi tupol",
+      "start": 15.86,
+      "end": 17.1,
+      "words": [
+        {
+          "word": "Jogi",
+          "start": 15.86,
+          "end": 16.5,
+          "confidence": 0.65
+        },
+        {
+          "word": "tupol",
+          "start": 16.5,
+          "end": 17.1,
+          "confidence": 0.49
+        }
+      ]
+    },
+    {
+      "text": "Basa fatne de bil",
+      "start": 17.1,
+      "end": 18.34,
+      "words": [
+        {
+          "word": "Basa",
+          "start": 17.1,
+          "end": 17.42,
+          "confidence": 0.61
+        },
+        {
+          "word": "fatne",
+          "start": 17.42,
+          "end": 17.82,
+          "confidence": 0.54
+        },
+        {
+          "word": "de",
+          "start": 17.82,
+          "end": 18.02,
+          "confidence": 0.37
+        },
+        {
+          "word": "bil",
+          "start": 18.02,
+          "end": 18.34,
+          "confidence": 0.31
+        }
+      ]
+    },
+    {
+      "text": "Gets tu khol",
+      "start": 18.34,
+      "end": 19.58,
+      "words": [
+        {
+          "word": "Gets",
+          "start": 18.34,
+          "end": 19.02,
+          "confidence": 0.62
+        },
+        {
+          "word": "tu",
+          "start": 19.02,
+          "end": 19.26,
+          "confidence": 0.22
+        },
+        {
+          "word": "khol",
+          "start": 19.26,
+          "end": 19.58,
+          "confidence": 0.55
+        }
+      ]
+    },
+    {
+      "text": "Baby lamiy",
+      "start": 19.58,
+      "end": 20.58,
+      "words": [
+        {
+          "word": "Baby",
+          "start": 19.58,
+          "end": 20.1,
+          "confidence": 0.41
+        },
+        {
+          "word": "lamiy",
+          "start": 20.1,
+          "end": 20.58,
+          "confidence": 0.38
+        }
+      ]
+    }
+  ],
+  "clean_cut_timestamps": [
+    {
+      "timestamp_sec": 3.98,
+      "word_after_which_to_cut": "hai",
+      "reason": "segment_end"
+    },
+    {
+      "timestamp_sec": 5.2,
+      "word_after_which_to_cut": "nao",
+      "reason": "segment_end"
+    },
+    {
+      "timestamp_sec": 6.86,
+      "word_after_which_to_cut": "Samarthi",
+      "reason": "segment_end"
+    },
+    {
+      "timestamp_sec": 9.24,
+      "word_after_which_to_cut": "ye",
+      "reason": "segment_end"
+    },
+    {
+      "timestamp_sec": 11.0,
+      "word_after_which_to_cut": "batan",
+      "reason": "segment_end"
+    },
+    {
+      "timestamp_sec": 12.16,
+      "word_after_which_to_cut": "sol",
+      "reason": "segment_end"
+    },
+    {
+      "timestamp_sec": 13.72,
+      "word_after_which_to_cut": "lmera",
+      "reason": "segment_end"
+    },
+    {
+      "timestamp_sec": 14.66,
+      "word_after_which_to_cut": "Akiyakol",
+      "reason": "segment_end"
+    },
+    {
+      "timestamp_sec": 15.86,
+      "word_after_which_to_cut": "mil",
+      "reason": "segment_end"
+    },
+    {
+      "timestamp_sec": 17.1,
+      "word_after_which_to_cut": "tupol",
+      "reason": "segment_end"
+    },
+    {
+      "timestamp_sec": 18.34,
+      "word_after_which_to_cut": "bil",
+      "reason": "segment_end"
+    },
+    {
+      "timestamp_sec": 19.58,
+      "word_after_which_to_cut": "khol",
+      "reason": "segment_end"
+    },
+    {
+      "timestamp_sec": 20.58,
+      "word_after_which_to_cut": "lamiy",
+      "reason": "segment_end"
+    }
+  ],
+  "extracted_at": 1786667192.3038669
+}

@@ -607,6 +607,7 @@ def select_best_audio_for_clip(
     clip_id: str,
     clip_folder: Optional[str] = None,
     audio_dir: Optional[str] = None,
+    exclude_filenames: Optional[set] = None,
 ) -> Dict[str, Any]:
     """
     Gemini Call 2 — BGM Selector.
@@ -624,13 +625,33 @@ def select_best_audio_for_clip(
     current_audio = clip_data.get("audio_data", {})
     pooled_audio_list = store.get_all_audio_data(limit=25)
 
-    # ── Load the unified pool index (single source of truth) ──────────────────
+    # ── 1. PRIMARY: Query Telegram Storage Group Vault Audio Index ────────────
+    vault_audio_pool = {}
+    try:
+        from Publishing_Modules.telegram_vault_indexer import TelegramVaultIndexer
+        vault = TelegramVaultIndexer()
+        vault_audio_pool = vault.get_vault_audio_pool()
+        if vault_audio_pool:
+            logger.info(f"🏛️ [BGM SELECTOR - PRIMARY] Loaded {len(vault_audio_pool)} candidate audio track(s) from Telegram Storage Vault index.")
+    except Exception as _tve:
+        logger.debug(f"[BGM SELECTOR] Vault audio index lookup notice: {_tve}")
+
+    # ── 2. SECONDARY: Load Local Pool Index & Merge ───────────────────────────
     from Audio_Modules.audio_pool_manager import AudioPoolManager
     _pm = AudioPoolManager()
-    pool_files = _pm.get_files_index()  # pool_metadata["files"] — has bpm, emotion, usage, last_used
+    local_pool_files = _pm.get_files_index()  # pool_metadata["files"]
+
+    # Merge: Start with vault index, overlay local metadata if present
+    pool_files = dict(vault_audio_pool)
+    for fname, meta in local_pool_files.items():
+        if fname in pool_files:
+            # Preserve existing rich vault fields while updating local usage
+            pool_files[fname].update(meta)
+        else:
+            pool_files[fname] = meta
 
     if not pool_files:
-        logger.warning("🎶 [BGM Selector] pool_metadata['files'] is empty — no candidates available.")
+        logger.warning("🎶 [BGM Selector] Neither Telegram Vault index nor local pool has candidates.")
         return {"selected_audio_track": None, "alignment_score": 0.0, "reasoning": "Empty pool index."}
 
     # Identify previously selected track for this clip (if re-editing)
@@ -638,8 +659,12 @@ def select_best_audio_for_clip(
     disqualified_tracks = set()
     if previous_bgm:
         disqualified_tracks.add(previous_bgm.lower())
+    if exclude_filenames:
+        for ef in exclude_filenames:
+            disqualified_tracks.add(ef.lower())
+            disqualified_tracks.add(os.path.basename(ef).lower())
 
-    # Build candidate list from pool_metadata["files"] — no disk scan needed
+    # Build candidate list from merged pool index
     all_candidates = [
         fname for fname, meta in pool_files.items()
         if isinstance(meta, dict)
@@ -649,14 +674,14 @@ def select_best_audio_for_clip(
     ]
 
     if not all_candidates:
-        logger.warning("🎶 [BGM Selector] No valid candidates found in pool_metadata['files'].")
+        logger.warning("🎶 [BGM Selector] No valid musical candidates found in merged pool index.")
         return {"selected_audio_track": None, "alignment_score": 0.0, "reasoning": "No valid BGM tracks in pool."}
 
     # Filter out previous BGM track if alternatives exist
     fresh_candidates = [c for c in all_candidates if c.lower() not in disqualified_tracks]
     available_candidates = fresh_candidates if fresh_candidates else all_candidates
 
-    # Format candidate BGM tracks — ALL data comes from pool_metadata["files"] entries
+    # Format candidate BGM tracks — ALL data comes from pool_files entries
     candidate_lines = {}  # fname -> formatted metadata line
     candidate_scores = []
 
