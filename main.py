@@ -1263,6 +1263,11 @@ def start_telegram_bot_service():
 
         async def _on_startup(application):
             try:
+                # Hydrate all vault JSON databases (master index, users, audio pool) from Telegram Storage Group
+                logger.info("📦 [VAULT CLOUD HYDRATION] Hydrating vault index, user sessions, and pool metadata from Telegram...")
+                vault_indexer.hydrate_all_vault_jsons_on_startup()
+                await vault_indexer.sync_vault_index_from_telegram(application.bot)
+
                 bot_user = await application.bot.get_me()
                 bot_id = str(bot_user.id)
                 admin_id = os.getenv("TELEGRAM_CHAT_ID") or os.getenv("TELEGRAM_ADMIN_ID")
