@@ -1,11 +1,9 @@
 {
-  "_comment": "AMTCE Rotating Pipeline v3 \u2014 1 account/day, 11 reels, skip top 3, keep 8 (2 immediate + 6 stored).",
+  "_comment": "AMTCE Rotating Pipeline v3 — Source accounts configured via Telegram Chat /addaccount.",
   "_version": "3.0",
   "account_mode_enabled": true,
   "_paparazzi": {
-    "source_accounts": [
-      "9x_bollywood"
-    ],
+    "source_accounts": [],
     "nsfw_accounts": [],
     "female_name_tokens": [],
     "male_name_tokens": []

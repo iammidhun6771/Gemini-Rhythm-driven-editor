@@ -26,8 +26,8 @@ def get_rotated_max_two_accounts(max_accounts: int = 2) -> List[str]:
     and updates the active target list.
     """
     if not os.path.exists(ACCOUNTS_JSON):
-        logger.warning(f"⚠️ {ACCOUNTS_JSON} not found. Returning default fallback accounts.")
-        return ["indiancelebspot", "b.town.ind"]
+        logger.warning(f"⚠️ {ACCOUNTS_JSON} not found. Please add target source accounts via Telegram Chat /addaccount.")
+        return []
 
     try:
         with open(ACCOUNTS_JSON, "r", encoding="utf-8") as f:
@@ -36,7 +36,8 @@ def get_rotated_max_two_accounts(max_accounts: int = 2) -> List[str]:
         paparazzi = data.get("_paparazzi", {})
         all_accounts = paparazzi.get("source_accounts", [])
         if not all_accounts:
-            return ["indiancelebspot"]
+            logger.warning("⚠️ No target source accounts configured in source_accounts.json. Use /addaccount <handle> to add accounts.")
+            return []
 
         # Track rotation pointer via state file
         rotation_state_file = os.path.join(_REPO_ROOT, "data", "scraper_rotation_pointer.json")
@@ -64,7 +65,7 @@ def get_rotated_max_two_accounts(max_accounts: int = 2) -> List[str]:
         return selected
     except Exception as e:
         logger.error(f"❌ Error rotating source accounts: {e}")
-        return ["indiancelebspot", "b.town.ind"]
+        return []
 
 
 def run_scheduled_scraper_batch(max_accounts: int = 2) -> List[str]:

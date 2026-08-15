@@ -46,8 +46,8 @@ def resolve_target_accounts(
             logger.warning(f"⚠️ [STEP 01] Failed to read source_accounts.json: {e}")
 
     if not resolved_sources:
-        resolved_sources = ["indiancelebspot", "b.town.ind"]
-        logger.info(f"📋 [STEP 01] Using fallback default accounts: {resolved_sources}")
+        logger.warning("⚠️ [STEP 01] No target accounts configured. Please add accounts via Telegram Chat /addaccount <handle>.")
+        resolved_sources = []
 
     # Enforce max limit for batch run
     final_targets = resolved_sources[:max_limit]

@@ -1279,7 +1279,7 @@ def start_telegram_bot_service():
                             text=(
                                 "🚀 **Master AI Video Factory Bot Active!**\n\n"
                                 "🎯 **Select a platform below to begin bulk scraping & editing**, or send a creator handle / video link:\n"
-                                "• 📸 **Instagram**: `@indiancelebspot`\n"
+                                "• 📸 **Instagram**: `@username` or `/addaccount @handle`\n"
                                 "• 🔴 **YouTube**: `@ChannelName`\n"
                                 "• 🎵 **TikTok**: `@tiktokuser`\n"
                                 "• 🌐 **Direct URL / File**: Paste link or upload video\n\n"
