@@ -166,7 +166,7 @@ def run_phase1_ingestion(
                 logger.warning(f"   ⚠ Failed to load source_accounts.json: {e}")
 
         if not sources:
-            sources = ["indiancelebspot", "b.town.ind"]
+            sources = []
 
         # Enforce Max 2 accounts limit per run
         sources = sources[:2]

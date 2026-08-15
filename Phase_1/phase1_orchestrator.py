@@ -135,7 +135,7 @@ def run_phase1_pipeline(
 
         # Step 1: Target Source Config
         cfg_res = resolve_target_accounts(target_accounts=target_accounts, max_limit=2, callback=event_callback)
-        sources = cfg_res.get("accounts", ["indiancelebspot"])
+        sources = cfg_res.get("accounts", [])
 
         # Step 3: Apify Harvest & Pre-screen
         limit = limit_per_account if limit_per_account else 3

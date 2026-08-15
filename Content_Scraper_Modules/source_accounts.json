@@ -1,9 +1,11 @@
 {
-  "_comment": "AMTCE Rotating Pipeline v3 — Source accounts configured via Telegram Chat /addaccount.",
+  "_comment": "AMTCE Rotating Pipeline v3 \u2014 Source accounts configured via Telegram Chat /addaccount.",
   "_version": "3.0",
   "account_mode_enabled": true,
   "_paparazzi": {
-    "source_accounts": [],
+    "source_accounts": [
+      "disha_patani13"
+    ],
     "nsfw_accounts": [],
     "female_name_tokens": [],
     "male_name_tokens": []

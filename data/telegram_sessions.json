@@ -1,1 +1,31 @@
-{}
+{
+  "sess_1786824431_7336": {
+    "session_id": "sess_1786824431_7336",
+    "telegram_message_id": 308,
+    "requestor_chat_id": 1363193987,
+    "video_path": "D:\\AMTCE\\Processed Shorts\\manual_DbqHIvRSV5q_master.mp4",
+    "raw_video_path": "D:\\AMTCE\\downloads\\manual_DbqHIvRSV5q\\video.mp4",
+    "clip_id": "manual_DbqHIvRSV5q",
+    "creator": "General",
+    "status": "APPROVED",
+    "custom_title": "kushakapila",
+    "created_at": 1786824431.6743872,
+    "updated_at": 1786824963.9651816,
+    "attempt_history": [
+      "D:\\AMTCE\\Processed Shorts\\manual_DcC-h87swq3_master.mp4"
+    ]
+  },
+  "sess_1786824964_774": {
+    "session_id": "sess_1786824964_774",
+    "telegram_message_id": 314,
+    "requestor_chat_id": 1363193987,
+    "video_path": "D:\\AMTCE\\Processed Shorts\\manual_DcC-h87swq3_master.mp4",
+    "raw_video_path": "D:\\AMTCE\\downloads\\manual_DcC-h87swq3\\video.mp4",
+    "clip_id": "manual_DcC-h87swq3",
+    "creator": "General",
+    "status": "AWAITING_REVIEW",
+    "custom_title": null,
+    "created_at": 1786824964.0114002,
+    "updated_at": 1786824968.7573872
+  }
+}

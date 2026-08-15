@@ -300,7 +300,7 @@ def _run_harvest_cycle() -> int:
             logger.warning(f"harvester: failed to load source accounts: {e}")
 
     if not sources:
-        sources = ["celebdesiress", "_mad_for_divas_", "avneetphile", "b.town.ind", "indiancelebspot"]
+        sources = []
 
     logger.info(f"🌾 [HARVESTER] Starting harvest cycle across {len(sources)} source accounts: {sources}")
     try:

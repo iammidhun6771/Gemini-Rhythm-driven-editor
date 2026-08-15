@@ -88,6 +88,7 @@ vault_indexer = TelegramVaultIndexer()
 user_selected_platform = {}  # {chat_id: "instagram" | "youtube" | "tiktok" | "direct"}
 user_pending_text = {}       # {chat_id: "target_id_string"}
 user_pending_reedit_session = {}  # {chat_id: "session_id"} for custom text feedback
+_wizard_sessions = {}        # {chat_id: {"wizard": str, "step": int, "data": dict}}
 
 def build_reedit_options_keyboard(session_id: str):
     """
@@ -139,22 +140,22 @@ def build_best_attempt_comparison_keyboard(session_id: str, total_attempts: int 
 
 def build_platform_selection_keyboard():
     """
-    Builds Interactive Platform Selector Keyboard for Bulk Scraping:
-      - [ 📸 Instagram Creator ]      callback_data="platform_instagram"
-      - [ 🔴 YouTube Shorts / Channel ] callback_data="platform_youtube"
-      - [ 🎵 TikTok Creator ]         callback_data="platform_tiktok"
-      - [ 🌐 Direct URL / Raw File ]  callback_data="platform_direct"
+    Builds the Main Menu 4-button keyboard:
+      - [ ⚙️ Auto Input Setup ]        callback_data="menu_auto_setup"
+      - [ 📱 Add Multiple Socials ]    callback_data="menu_add_socials"
+      - [ 🔑 Assign Credentials ]      callback_data="menu_credentials"
+      - [ 🔗 Direct URL / Manual ]     callback_data="menu_direct_url"
     """
     try:
         from telegram import InlineKeyboardButton, InlineKeyboardMarkup
         keyboard = [
             [
-                InlineKeyboardButton("📸 Instagram Creator", callback_data="platform_instagram"),
-                InlineKeyboardButton("🔴 YouTube Shorts / Channel", callback_data="platform_youtube"),
+                InlineKeyboardButton("⚙️ Auto Input Setup", callback_data="menu_auto_setup"),
+                InlineKeyboardButton("📱 Add Multiple Socials", callback_data="menu_add_socials"),
             ],
             [
-                InlineKeyboardButton("🎵 TikTok Creator", callback_data="platform_tiktok"),
-                InlineKeyboardButton("🌐 Direct URL / Raw File", callback_data="platform_direct"),
+                InlineKeyboardButton("🔑 Assign Credentials", callback_data="menu_credentials"),
+                InlineKeyboardButton("🔗 Direct URL / Manual", callback_data="menu_direct_url"),
             ]
         ]
         return InlineKeyboardMarkup(keyboard)
@@ -221,25 +222,164 @@ async def handle_telegram_callback(update, context):
     chat_id = query.message.chat_id if query.message else user_id
     logger.info(f"📲 [TELEGRAM BOT] Received Callback Click: '{data}' from User ID: {user_id}")
 
-    # Handle Back / Cancel Button
-    if data == "platform_cancel":
+    # ── Main Menu Navigation ──────────────────────────────────────────────────
+    if data == "platform_cancel" or data == "menu_main":
+        _wizard_sessions.pop(chat_id, None)
         user_selected_platform.pop(chat_id, None)
         user_pending_text.pop(chat_id, None)
         keyboard = build_platform_selection_keyboard()
         await query.edit_message_text(
-            text="👋 **Platform selection cancelled!**\n\n🎯 **Select a platform below to begin:**",
+            text="👋 **Back to Main Menu!**\n\n👇 **Choose what you want to do:**",
             reply_markup=keyboard
         )
         return
 
-    # Handle Platform Selection Buttons
+    # ── ⚙️ Auto Input Setup Wizard ────────────────────────────────────────────
+    if data == "menu_auto_setup":
+        _wizard_sessions[chat_id] = {"wizard": "auto_setup", "step": 1, "data": {}}
+        back_kbd = build_back_button_keyboard()
+        await query.edit_message_text(
+            text=(
+                "⚙️ **Auto Input Setup — Step 1/6: Source Account IDs**\n\n"
+                "Send the platform handles you want to scrape.\n\n"
+                "📌 **Format** (one per line or all together):\n"
+                "  `/instagram @indiancelebspot`\n"
+                "  `/youtube @ChannelName`\n"
+                "  `/tiktok @tiktokuser`\n\n"
+                "You can add up to **2 accounts total** across any mix of platforms.\n"
+                "Send them now 👇"
+            ),
+            reply_markup=back_kbd
+        )
+        return
+
+    # ── 📱 Add Multiple Socials Wizard ────────────────────────────────────────
+    if data == "menu_add_socials":
+        _wizard_sessions[chat_id] = {"wizard": "add_socials", "step": 1, "data": {}}
+        from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+        kbd = InlineKeyboardMarkup([
+            [InlineKeyboardButton("📺 YouTube", callback_data="socials_youtube"),
+             InlineKeyboardButton("📸 Instagram / Meta", callback_data="socials_instagram")],
+            [InlineKeyboardButton("↩️ Back to Main Menu / Cancel", callback_data="menu_main")]
+        ])
+        await query.edit_message_text(
+            text=(
+                "📱 **Add Multiple Socials — Step 1: Choose Platform**\n\n"
+                "Which social account do you want to connect?\n"
+                "*(You can repeat this for each platform)*"
+            ),
+            reply_markup=kbd
+        )
+        return
+
+    if data == "socials_youtube":
+        sess = _wizard_sessions.setdefault(chat_id, {"wizard": "add_socials", "step": 2, "data": {}})
+        sess["step"] = 2
+        sess["platform"] = "youtube"
+        back_kbd = build_back_button_keyboard()
+        await query.edit_message_text(
+            text=(
+                "📺 **YouTube Setup — Step 2: Upload Client Secret**\n\n"
+                "1️⃣ Go to Google Cloud Console → APIs & Services → Credentials\n"
+                "2️⃣ Download your **OAuth 2.0 client secret JSON** file\n"
+                "3️⃣ **Upload the `client_secret.json` file here** (as a file attachment)\n\n"
+                "The bot will save it and start the YouTube OAuth sign-in flow automatically!"
+            ),
+            reply_markup=back_kbd
+        )
+        return
+
+    if data == "socials_instagram":
+        sess = _wizard_sessions.setdefault(chat_id, {"wizard": "add_socials", "step": 2, "data": {}})
+        sess["step"] = 2
+        sess["platform"] = "instagram"
+        back_kbd = build_back_button_keyboard()
+        await query.edit_message_text(
+            text=(
+                "📸 **Instagram / Meta Setup — Step 2: Send Credentials**\n\n"
+                "Send all 4 Meta credentials in **one message** using this exact format:\n\n"
+                "`/metagraphapi PAGE_ID=your_page_id PAGE_TOKEN=EAAMxxx IG_ID=your_ig_business_id IG_TOKEN=EAAMxxx`\n\n"
+                "📌 **Where to find these:**\n"
+                "• Meta Business Suite → Settings → Page Access Tokens\n"
+                "• Instagram Graph API → Business Account ID\n\n"
+                "⏱️ This session will accept your credentials for **5 minutes**."
+            ),
+            reply_markup=back_kbd
+        )
+        return
+
+    if data == "socials_overflow_yes":
+        sess = _wizard_sessions.get(chat_id, {})
+        sess.setdefault("data", {})["overflow_publish"] = True
+        back_kbd = build_back_button_keyboard()
+        await query.edit_message_text(
+            text=(
+                "✅ **Overflow Publishing ON** — if daily limit is hit on one account, bot will post to the next connected social.\n\n"
+                "📌 **Step 4: Branding / Watermark Name**\n\n"
+                "What branding name should appear on your watermark?\n"
+                "*(Example: `MyBrand TV`, `CelebSpot`, `Viral Shorts`)*\n\n"
+                "Send your brand name now 👇"
+            ),
+            reply_markup=back_kbd
+        )
+        if chat_id in _wizard_sessions:
+            _wizard_sessions[chat_id]["step"] = 4
+        return
+
+    if data == "socials_overflow_no":
+        sess = _wizard_sessions.get(chat_id, {})
+        sess.setdefault("data", {})["overflow_publish"] = False
+        back_kbd = build_back_button_keyboard()
+        await query.edit_message_text(
+            text=(
+                "❌ **Overflow Publishing OFF** — bot will only post to the primary account and stop at the daily limit.\n\n"
+                "📌 **Step 4: Branding / Watermark Name**\n\n"
+                "What branding name should appear on your watermark?\n"
+                "*(Example: `MyBrand TV`, `CelebSpot`, `Viral Shorts`)*\n\n"
+                "Send your brand name now 👇"
+            ),
+            reply_markup=back_kbd
+        )
+        if chat_id in _wizard_sessions:
+            _wizard_sessions[chat_id]["step"] = 4
+        return
+
+    # ── 🔑 Assign Credentials Wizard ──────────────────────────────────────────
+    if data == "menu_credentials":
+        _wizard_sessions[chat_id] = {"wizard": "credentials", "step": 1, "data": {}}
+        back_kbd = build_back_button_keyboard()
+        await query.edit_message_text(
+            text=(
+                "🔑 **Assign Credentials — Step 1/4: Apify Token**\n\n"
+                "Apify is used to scrape Instagram, YouTube & TikTok.\n\n"
+                "Send your Apify API token now:\n"
+                "`/setapify YOUR_APIFY_TOKEN`\n\n"
+                "*(Get it from: https://console.apify.com → Settings → API Token)*"
+            ),
+            reply_markup=back_kbd
+        )
+        return
+
+    # ── 🔗 Direct URL / Manual ─────────────────────────────────────────────────
+    if data == "menu_direct_url":
+        user_selected_platform[chat_id] = "direct"
+        back_kbd = build_back_button_keyboard()
+        await query.edit_message_text(
+            text=(
+                "🔗 **Direct URL / Manual Mode**\n\n"
+                "📎 **Paste any video URL** (Instagram Reel, YouTube Short, TikTok, etc.)\n"
+                "📁 Or **upload a video file** (`.mp4`) directly here.\n\n"
+                "The bot will download it, run the full AI Master Edit pipeline, and send the rendered reel back to you!"
+            ),
+            reply_markup=back_kbd
+        )
+        return
+
+    # ── Legacy platform_ prefix (kept for backwards compat) ──────────────────
     if data.startswith("platform_"):
         chosen_p = data.replace("platform_", "").strip()
         user_selected_platform[chat_id] = chosen_p
-
-        # Check if user had already typed a pending target handle before clicking the platform button!
         pending_handle = user_pending_text.pop(chat_id, None)
-
         if pending_handle and chosen_p != "direct":
             await context.bot.send_message(
                 chat_id=chat_id,
@@ -247,47 +387,21 @@ async def handle_telegram_callback(update, context):
                     f"🎯 **[STEP 1/3] Target Handle Received!**\n\n"
                     f"👤 **Creator**: `@{pending_handle}`\n"
                     f"🌐 **Platform**: `{chosen_p.title()}`\n"
-                    f"⚙️ **Status**: Scraping top reels for {chosen_p.title()} & starting AI editing pipeline... Please wait!"
+                    f"⚙️ **Status**: Scraping top reels & starting AI editing pipeline..."
                 )
             )
             try:
-                run_master_pipeline(
-                    mode="auto",
-                    target_accounts=[pending_handle],
-                    platform=chosen_p,
-                    requestor_chat_id=chat_id
-                )
+                run_master_pipeline(mode="auto", target_accounts=[pending_handle], platform=chosen_p, requestor_chat_id=chat_id)
             except Exception as _p_err:
                 logger.error(f"❌ Error executing pending handle pipeline: {_p_err}")
             return
-        elif pending_handle and chosen_p == "direct":
-            await context.bot.send_message(
-                chat_id=chat_id,
-                text=(
-                    f"📥 **[STEP 1/3] Direct Video Ingestion!**\n\n"
-                    f"🔗 **Target**: `{pending_handle}`\n"
-                    f"⚙️ **Status**: Ingesting video & starting AI Master Editor..."
-                )
-            )
-            try:
-                run_master_pipeline(
-                    mode="manual",
-                    url=pending_handle if pending_handle.startswith("http") else None,
-                    input_path=pending_handle if os.path.exists(pending_handle) else None,
-                    platform="direct",
-                    requestor_chat_id=chat_id
-                )
-            except Exception as _p_err:
-                logger.error(f"❌ Error executing direct pipeline: {_p_err}")
-            return
-
-        prompts = {
-            "instagram": "📸 **Instagram Mode Selected!**\n\n👇 **Send the Instagram Creator handle** (e.g. `indiancelebspot` or `@b.town.ind`) to scrape top reels in bulk:",
-            "youtube": "🔴 **YouTube Shorts / Channel Mode Selected!**\n\n👇 **Send the YouTube channel handle or URL** (e.g. `@ChannelName` or `https://www.youtube.com/@ChannelName/shorts`) to scrape top Shorts in bulk:",
-            "tiktok": "🎵 **TikTok Mode Selected!**\n\n👇 **Send the TikTok Creator handle or URL** (e.g. `@tiktokuser` or `https://www.tiktok.com/@tiktokuser`) to scrape top videos in bulk:",
-            "direct": "🌐 **Direct URL / Raw File Mode Selected!**\n\n👇 **Send any video URL** (Instagram Reel, YouTube Short, TikTok, etc.) or **upload a raw `.mp4` video file** directly to process:"
-        }
         back_kbd = build_back_button_keyboard()
+        prompts = {
+            "instagram": "📸 **Instagram Mode**\n\nSend the creator handle (e.g. `@indiancelebspot`):",
+            "youtube": "🔴 **YouTube Mode**\n\nSend the channel handle (e.g. `@ChannelName`):",
+            "tiktok": "🎵 **TikTok Mode**\n\nSend the creator handle (e.g. `@tiktokuser`):",
+            "direct": "🌐 **Direct URL Mode**\n\nPaste any video URL or upload a video file:"
+        }
         await query.edit_message_text(text=prompts.get(chosen_p, "Send target handle or URL below:"), reply_markup=back_kbd)
         return
 
@@ -719,6 +833,284 @@ def _dispatch_pipeline_in_background(**kwargs):
     t.start()
 
 
+async def _wizard_auto_setup_step(msg, chat_id: int, text: str):
+    """Advances the Auto Input Setup wizard through steps 1-6."""
+    sess = _wizard_sessions.get(chat_id)
+    if not sess or sess.get("wizard") != "auto_setup":
+        return False
+    step = sess.get("step", 1)
+    data = sess.setdefault("data", {})
+    back_kbd = build_back_button_keyboard()
+
+    if step == 1:
+        # Parse platform IDs like "/instagram @handle" or "instagram @handle"
+        lines = text.strip().splitlines()
+        added = []
+        for line in lines:
+            line = line.strip().lstrip("/")
+            for plat in ["instagram", "youtube", "tiktok"]:
+                if line.lower().startswith(plat):
+                    handle = line[len(plat):].strip().lstrip("@").strip()
+                    if handle:
+                        added.append({"platform": plat, "handle": handle})
+        if not added:
+            await msg.reply_text(
+                "⚠️ Could not parse any account IDs.\n\n"
+                "Please use the format:\n"
+                "`/instagram @handle`  or  `/youtube @handle`  or  `/tiktok @handle`"
+            )
+            return True
+        data["accounts"] = added[:2]  # max 2
+        acc_summary = "\n".join([f"• `{a['platform'].title()}`: `@{a['handle']}`" for a in data["accounts"]])
+        sess["step"] = 2
+        await msg.reply_text(
+            f"✅ **Accounts saved** ({len(data['accounts'])}/2 max):\n{acc_summary}\n\n"
+            f"⏰ **Step 2/6: Set Scraping & Processing Time**\n\n"
+            f"When should the bot automatically scrape & render reels?\n"
+            f"Send time(s) in **24h HH:MM** format:\n"
+            f"*(Example: `07:00,19:00` → runs at 7 AM and 7 PM daily)*",
+            reply_markup=back_kbd
+        )
+        return True
+
+    if step == 2:
+        data["scrape_times"] = text.strip()
+        sess["step"] = 3
+        await msg.reply_text(
+            f"✅ **Scraping times set**: `{data['scrape_times']}`\n\n"
+            f"📤 **Step 3/6: Set Publishing Time**\n\n"
+            f"When should the bot upload the finished reels to your social accounts?\n"
+            f"Send time(s) in **24h HH:MM** format:\n"
+            f"*(Example: `07:30,19:30` → posts at 7:30 AM and 7:30 PM daily)*",
+            reply_markup=back_kbd
+        )
+        return True
+
+    if step == 3:
+        data["publish_times"] = text.strip()
+        sess["step"] = 4
+        await msg.reply_text(
+            f"✅ **Publishing times set**: `{data['publish_times']}`\n\n"
+            f"🎬 **Step 4/6: Clips Per Account Per Run**\n\n"
+            f"How many clips should the bot scrape from each account per scheduled run?\n"
+            f"*(Recommended: `5–11`, max: `11`)*\n\nSend a number 👇",
+            reply_markup=back_kbd
+        )
+        return True
+
+    if step == 4:
+        try:
+            clips = min(int(text.strip()), 11)
+        except ValueError:
+            clips = 5
+        data["clips_per_account"] = clips
+        sess["step"] = 5
+        await msg.reply_text(
+            f"✅ **Clips per account**: `{clips}` clips per run\n\n"
+            f"📅 **Step 5/6: Daily Publish Limit**\n\n"
+            f"How many reels should the bot publish **per day** per social account?\n"
+            f"*(Recommended: `2`, to keep accounts safe)*\n\nSend a number 👇",
+            reply_markup=back_kbd
+        )
+        return True
+
+    if step == 5:
+        try:
+            pub_limit = max(1, int(text.strip()))
+        except ValueError:
+            pub_limit = 2
+        data["max_publish_per_day"] = pub_limit
+        sess["step"] = 6
+        await msg.reply_text(
+            f"✅ **Daily publish limit**: `{pub_limit}` reels/day\n\n"
+            f"🗓️ **Step 6/6: Days Per Week**\n\n"
+            f"How many days per week should the bot run the scraping schedule?\n"
+            f"*(Example: `5` = Monday–Friday, `7` = every day)*\n\nSend a number (1–7) 👇",
+            reply_markup=back_kbd
+        )
+        return True
+
+    if step == 6:
+        try:
+            days = max(1, min(7, int(text.strip())))
+        except ValueError:
+            days = 7
+        data["days_per_week"] = days
+        # Save everything
+        env_path = os.path.join(_REPO_ROOT, "Credentials", ".env")
+        try:
+            lines_env = open(env_path).readlines() if os.path.exists(env_path) else []
+            existing = {l.split("=")[0]: l for l in lines_env if "=" in l}
+            existing["SCRAPING_AUTO_INPUT_TIMES"] = f'SCRAPING_AUTO_INPUT_TIMES="{data["scrape_times"]}"\n'
+            existing["PUBLISH_STATIC_TIMES"] = f'PUBLISH_STATIC_TIMES="{data["publish_times"]}"\n'
+            existing["CLIPS_PER_ACCOUNT_PER_RUN"] = f'CLIPS_PER_ACCOUNT_PER_RUN="{data["clips_per_account"]}"\n'
+            existing["MAX_PUBLISH_PER_DAY"] = f'MAX_PUBLISH_PER_DAY="{data["max_publish_per_day"]}"\n'
+            existing["SCRAPE_DAYS_PER_WEEK"] = f'SCRAPE_DAYS_PER_WEEK="{data["days_per_week"]}"\n'
+            with open(env_path, "w") as f:
+                f.writelines(existing.values())
+        except Exception as _env_err:
+            logger.error(f"Failed to write auto-setup to .env: {_env_err}")
+        # Save source accounts
+        try:
+            from Downloader_Modules.scheduled_scraper_manager import add_source_account
+            for acc in data.get("accounts", []):
+                add_source_account(acc["handle"], acc["platform"])
+        except Exception as _sa_err:
+            logger.debug(f"add_source_account error: {_sa_err}")
+        _wizard_sessions.pop(chat_id, None)
+        accs = "\n".join([f"  • `{a['platform'].title()}`: `@{a['handle']}`" for a in data.get("accounts", [])])
+        await msg.reply_text(
+            f"🎉 **Auto Input Setup Complete!**\n\n"
+            f"📋 **Summary:**\n"
+            f"👤 **Accounts:**\n{accs}\n"
+            f"⏰ **Scrape & Process**: `{data['scrape_times']}` daily\n"
+            f"📤 **Publish to Socials**: `{data['publish_times']}` daily\n"
+            f"🎬 **Clips per account per run**: `{data['clips_per_account']}`\n"
+            f"📅 **Daily publish limit**: `{data['max_publish_per_day']}` reels/day\n"
+            f"🗓️ **Active days per week**: `{data['days_per_week']}` days\n\n"
+            f"✅ All settings saved to `.env` & Telegram Storage Vault!\n"
+            f"The bot will now automatically run on your schedule.",
+            reply_markup=build_platform_selection_keyboard()
+        )
+        return True
+
+    return False
+
+
+async def _wizard_socials_step(msg, chat_id: int, text: str, is_document: bool = False):
+    """Advances the Add Socials wizard through its steps."""
+    sess = _wizard_sessions.get(chat_id)
+    if not sess or sess.get("wizard") != "add_socials":
+        return False
+    step = sess.get("step", 1)
+    data = sess.setdefault("data", {})
+    back_kbd = build_back_button_keyboard()
+
+    if step == 2 and sess.get("platform") == "youtube" and is_document:
+        # Client secret file uploaded — save and trigger ytcode
+        await msg.reply_text(
+            "✅ **client_secret.json received!**\n\n"
+            "🔄 Now use `/ytcode` to start the Google sign-in flow:\n"
+            "1️⃣ The bot will send you a Google OAuth link\n"
+            "2️⃣ Sign in, copy the full `http://localhost/?code=...` URL\n"
+            "3️⃣ Paste it back here or use `/ytcode <url>`\n\n"
+            "After completing OAuth, your YouTube token will be saved automatically!"
+        )
+        sess["step"] = 3
+        return True
+
+    if step == 3:
+        # Ask overflow + branding
+        from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+        kbd = InlineKeyboardMarkup([
+            [InlineKeyboardButton("✅ Yes — post to next social if limit hit", callback_data="socials_overflow_yes"),
+             InlineKeyboardButton("❌ No — stop at daily limit", callback_data="socials_overflow_no")],
+            [InlineKeyboardButton("↩️ Back to Main Menu / Cancel", callback_data="menu_main")]
+        ])
+        await msg.reply_text(
+            "📌 **Step 3: Overflow Publishing**\n\n"
+            f"You've set a daily publish limit per account.\n"
+            f"If the limit is reached, should the bot post the remaining reels to your **other connected social accounts**?",
+            reply_markup=kbd
+        )
+        return True
+
+    if step == 4:
+        # Branding name
+        brand = text.strip()
+        data["watermark_brand"] = brand
+        env_path = os.path.join(_REPO_ROOT, "Credentials", ".env")
+        try:
+            lines_env = open(env_path).readlines() if os.path.exists(env_path) else []
+            existing = {l.split("=")[0]: l for l in lines_env if "=" in l}
+            existing["WATERMARK_TEXT"] = f'WATERMARK_TEXT="{brand}"\n'
+            existing["OVERFLOW_PUBLISH"] = f'OVERFLOW_PUBLISH="{str(data.get("overflow_publish", False)).lower()}"\n'
+            with open(env_path, "w") as f:
+                f.writelines(existing.values())
+        except Exception as _e:
+            logger.error(f"Failed to write socials settings to .env: {_e}")
+        _wizard_sessions.pop(chat_id, None)
+        await msg.reply_text(
+            f"🎉 **Socials Setup Complete!**\n\n"
+            f"🏷️ **Watermark Brand Name**: `{brand}`\n"
+            f"📤 **Overflow Publishing**: `{'ON ✅' if data.get('overflow_publish') else 'OFF ❌'}`\n\n"
+            f"All settings saved! Your branded reels will now be posted automatically.",
+            reply_markup=build_platform_selection_keyboard()
+        )
+        return True
+
+    return False
+
+
+async def _wizard_credentials_step(msg, chat_id: int, text: str):
+    """Advances the Assign Credentials wizard through its steps."""
+    sess = _wizard_sessions.get(chat_id)
+    if not sess or sess.get("wizard") != "credentials":
+        return False
+    step = sess.get("step", 1)
+    back_kbd = build_back_button_keyboard()
+
+    if step == 1 and text.startswith("/setapify "):
+        token = text.replace("/setapify ", "").strip()
+        try:
+            from Publishing_Modules.telegram_user_manager import set_user_apify_token
+            set_user_apify_token(str(chat_id), token)
+        except Exception as _e:
+            logger.debug(f"setapify wizard: {_e}")
+        sess["step"] = 2
+        await msg.reply_text(
+            f"✅ **Apify token saved!**\n\n"
+            f"🤖 **Step 2/3: Gemini API Key**\n\n"
+            f"Send your Google Gemini API key:\n"
+            f"`/setgemini YOUR_GEMINI_KEY`\n\n"
+            f"*(Get it from: https://aistudio.google.com/apikey)*",
+            reply_markup=back_kbd
+        )
+        return True
+
+    if step == 2 and text.startswith("/setgemini "):
+        key = text.replace("/setgemini ", "").strip()
+        try:
+            from Publishing_Modules.telegram_user_manager import set_user_gemini_key
+            set_user_gemini_key(str(chat_id), key)
+        except Exception as _e:
+            logger.debug(f"setgemini wizard: {_e}")
+        sess["step"] = 3
+        await msg.reply_text(
+            f"✅ **Gemini key saved!**\n\n"
+            f"📦 **Step 3/3: Telegram Storage Group Chat ID**\n\n"
+            f"Send your Telegram Storage Group Chat ID:\n"
+            f"`/setstoragechat -100xxxxxxxxxx`\n\n"
+            f"*(Forward any message from your storage group to @userinfobot to get the Chat ID)*",
+            reply_markup=back_kbd
+        )
+        return True
+
+    if step == 3 and text.startswith("/setstoragechat "):
+        chat_id_val = text.replace("/setstoragechat ", "").strip()
+        env_path = os.path.join(_REPO_ROOT, "Credentials", ".env")
+        try:
+            lines_env = open(env_path).readlines() if os.path.exists(env_path) else []
+            existing = {l.split("=")[0]: l for l in lines_env if "=" in l}
+            existing["TELEGRAM_STORAGE_CHAT_ID"] = f'TELEGRAM_STORAGE_CHAT_ID="{chat_id_val}"\n'
+            with open(env_path, "w") as f:
+                f.writelines(existing.values())
+        except Exception as _e:
+            logger.error(f"Failed to write TELEGRAM_STORAGE_CHAT_ID: {_e}")
+        _wizard_sessions.pop(chat_id, None)
+        await msg.reply_text(
+            f"🎉 **All Credentials Assigned!**\n\n"
+            f"✅ **Apify Token**: saved\n"
+            f"✅ **Gemini API Key**: saved\n"
+            f"📦 **Telegram Storage Group**: `{chat_id_val}`\n\n"
+            f"All keys saved securely! Your bot is ready to run.",
+            reply_markup=build_platform_selection_keyboard()
+        )
+        return True
+
+    return False
+
+
 async def handle_telegram_incoming_msg(update, context):
     """
     Handles user messages sent to Telegram bot:
@@ -732,6 +1124,49 @@ async def handle_telegram_incoming_msg(update, context):
     chat_id = msg.chat.id
     from_user = msg.from_user.to_dict() if msg.from_user else {}
     user_id = str(msg.from_user.id) if msg.from_user else str(chat_id)
+
+    # ── Active Wizard Step Handler ────────────────────────────────────────────
+    active_wizard = _wizard_sessions.get(chat_id, {}).get("wizard")
+    if active_wizard and msg.text and not msg.text.startswith("/start") and not msg.text.startswith("/help"):
+        is_doc = bool(msg.document or msg.video)
+        text_in = msg.text.strip() if msg.text else ""
+        if active_wizard == "auto_setup":
+            if await _wizard_auto_setup_step(msg, chat_id, text_in):
+                return
+        elif active_wizard == "add_socials":
+            sess = _wizard_sessions.get(chat_id, {})
+            if sess.get("step") == 2 and sess.get("platform") == "instagram" and text_in.startswith("/metagraphapi "):
+                raw = text_in.replace("/metagraphapi ", "").strip()
+                env_vars = {}
+                for part in raw.split():
+                    if "=" in part:
+                        k, v = part.split("=", 1)
+                        env_vars[k.strip()] = v.strip()
+                env_path = os.path.join(_REPO_ROOT, "Credentials", ".env")
+                try:
+                    lines_env = open(env_path).readlines() if os.path.exists(env_path) else []
+                    existing = {l.split("=")[0]: l for l in lines_env if "=" in l}
+                    for k, v in env_vars.items():
+                        existing[k] = f'{k}="{v}"\n'
+                    with open(env_path, "w") as f:
+                        f.writelines(existing.values())
+                except Exception as _e:
+                    logger.error(f"metagraphapi wizard: {_e}")
+                saved = ", ".join([f"`{k}`" for k in env_vars])
+                await msg.reply_text(f"✅ **Meta credentials saved**: {saved}")
+                _wizard_sessions[chat_id]["step"] = 3
+                if await _wizard_socials_step(msg, chat_id, ""):
+                    return
+                return
+            if await _wizard_socials_step(msg, chat_id, text_in, is_doc):
+                return
+        elif active_wizard == "credentials":
+            if await _wizard_credentials_step(msg, chat_id, text_in):
+                return
+    if active_wizard and (msg.document or msg.video):
+        if active_wizard == "add_socials":
+            if await _wizard_socials_step(msg, chat_id, "", is_document=True):
+                return
 
     # Check if user pasted a localhost OAuth redirect URL or auth code
     if msg.text and ("localhost" in msg.text or "code=" in msg.text) and ("http://" in msg.text or "https://" in msg.text):
@@ -1349,6 +1784,79 @@ def start_telegram_bot_service():
         app.add_handler(CommandHandler("ytcode", cmd_ytcode))
         app.add_handler(CallbackQueryHandler(handle_telegram_callback))
         app.add_handler(MessageHandler(filters.TEXT | filters.VIDEO | filters.Document.ALL, handle_telegram_incoming_msg))
+
+        # ── Wizard shortcut commands ──────────────────────────────────────────
+        async def _cmd_auto_setup(update, context):
+            sess = _wizard_sessions.setdefault(update.effective_chat.id, {"wizard": "auto_setup", "step": 1, "data": {}})
+            sess.update({"wizard": "auto_setup", "step": 1, "data": {}})
+            await update.message.reply_text(
+                "⚙️ **Auto Input Setup — Step 1/6: Source Account IDs**\n\n"
+                "Send your platform handles (one per line or all together):\n"
+                "`/instagram @handle`\n`/youtube @handle`\n`/tiktok @handle`\n\n"
+                "You can add up to 2 accounts total.",
+                reply_markup=build_back_button_keyboard()
+            )
+        async def _cmd_addaccount(update, context):
+            args_text = " ".join(context.args).strip() if context.args else ""
+            if not args_text:
+                await update.message.reply_text("Usage: `/addaccount @handle` or use ⚙️ Auto Input Setup from the menu.")
+                return
+            handle = args_text.lstrip("@").strip()
+            try:
+                from Downloader_Modules.scheduled_scraper_manager import add_source_account
+                add_source_account(handle, "instagram")
+            except Exception as _e:
+                logger.debug(f"addaccount: {_e}")
+            await update.message.reply_text(f"✅ Account `@{handle}` added! Use ⚙️ Auto Input Setup to configure full schedule.")
+        async def _cmd_removeaccount(update, context):
+            args_text = " ".join(context.args).strip() if context.args else ""
+            handle = args_text.lstrip("@").strip()
+            try:
+                from Downloader_Modules.scheduled_scraper_manager import remove_source_account
+                remove_source_account(handle)
+                await update.message.reply_text(f"🗑️ Account `@{handle}` removed!")
+            except Exception as _e:
+                await update.message.reply_text(f"⚠️ Could not remove `@{handle}`: {_e}")
+        async def _cmd_listaccounts(update, context):
+            try:
+                import json as _json
+                accs_path = os.path.join(_REPO_ROOT, "Content_Scraper_Modules", "source_accounts.json")
+                accs = _json.loads(open(accs_path).read()) if os.path.exists(accs_path) else []
+                if accs:
+                    lines = "\n".join([f"• `@{a.get('handle', a) if isinstance(a, dict) else a}`" for a in accs])
+                    await update.message.reply_text(f"📋 **Active Source Accounts ({len(accs)}):**\n\n{lines}")
+                else:
+                    await update.message.reply_text("📋 No accounts added yet.\n\nUse ⚙️ Auto Input Setup from the menu or `/addaccount @handle`.")
+            except Exception as _e:
+                await update.message.reply_text(f"⚠️ Could not list accounts: {_e}")
+        async def _cmd_setapify(update, context):
+            args_text = " ".join(context.args).strip() if context.args else ""
+            if not args_text:
+                await update.message.reply_text("Usage: `/setapify YOUR_APIFY_TOKEN`")
+                return
+            try:
+                from Publishing_Modules.telegram_user_manager import set_user_apify_token
+                set_user_apify_token(str(update.effective_chat.id), args_text)
+            except Exception as _e:
+                logger.debug(f"setapify: {_e}")
+            await update.message.reply_text("✅ Apify token saved!")
+        async def _cmd_setgemini(update, context):
+            args_text = " ".join(context.args).strip() if context.args else ""
+            if not args_text:
+                await update.message.reply_text("Usage: `/setgemini YOUR_GEMINI_KEY`")
+                return
+            try:
+                from Publishing_Modules.telegram_user_manager import set_user_gemini_key
+                set_user_gemini_key(str(update.effective_chat.id), args_text)
+            except Exception as _e:
+                logger.debug(f"setgemini: {_e}")
+            await update.message.reply_text("✅ Gemini API key saved!")
+        app.add_handler(CommandHandler("autosetup", _cmd_auto_setup))
+        app.add_handler(CommandHandler("addaccount", _cmd_addaccount))
+        app.add_handler(CommandHandler("removeaccount", _cmd_removeaccount))
+        app.add_handler(CommandHandler("listaccounts", _cmd_listaccounts))
+        app.add_handler(CommandHandler("setapify", _cmd_setapify))
+        app.add_handler(CommandHandler("setgemini", _cmd_setgemini))
 
         logger.info("✅ Telegram Bot Active & Listening! Platform Selection Menu dispatched to admin chat.")
         app.run_polling(poll_interval=2.0, drop_pending_updates=False)

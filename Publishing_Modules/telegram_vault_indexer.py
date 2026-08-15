@@ -507,6 +507,7 @@ class TelegramVaultIndexer:
         audio_path: Optional[str] = None,
         beat_math: Optional[Dict[str, Any]] = None,
         user_id: Optional[str] = None,
+        pin_now: bool = True,
     ) -> Dict[str, Any]:
         """
         Column 2 Record: Uploads raw source video and extracted audio to TELEGRAM_STORAGE_GROUP_ID,

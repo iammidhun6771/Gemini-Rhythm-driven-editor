@@ -95,7 +95,7 @@ def run_scheduled_scraper_batch(max_accounts: int = 2) -> List[str]:
     return rendered_reels
 
 
-def add_source_account(account_handle: str) -> bool:
+def add_source_account(account_handle: str, platform: str = "instagram") -> bool:
     """Adds a new target account handle to source_accounts.json and syncs to Telegram Vault."""
     clean_handle = account_handle.strip().lstrip("@")
     if not clean_handle:
@@ -113,7 +113,7 @@ def add_source_account(account_handle: str) -> bool:
             with open(ACCOUNTS_JSON, "w", encoding="utf-8") as wf:
                 json.dump(data, wf, indent=2)
             sync_source_accounts_to_telegram_vault()
-            logger.info("➕ [SOURCE ACCOUNTS] Added @%s to source_accounts.json & synced to Telegram Vault", clean_handle)
+            logger.info("➕ [SOURCE ACCOUNTS] Added @%s (%s) to source_accounts.json & synced to Telegram Vault", clean_handle, platform)
             return True
     except Exception as e:
         logger.error("❌ Failed to add source account @%s: %s", clean_handle, e)
