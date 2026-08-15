@@ -22,7 +22,7 @@ on:
           - youtube
           - tiktok
       target_accounts:
-        description: 'Target creator handle(s) (comma-separated, e.g. indiancelebspot)'
+        description: 'Target creator handle(s) (comma-separated, e.g. creator_handle)'
         required: false
         default: ''
         type: string
