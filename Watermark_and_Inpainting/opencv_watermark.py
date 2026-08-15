@@ -46,7 +46,31 @@ except ImportError:
     except ImportError:
         StaticPatchReuseEngine = None
 
-# IMPORT SHARED ENHANCERS (Refactored)
+def get_brand_logo_image():
+    """Loads custom brand logo image from logo/ or Credentials/logo/ directory."""
+    repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) if "__file__" in globals() else os.getcwd()
+    possible_dirs = [
+        os.path.join(repo_root, "logo"),
+        os.path.join(repo_root, "Credentials", "logo"),
+        os.path.join(os.getcwd(), "logo")
+    ]
+    possible_names = ["brand_logo.jpg", "brand_logo.png", "logo.jpg", "logo.png", "brand.png", "brand_logo.jpeg"]
+    for d in possible_dirs:
+        if os.path.exists(d):
+            for name in possible_names:
+                fpath = os.path.join(d, name)
+                if os.path.exists(fpath) and os.path.getsize(fpath) > 0:
+                    img = cv2.imread(fpath, cv2.IMREAD_UNCHANGED)
+                    if img is not None:
+                        return img
+            for f in os.listdir(d):
+                if f.lower().endswith((".png", ".jpg", ".jpeg", ".webp")):
+                    fpath = os.path.join(d, f)
+                    if os.path.getsize(fpath) > 0:
+                        img = cv2.imread(fpath, cv2.IMREAD_UNCHANGED)
+                        if img is not None:
+                            return img
+    return None
 try:
     from Visual_Refinement_Modules.watermark_enhancers import AlphaNeutralizer, ContrastHealer, EdgeIntegrator, MicroTextureBlender
     ENHANCERS_AVAILABLE = True
@@ -846,6 +870,9 @@ def _run_inpaint_pass(video_path, mask_paths, output_path, radius=3, alpha=1.0, 
         
         frame_idx = 0
         logged_enhancements = False
+        brand_logo_asset = get_brand_logo_image()
+        if brand_logo_asset is not None:
+            logger.info("🖼️ [BRAND LOGO ENGINE] Loaded custom brand logo asset for ROI overwrite (%dx%d)", brand_logo_asset.shape[1], brand_logo_asset.shape[0])
         start_time = time.time() # F. HARD TIME GUARD
 
         try:
@@ -969,10 +996,35 @@ def _run_inpaint_pass(video_path, mask_paths, output_path, radius=3, alpha=1.0, 
                             # --- STANDARD / ENHANCED MODE ---
                             roi_frame = cv2.inpaint(roi_frame, roi_mask, radius, cv2.INPAINT_NS)
                             roi_frame = cv2.GaussianBlur(roi_frame, (5, 5), 0)
+
+                            # --- BRAND LOGO OVERWRITE ENGINE ---
+                            if brand_logo_asset is not None and rw >= 20 and rh >= 20:
+                                try:
+                                    logo_h, logo_w = brand_logo_asset.shape[:2]
+                                    scale = min(rw / float(logo_w), rh / float(logo_h))
+                                    nw, nh = max(1, int(logo_w * scale)), max(1, int(logo_h * scale))
+                                    resized_logo = cv2.resize(brand_logo_asset, (nw, nh), interpolation=cv2.INTER_AREA)
+
+                                    ox = (rw - nw) // 2
+                                    oy = (rh - nh) // 2
+
+                                    if brand_logo_asset.shape[2] == 4:
+                                        # Transparent PNG alpha blend
+                                        alpha = (resized_logo[:, :, 3].astype(np.float32) / 255.0)[:, :, None]
+                                        bgr_logo = resized_logo[:, :, :3].astype(np.float32)
+                                        roi_bg = roi_frame[oy:oy+nh, ox:ox+nw].astype(np.float32)
+                                        blended_logo = (bgr_logo * alpha + roi_bg * (1.0 - alpha)).astype(np.uint8)
+                                        roi_frame[oy:oy+nh, ox:ox+nw] = blended_logo
+                                    else:
+                                        # BGR image overwrite (JPG/JPEG)
+                                        roi_frame[oy:oy+nh, ox:ox+nw] = resized_logo
+                                except Exception as _logo_err:
+                                    pass
+
                             frame[ry:ry+rh, rx:rx+rw] = roi_frame
     
                             if not logged_enhancements:
-                                 logger.info("✨ Enhanced Inpaint Pass Active (ROI Optimized)")
+                                 logger.info("✨ Enhanced Inpaint + Brand Logo Overwrite Active (ROI Optimized)")
                                  logged_enhancements = True
                 
                 out.write(frame)
