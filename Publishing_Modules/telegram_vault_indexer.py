@@ -579,6 +579,22 @@ class TelegramVaultIndexer:
         """
         storage_group_id = os.getenv("TELEGRAM_STORAGE_GROUP_ID") or os.getenv("TELEGRAM_CHAT_ID")
 
+        if not master_file_id and storage_group_id and bot and master_video_path and os.path.exists(master_video_path):
+            try:
+                filename = os.path.basename(master_video_path)
+                logger.info("🎬 [VAULT REEL UPLOAD] Sending master reel video (%s) to Storage Group...", filename)
+                with open(master_video_path, "rb") as vf:
+                    vmsg = await bot.send_video(
+                        chat_id=int(storage_group_id),
+                        video=vf,
+                        caption=f"🎬 **[VAULT MASTER REEL]** `{filename}`\n🆔 `{session_id}`" + (f"\n👤 User: `{user_id}`" if user_id else "")
+                    )
+                    if vmsg and vmsg.video:
+                        master_file_id = vmsg.video.file_id
+                        logger.info("✅ [VAULT REEL SUCCESS] Master video reel file_id captured: %s", master_file_id)
+            except Exception as _mv_err:
+                logger.warning("⚠️ Could not upload master video reel to Telegram Storage Group: %s", _mv_err)
+
         entry = {
             "session_id": session_id,
             "social_media_id": social_url or "direct_upload",
