@@ -23,6 +23,7 @@ import uuid
 import shutil
 import sys
 import time
+from typing import Optional, List, Dict, Any
 
 logger = logging.getLogger("opencv_watermark")
 
@@ -46,25 +47,53 @@ except ImportError:
     except ImportError:
         StaticPatchReuseEngine = None
 
-def get_brand_logo_image():
-    """Loads custom brand logo image from logo/ or Credentials/logo/ directory."""
+def get_brand_logo_image(brand_name: Optional[str] = None, platform: Optional[str] = None):
+    """
+    Finds custom brand logo image for a specific brand/channel or platform.
+    Resolution order:
+      1. logo/<brand_name>.png/.jpg (e.g. logo/fitsbysakshitha.jpg)
+      2. logo/<platform>_logo.png/.jpg (e.g. logo/youtube_logo.jpg)
+      3. Global fallback: logo/brand_logo.jpg, logo/brand_logo.png, etc.
+    """
     repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) if "__file__" in globals() else os.getcwd()
     possible_dirs = [
         os.path.join(repo_root, "logo"),
         os.path.join(repo_root, "Credentials", "logo"),
         os.path.join(os.getcwd(), "logo")
     ]
-    possible_names = ["brand_logo.jpg", "brand_logo.png", "logo.jpg", "logo.png", "brand.png", "brand_logo.jpeg"]
+    
+    # 1. Resolve brand candidates
+    target_brands = []
+    if brand_name:
+        clean_b = brand_name.strip().lower().replace(" ", "_")
+        target_brands.extend([clean_b, f"{clean_b}_logo"])
+    
+    env_brand = os.getenv("BRAND_WATERMARK_TEXT", "").strip().lower().replace(" ", "_") or os.getenv("WATERMARK_TEXT", "").strip().lower().replace(" ", "_")
+    if env_brand and env_brand not in target_brands:
+        target_brands.extend([env_brand, f"{env_brand}_logo"])
+
+    if platform:
+        clean_p = platform.strip().lower()
+        target_brands.extend([clean_p, f"{clean_p}_logo", f"{clean_p}_brand_logo"])
+
+    target_brands.extend(["brand_logo", "logo", "brand"])
+
+    exts = [".png", ".jpg", ".jpeg", ".webp", ".svg"]
+
     for d in possible_dirs:
         if os.path.exists(d):
-            for name in possible_names:
-                fpath = os.path.join(d, name)
-                if os.path.exists(fpath) and os.path.getsize(fpath) > 0:
-                    img = cv2.imread(fpath, cv2.IMREAD_UNCHANGED)
-                    if img is not None:
-                        return img
+            # Check candidate brand names first
+            for b in target_brands:
+                for ext in exts:
+                    fpath = os.path.join(d, f"{b}{ext}")
+                    if os.path.exists(fpath) and os.path.getsize(fpath) > 0:
+                        img = cv2.imread(fpath, cv2.IMREAD_UNCHANGED)
+                        if img is not None:
+                            logger.info("🖼️ [BRAND LOGO] Found brand-specific logo asset: %s", fpath)
+                            return img
+            # Fallback to any image file in logo directory
             for f in os.listdir(d):
-                if f.lower().endswith((".png", ".jpg", ".jpeg", ".webp")):
+                if f.lower().endswith(tuple(exts)):
                     fpath = os.path.join(d, f)
                     if os.path.getsize(fpath) > 0:
                         img = cv2.imread(fpath, cv2.IMREAD_UNCHANGED)
