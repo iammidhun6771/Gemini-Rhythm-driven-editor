@@ -667,6 +667,45 @@ async def process_yt_auth_code_input(msg, raw_text: str):
 
 # ── Telegram Message & Media Handler ─────────────────────────────────────────
 
+ACTIVE_PIPELINE_JOBS = set()
+
+async def _check_and_notify_busy_state(msg, user_id_str: str):
+    """If another job is actively rendering and user has no personal API key, prompt them to add key for high speed."""
+    if len(ACTIVE_PIPELINE_JOBS) > 0:
+        try:
+            from Publishing_Modules.telegram_user_manager import get_user_apify_token, get_user_gemini_key
+            has_apify = bool(get_user_apify_token(user_id_str))
+            has_gemini = bool(get_user_gemini_key(user_id_str))
+            if not has_apify and not has_gemini:
+                await msg.reply_text(
+                    "⏳ **[QUEUE NOTICE] Shared Engine Busy**\n\n"
+                    "Shared keys are currently rendering another job. Your request is queued!\n\n"
+                    "⚡ **Want to skip the queue & process INSTANTLY at max speed?**\n"
+                    "Add your personal API key:\n"
+                    "• 🔑 `/setapify <your_apify_token>`\n"
+                    "• 🤖 `/setgemini <your_gemini_key>`\n\n"
+                    "*(Users with personal keys bypass all shared queues!)*"
+                )
+        except Exception as _e:
+            logger.debug("Notice on busy state check: %s", _e)
+
+def _dispatch_pipeline_in_background(**kwargs):
+    """Spawns non-blocking daemon thread so Telegram bot loop never freezes."""
+    job_id = f"{kwargs.get('requestor_chat_id')}_{time.time()}"
+    ACTIVE_PIPELINE_JOBS.add(job_id)
+    def _worker():
+        try:
+            run_master_pipeline(**kwargs)
+        except Exception as _pe:
+            logger.error("❌ Background pipeline error: {_pe}")
+        finally:
+            ACTIVE_PIPELINE_JOBS.discard(job_id)
+
+    import threading
+    t = threading.Thread(target=_worker, daemon=True)
+    t.start()
+
+
 async def handle_telegram_incoming_msg(update, context):
     """
     Handles user messages sent to Telegram bot:
@@ -755,64 +794,58 @@ async def handle_telegram_incoming_msg(update, context):
 
         elif text.startswith("http://") or text.startswith("https://") or "instagram.com" in text or "youtube.com" in text or "youtu.be" in text or "tiktok.com" in text:
             target_url = text
+            await _check_and_notify_busy_state(msg, str(from_user.get("id") or chat_id))
             await msg.reply_text(
                 f"📥 **[STEP 1/3] Direct Video URL Received!**\n\n"
                 f"🔗 **Target URL**: `{target_url}`\n"
                 f"🌐 **Platform**: `{chosen_platform.title()}`\n"
                 f"⚙️ **Status**: Ingesting video & starting AI Master Editor..."
             )
-            # Execute pipeline immediately for URL input
-            try:
-                results = run_master_pipeline(
-                    mode="manual",
-                    url=target_url,
-                    platform=chosen_platform,
-                    requestor_chat_id=chat_id
-                )
-            except Exception as _url_err:
-                logger.error(f"❌ URL pipeline execution failed: {_url_err}")
+            # Execute pipeline in non-blocking background thread
+            _dispatch_pipeline_in_background(
+                mode="manual",
+                url=target_url,
+                platform=chosen_platform,
+                requestor_chat_id=chat_id
+            )
             return
 
         elif text.startswith("@") or text.lower().startswith("scrape:") or text.lower().startswith("account:"):
             clean_handle = text.replace("scrape:", "").replace("account:", "").strip().lstrip("@")
             target_accs = [clean_handle]
+            await _check_and_notify_busy_state(msg, str(from_user.get("id") or chat_id))
             await msg.reply_text(
                 f"🎯 **[STEP 1/3] Target Creator Handle Received!**\n\n"
                 f"👤 **Creator**: `@{clean_handle}`\n"
                 f"🌐 **Platform**: `{chosen_platform.title()}`\n"
                 f"⚙️ **Status**: Scraping top reels & launching AI editing pipeline... Please wait!"
             )
-            # Execute pipeline immediately for account scraping
-            try:
-                results = run_master_pipeline(
-                    mode="auto",
-                    target_accounts=target_accs,
-                    platform=chosen_platform,
-                    requestor_chat_id=chat_id
-                )
-            except Exception as _acc_err:
-                logger.error(f"❌ Account pipeline execution failed: {_acc_err}")
+            # Execute pipeline in non-blocking background thread
+            _dispatch_pipeline_in_background(
+                mode="auto",
+                target_accounts=target_accs,
+                platform=chosen_platform,
+                requestor_chat_id=chat_id
+            )
             return
 
         elif has_platform_choice:
             clean_handle = text.strip().lstrip("@")
             target_accs = [clean_handle]
+            await _check_and_notify_busy_state(msg, str(from_user.get("id") or chat_id))
             await msg.reply_text(
                 f"🎯 **[STEP 1/3] Target Creator Handle Received!**\n\n"
                 f"👤 **Creator**: `@{clean_handle}`\n"
                 f"🌐 **Platform**: `{chosen_platform.title()}`\n"
                 f"⚙️ **Status**: Scraping top reels for {chosen_platform.title()} & launching AI pipeline..."
             )
-            # Execute pipeline immediately for platform-specific handle
-            try:
-                results = run_master_pipeline(
-                    mode="auto",
-                    target_accounts=target_accs,
-                    platform=chosen_platform,
-                    requestor_chat_id=chat_id
-                )
-            except Exception as _plat_err:
-                logger.error(f"❌ Platform pipeline execution failed: {_plat_err}")
+            # Execute pipeline in non-blocking background thread
+            _dispatch_pipeline_in_background(
+                mode="auto",
+                target_accounts=target_accs,
+                platform=chosen_platform,
+                requestor_chat_id=chat_id
+            )
             return
 
         else:
@@ -827,6 +860,7 @@ async def handle_telegram_incoming_msg(update, context):
             return
 
     elif msg.video or msg.document:
+        await _check_and_notify_busy_state(msg, str(from_user.get("id") or chat_id))
         await msg.reply_text(
             f"📥 **[STEP 1/3] Video File Upload Received!**\n\n"
             f"📁 **File**: Saved successfully\n"
@@ -837,16 +871,13 @@ async def handle_telegram_incoming_msg(update, context):
         os.makedirs(temp_dir, exist_ok=True)
         local_video_path = os.path.join(temp_dir, "video.mp4")
         await file_obj.download_to_drive(custom_path=local_video_path)
-        # Execute pipeline immediately for video file upload
-        try:
-            results = run_master_pipeline(
-                mode="manual",
-                input_path=local_video_path,
-                platform=chosen_platform,
-                requestor_chat_id=chat_id
-            )
-        except Exception as _upload_err:
-            logger.error(f"❌ Video upload pipeline execution failed: {_upload_err}")
+        # Execute pipeline in non-blocking background thread
+        _dispatch_pipeline_in_background(
+            mode="manual",
+            input_path=local_video_path,
+            platform=chosen_platform,
+            requestor_chat_id=chat_id
+        )
         return
 
     # Fallback: No valid input detected
@@ -1099,9 +1130,7 @@ def run_master_pipeline(
 
                     t = threading.Thread(target=_run_in_thread, daemon=True)
                     t.start()
-                    t.join(timeout=1200.0)
-
-                    logger.info(f"📲 [REALTIME TELEGRAM DELIVERY] Delivered '{os.path.basename(reel_path)}' directly to Telegram!")
+                    logger.info(f"📲 [REALTIME TELEGRAM DELIVERY] Dispatched delivery task for '{os.path.basename(reel_path)}' to Telegram!")
                 except Exception as _deliv_err:
                     logger.error(f"❌ Realtime Telegram delivery failed for {os.path.basename(reel_path)}: {_deliv_err}")
 
