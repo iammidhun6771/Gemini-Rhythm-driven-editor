@@ -24,6 +24,11 @@ storage/
 claw-code/
 scratch/
 
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
 # Media formats
 *.mp4
 *.mp3
