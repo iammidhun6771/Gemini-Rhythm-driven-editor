@@ -42,6 +42,7 @@ def _empty_vault_index() -> Dict[str, Any]:
         "pinned_message_id": None,
         "metadata_pool_file_id": None,
         "telegram_users_file_id": None,
+        "source_accounts_file_id": None,
         "column_1_processed_reels": {
             "by_session_id": {},
             "by_social_media_id": {},
@@ -154,9 +155,9 @@ class TelegramVaultIndexer:
     def hydrate_all_vault_jsons_on_startup(self) -> Dict[str, bool]:
         """
         1. Downloads pinned master_vault_index.json from Telegram Storage Group.
-        2. Downloads latest telegram_users.json and metadata_pool.json using file_ids in index.
+        2. Downloads latest telegram_users.json, metadata_pool.json, and source_accounts.json using file_ids in index.
         """
-        results = {"pinned_index": False, "telegram_users": False, "metadata_pool": False}
+        results = {"pinned_index": False, "telegram_users": False, "metadata_pool": False, "source_accounts": False}
         try:
             # Step 1: Download pinned index from Telegram Storage Group first!
             results["pinned_index"] = self.sync_pinned_index_from_telegram_sync()
@@ -173,6 +174,12 @@ class TelegramVaultIndexer:
                 from Audio_Modules.audio_pool_manager import AudioPoolManager
                 pm = AudioPoolManager()
                 results["metadata_pool"] = self.download_vault_file_by_id(pool_file_id, pm.meta_path)
+
+            # Step 4: Download source_accounts.json
+            sa_file_id = self.vault_index.get("source_accounts_file_id")
+            if sa_file_id:
+                sa_path = os.path.join(_REPO_ROOT, "Content_Scraper_Modules", "source_accounts.json")
+                results["source_accounts"] = self.download_vault_file_by_id(sa_file_id, sa_path)
         except Exception as _h_err:
             logger.warning("⚠️ Vault JSON hydration notice: %s", _h_err)
         return results
