@@ -717,6 +717,8 @@ async def handle_telegram_incoming_msg(update, context):
         return
 
     chat_id = msg.chat.id
+    from_user = msg.from_user.to_dict() if msg.from_user else {}
+    user_id = str(msg.from_user.id) if msg.from_user else str(chat_id)
 
     # Check if user pasted a localhost OAuth redirect URL or auth code
     if msg.text and ("localhost" in msg.text or "code=" in msg.text) and ("http://" in msg.text or "https://" in msg.text):
