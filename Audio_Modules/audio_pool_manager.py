@@ -60,7 +60,15 @@ class AudioPoolManager:
         self._sync_active_to_metadata()
 
     def _load_metadata(self) -> Dict:
-        """Loads metadata safely."""
+        """Loads metadata safely with Telegram Vault cloud hydration fallback."""
+        if not os.path.exists(self.meta_path) or os.path.getsize(self.meta_path) < 10:
+            try:
+                from Publishing_Modules.telegram_vault_indexer import TelegramVaultIndexer
+                indexer = TelegramVaultIndexer()
+                indexer.hydrate_all_vault_jsons_on_startup()
+            except Exception as _h_err:
+                logger.debug("Notice on pool metadata hydration: %s", _h_err)
+
         if not os.path.exists(self.meta_path):
             return {}
         try:
@@ -70,8 +78,8 @@ class AudioPoolManager:
             logger.error(f"❌ Failed to load audio pool metadata: {e}")
             return {}
 
-    def _save_metadata(self):
-        """Saves metadata atomically with file locking."""
+    def _save_metadata(self, sync_to_vault: bool = True):
+        """Saves metadata atomically with file locking and syncs to Telegram Storage Group."""
         with self.lock:
             temp_path = self.meta_path + ".tmp"
             try:
@@ -82,11 +90,44 @@ class AudioPoolManager:
                 with open(temp_path, "w", encoding="utf-8") as f:
                     json.dump(self.metadata, f, indent=2)
                 os.replace(temp_path, self.meta_path)
+
+                if sync_to_vault:
+                    self._sync_to_telegram_vault()
             except Exception as e:
                 logger.error(f"❌ Failed to save audio pool metadata: {e}")
                 if os.path.exists(temp_path):
                     try: os.remove(temp_path)
                     except: pass
+
+    def _sync_to_telegram_vault(self):
+        """Uploads pool_metadata.json to Telegram Storage Group and updates pinned master_vault_index.json."""
+        try:
+            from Publishing_Modules.telegram_vault_indexer import TelegramVaultIndexer
+            indexer = TelegramVaultIndexer()
+            storage_group_id = os.getenv("TELEGRAM_STORAGE_GROUP_ID") or os.getenv("TELEGRAM_CHAT_ID")
+            bot_token = os.getenv("TELEGRAM_BOT_TOKEN", "").strip()
+            
+            if storage_group_id and bot_token and os.path.exists(self.meta_path):
+                try:
+                    from Downloader_Modules.telegram_listener import _send_file_multipart
+                    res = _send_file_multipart(
+                        "sendDocument",
+                        storage_group_id,
+                        "document",
+                        self.meta_path,
+                        caption=f"📦 **[VAULT BACKUP]** `pool_metadata.json` (Updated {time.strftime('%H:%M:%S')})"
+                    )
+                    if res and isinstance(res, dict):
+                        doc_id = res.get("document", {}).get("file_id")
+                        if doc_id:
+                            indexer.vault_index["metadata_pool_file_id"] = doc_id
+                            indexer._save_local_index()
+                            indexer.upload_and_pin_vault_index_sync(_send_file_multipart)
+                            logger.info("✅ [POOL METADATA VAULT BACKUP] Uploaded & PINNED updated pool_metadata.json to Storage Group (file_id: %s)", doc_id[:15])
+                except Exception as _up_err:
+                    logger.debug("Notice uploading pool_metadata.json to Telegram vault: %s", _up_err)
+        except Exception as _e:
+            logger.debug("Notice triggering pool metadata sync: %s", _e)
 
     def _calculate_hash(self, path: str) -> str:
         """Fast size+mtime hash for integrity check."""
