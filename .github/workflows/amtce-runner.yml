@@ -75,6 +75,15 @@ jobs:
       with:
         python-version: '3.10'
         cache: 'pip'
+        cache-dependency-path: 'requirements.txt'
+
+    - name: Cache Pip Wheels
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
 
     # ── 3. System Dependencies (Fast Static FFmpeg Setup) ───────────────────────────
     - name: Set up FFmpeg
@@ -84,13 +93,10 @@ jobs:
         echo "$HOME/.local/bin" >> $GITHUB_PATH
 
     # ── 4. Python Dependencies ────────────────────────────────────────────────
-    # No separate PyTorch step needed:
-    # - faster-whisper runs on device="cpu" via ctranslate2 (bundled) — no torch
-    # - torch/torchvision are NOT in requirements.txt and NOT imported anywhere
     - name: Install Python Dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install --prefer-binary -r requirements.txt
+        pip install --prefer-binary --no-cache-dir=false -r requirements.txt
 
     # ── 5. Credential Injection ───────────────────────────────────────────────
     - name: Setup Environment Variables & Tokens

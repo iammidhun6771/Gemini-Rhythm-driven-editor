@@ -56,7 +56,7 @@ huggingface_hub>=0.22.0
 # --- VISION / IMAGE ---
 opencv-python-headless>=4.9.0.80,<5.0.0
 Pillow>=10.0.0
-scenedetect>=0.6.0
+scenedetect[opencv-headless]>=0.6.0
 scikit-image>=0.22.0
 
 # --- NUMERICAL / ML ---
