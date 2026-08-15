@@ -1,21 +1,55 @@
 # Environment variables & secrets
 .env
 *.env
+Credentials/*.json
+!Credentials/README.md
 
 # Python cache & virtual environments
 __pycache__/
 *.pyc
 .venv/
 venv/
+*.pyo
+*.pyd
+.pytest_cache/
 
-# Downloaded raw media & temporary frames
+# Downloaded raw media & temporary outputs
 downloads/
+Processed Shorts/
+Original_audio/
+cache/
+debug_frames/
+temp_watermark/
+storage/
+claw-code/
+scratch/
+
+# Media formats
+*.mp4
+*.mp3
+*.wav
 *.aac
 *.m4a
 *.png
 *.jpg
 *.jpeg
+*.webm
+*.avi
+*.mov
+*.flac
 
-# Logs
+# AI Model weights & heavy binaries
+models/*.caffemodel
+models/*.pth
+models/*.onnx
+models/*.bin
+models/*.weights
+
+# Graphify cache
+graphify-out/cache/
+
+# Logs & transient session data
 logs/
 *.log
+.clip_intelligence.json
+gemini_routing.json
