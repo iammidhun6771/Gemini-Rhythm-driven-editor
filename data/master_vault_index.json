@@ -2,6 +2,8 @@
   "version": 2.0,
   "updated_at": 0.0,
   "pinned_message_id": null,
+  "metadata_pool_file_id": null,
+  "telegram_users_file_id": null,
   "column_1_processed_reels": {
     "by_session_id": {},
     "by_social_media_id": {},
@@ -9,6 +11,7 @@
   },
   "column_2_downloaded_sources": {
     "by_social_media_id": {},
-    "by_session_id": {}
+    "by_session_id": {},
+    "by_user_id": {}
   }
 }

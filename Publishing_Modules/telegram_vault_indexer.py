@@ -1,6 +1,6 @@
 """
 Publishing_Modules / telegram_vault_indexer.py
-================================================
+================================================================
 Telegram Storage Group Unified Master Vault Indexer.
 
 Turns Telegram into an unlimited, zero-cost cloud data lake for ephemeral runners
@@ -26,18 +26,7 @@ import sys
 import json
 import time
 import logging
-import urllib.request
-import urllib.parse
-from typing import Dict, Any, Optional, Tuple
-
-try:
-    from dotenv import load_dotenv
-    for p in ["Credentials/.env", ".env"]:
-        if os.path.exists(p):
-            load_dotenv(p, override=False)
-            break
-except ImportError:
-    pass
+from typing import Dict, Any, Optional
 
 logger = logging.getLogger("telegram_vault_indexer")
 
@@ -51,6 +40,8 @@ def _empty_vault_index() -> Dict[str, Any]:
         "version": 2.0,
         "updated_at": time.time(),
         "pinned_message_id": None,
+        "metadata_pool_file_id": None,
+        "telegram_users_file_id": None,
         "column_1_processed_reels": {
             "by_session_id": {},
             "by_social_media_id": {},
@@ -96,25 +87,141 @@ class TelegramVaultIndexer:
         except Exception as e:
             logger.error(f"❌ Failed to save local vault index: {e}")
 
+    # ── VAULT JSON HYDRATION & CLOUD SYNC APIs ───────────────────────────────
+
+    def download_vault_file_by_id(self, file_id: str, dest_path: str) -> bool:
+        """
+        Downloads a document file (e.g. telegram_users.json or metadata_pool.json)
+        from Telegram Storage Group into dest_path via Telegram Bot API getFile.
+        """
+        if not file_id:
+            return False
+        bot_token = os.getenv("TELEGRAM_BOT_TOKEN", "").strip()
+        if not bot_token:
+            return False
+
+        try:
+            import urllib.request
+            import json as _json
+            get_file_url = f"https://api.telegram.org/bot{bot_token}/getFile?file_id={file_id}"
+            req = urllib.request.Request(get_file_url)
+            with urllib.request.urlopen(req, timeout=15) as resp:
+                res_data = _json.loads(resp.read().decode("utf-8"))
+
+            if res_data.get("ok"):
+                f_path = res_data["result"]["file_path"]
+                dl_url = f"https://api.telegram.org/file/bot{bot_token}/{f_path}"
+                os.makedirs(os.path.dirname(dest_path), exist_ok=True)
+                with urllib.request.urlopen(dl_url, timeout=30) as dl_resp, open(dest_path, "wb") as out_f:
+                    out_f.write(dl_resp.read())
+                logger.info("✅ [VAULT HYDRATION] Successfully downloaded %s from Telegram Storage Group (file_id: %s)", os.path.basename(dest_path), file_id[:15])
+                return True
+        except Exception as _dl_err:
+            logger.warning("⚠️ Vault hydration download failed for %s: %s", os.path.basename(dest_path), _dl_err)
+        return False
+
+    def sync_pinned_index_from_telegram_sync(self) -> bool:
+        """
+        Synchronously fetches TELEGRAM_STORAGE_GROUP_ID for pinned master_vault_index.json,
+        downloads it, and updates local vault_index.
+        """
+        storage_group_id = os.getenv("TELEGRAM_STORAGE_GROUP_ID") or os.getenv("TELEGRAM_CHAT_ID")
+        bot_token = os.getenv("TELEGRAM_BOT_TOKEN", "").strip()
+        if not storage_group_id or not bot_token:
+            return False
+
+        try:
+            import urllib.request
+            import json as _json
+            url = f"https://api.telegram.org/bot{bot_token}/getChat?chat_id={storage_group_id}"
+            req = urllib.request.Request(url)
+            with urllib.request.urlopen(req, timeout=15) as resp:
+                data = _json.loads(resp.read().decode("utf-8"))
+            
+            if data.get("ok"):
+                pinned = data.get("result", {}).get("pinned_message", {})
+                doc = pinned.get("document", {})
+                if doc.get("file_name") in ["telegram_media_index.json", "master_vault_index.json"] and doc.get("file_id"):
+                    file_id = doc["file_id"]
+                    if self.download_vault_file_by_id(file_id, self.index_file):
+                        self.vault_index = self._load_local_index()
+                        logger.info("📌 [VAULT SYNC SUCCESS] Downloaded and reloaded pinned master_vault_index.json from Telegram Storage Group!")
+                        return True
+        except Exception as err:
+            logger.warning("⚠️ Sync pinned master index notice: %s", err)
+        return False
+
+    def hydrate_all_vault_jsons_on_startup(self) -> Dict[str, bool]:
+        """
+        1. Downloads pinned master_vault_index.json from Telegram Storage Group.
+        2. Downloads latest telegram_users.json and metadata_pool.json using file_ids in index.
+        """
+        results = {"pinned_index": False, "telegram_users": False, "metadata_pool": False}
+        try:
+            # Step 1: Download pinned index from Telegram Storage Group first!
+            results["pinned_index"] = self.sync_pinned_index_from_telegram_sync()
+
+            # Step 2: Download telegram_users.json
+            users_file_id = self.vault_index.get("telegram_users_file_id")
+            if users_file_id:
+                from Publishing_Modules.telegram_user_manager import USERS_JSON_PATH
+                results["telegram_users"] = self.download_vault_file_by_id(users_file_id, USERS_JSON_PATH)
+
+            # Step 3: Download metadata_pool.json
+            pool_file_id = self.vault_index.get("metadata_pool_file_id")
+            if pool_file_id:
+                from Audio_Modules.audio_pool_manager import AudioPoolManager
+                pm = AudioPoolManager()
+                results["metadata_pool"] = self.download_vault_file_by_id(pool_file_id, pm.meta_path)
+        except Exception as _h_err:
+            logger.warning("⚠️ Vault JSON hydration notice: %s", _h_err)
+        return results
+
+    def upload_and_pin_vault_index_sync(self, upload_fn=None):
+        """
+        Synchronously uploads master_vault_index.json to TELEGRAM_STORAGE_GROUP_ID
+        and pins the message so master_vault_index.json is NEVER lost!
+        """
+        storage_group_id = os.getenv("TELEGRAM_STORAGE_GROUP_ID") or os.getenv("TELEGRAM_CHAT_ID")
+        if not storage_group_id or not upload_fn or not os.path.exists(self.index_file):
+            return
+
+        try:
+            reels_cnt = len(self.vault_index.get("column_1_processed_reels", {}).get("by_session_id", {}))
+            sources_cnt = len(self.vault_index.get("column_2_downloaded_sources", {}).get("by_social_media_id", {}))
+            caption = f"📌 **[VAULT MASTER INDEX]** Auto-Synced\n🕒 `{time.strftime('%Y-%m-%d %H:%M:%S')}`\n📊 Reels: `{reels_cnt}` | Sources: `{sources_cnt}`"
+            res = upload_fn("sendDocument", storage_group_id, "document", self.index_file, caption=caption)
+            if res and isinstance(res, dict):
+                msg_id = res.get("message_id")
+                if msg_id:
+                    self.vault_index["pinned_message_id"] = msg_id
+                    self._save_local_index()
+                    try:
+                        from Downloader_Modules.telegram_listener import _api_call
+                        _api_call("pinChatMessage", {"chat_id": str(storage_group_id), "message_id": msg_id, "disable_notification": True})
+                    except Exception as _p_call_err:
+                        logger.warning("Notice on pinChatMessage call: %s", _p_call_err)
+                    logger.info("📌 [VAULT PIN SUCCESS] Uploaded & PINNED master_vault_index.json in Storage Group (Message ID: %s)", msg_id)
+        except Exception as _pin_err:
+            logger.warning("⚠️ Vault index upload/pin notice: %s", _pin_err)
+
     # ── LOOKUP APIs ───────────────────────────────────────────────────────────
 
     def lookup_downloaded_source(self, social_url: str) -> Optional[Dict[str, Any]]:
         """
         Column 2 Lookup: Returns cached raw video file_id and audio_math if this URL
-        was downloaded previously. Enables 1.5s re-use without re-downloading.
+        was downloaded previously. Enables 1.5s cache hits on duplicate URL requests without re-downloading.
         """
         if not social_url:
             return None
         clean_url = str(social_url).strip().rstrip("`").rstrip("%60")
         c2 = self.vault_index.get("column_2_downloaded_sources", {}).get("by_social_media_id", {})
         
-        # 1. Exact match
         hit = c2.get(clean_url) or c2.get(social_url.strip())
         if hit:
             logger.info(f"⚡ [VAULT CACHE HIT] Column 2 found source for URL: {clean_url[:60]}...")
             return hit
 
-        # 2. Extract shortcode or video ID and match
         import re
         sc_match = re.search(r"/(?:reel|reels|p|shorts|v)/([A-Za-z0-9_-]{5,})", clean_url)
         shortcode = sc_match.group(1) if sc_match else None
@@ -124,7 +231,6 @@ class TelegramVaultIndexer:
                     logger.info(f"⚡ [VAULT CACHE HIT] Column 2 matched shortcode '{shortcode}' -> {stored_url[:60]}")
                     return entry
 
-        # 3. Substring matching fallback
         for stored_url, entry in c2.items():
             s_clean = stored_url.split("?")[0].rstrip("/").rstrip("`").rstrip("%60")
             u_clean = clean_url.split("?")[0].rstrip("/")
@@ -141,7 +247,6 @@ class TelegramVaultIndexer:
         """
         c1 = self.vault_index.get("column_1_processed_reels", {})
         
-        # User-scoped lookup
         if user_id:
             user_data = c1.get("by_user_id", {}).get(user_id, {})
             if session_id and session_id in user_data:
@@ -151,7 +256,6 @@ class TelegramVaultIndexer:
                     if entry.get("social_media_id") == social_url.strip():
                         return entry
         
-        # Global lookup
         if session_id:
             hit = c1.get("by_session_id", {}).get(session_id)
             if hit:
@@ -181,7 +285,6 @@ class TelegramVaultIndexer:
         if os.path.exists(local_path) and os.path.getsize(local_path) > 1024:
             return local_path
 
-        # Find extracted_audio_file_id in Column 2 or Column 1
         c2 = self.vault_index.get("column_2_downloaded_sources", {}).get("by_social_media_id", {})
         file_id = None
         for _url, entry in c2.items():
@@ -208,186 +311,7 @@ class TelegramVaultIndexer:
                 logger.warning(f"⚠️ Vault on-demand audio fetch failed for '{filename}': {e}")
         return None
 
-    def download_telegram_file_sync(self, file_id: str, dest_path: str) -> bool:
-        """
-        Synchronous direct HTTP downloader from Telegram Bot API using file_id.
-        Streams in 64KB chunks directly into dest_path.
-        """
-        if not file_id:
-            return False
-        bot_token = os.getenv("TELEGRAM_BOT_TOKEN")
-        if not bot_token:
-            return False
-
-        try:
-            os.makedirs(os.path.dirname(os.path.abspath(dest_path)), exist_ok=True)
-            get_url = f"https://api.telegram.org/bot{bot_token}/getFile?file_id={file_id}"
-            req = urllib.request.Request(get_url, headers={"User-Agent": "AMTCE-VaultDownloader"})
-            with urllib.request.urlopen(req, timeout=15) as resp:
-                data = json.loads(resp.read().decode("utf-8"))
-                if not data.get("ok") or not data.get("result", {}).get("file_path"):
-                    logger.warning(f"[VAULT DOWNLOAD] getFile failed for {file_id}: {data}")
-                    return False
-                remote_path = data["result"]["file_path"]
-
-            down_url = f"https://api.telegram.org/file/bot{bot_token}/{remote_path}"
-            down_req = urllib.request.Request(down_url, headers={"User-Agent": "AMTCE-VaultDownloader"})
-            temp_dest = dest_path + ".tmp"
-            with urllib.request.urlopen(down_req, timeout=60) as src, open(temp_dest, "wb") as dst:
-                while True:
-                    chunk = src.read(65536)
-                    if not chunk:
-                        break
-                    dst.write(chunk)
-
-            if os.path.exists(temp_dest) and os.path.getsize(temp_dest) > 100:
-                os.replace(temp_dest, dest_path)
-                logger.info(f"✅ [VAULT DOWNLOAD SUCCESS] Hydrated {os.path.basename(dest_path)} ({os.path.getsize(dest_path)} bytes) from Telegram Storage.")
-                return True
-            else:
-                if os.path.exists(temp_dest): os.remove(temp_dest)
-                return False
-        except Exception as e:
-            logger.warning(f"⚠️ [VAULT DOWNLOAD ERROR] Could not download file_id {file_id}: {e}")
-            return False
-
-    def hydrate_raw_video_from_vault(self, social_url: str, destination_dir: str) -> Optional[str]:
-        """
-        Phase 1 Ingestion Accelerator:
-        Checks Column 2 of master_vault_index.json for cached raw video.
-        If found, downloads it directly from Telegram Storage in ~1s into destination_dir/video.mp4.
-        """
-        hit = self.lookup_downloaded_source(social_url)
-        if not hit:
-            # Fallback search by shortcode substring
-            c2 = self.vault_index.get("column_2_downloaded_sources", {}).get("by_social_media_id", {})
-            for u, entry in c2.items():
-                if any(part in u for part in social_url.split("/") if len(part) > 6):
-                    hit = entry
-                    break
-
-        if hit and hit.get("raw_video_file_id"):
-            file_id = hit["raw_video_file_id"]
-            out_path = os.path.join(destination_dir, "video.mp4")
-            if os.path.exists(out_path) and os.path.getsize(out_path) > 1024:
-                return out_path
-            logger.info(f"📥 [VAULT HYDRATE] Fetching raw video from Telegram Storage Group for {social_url[:60]}...")
-            if self.download_telegram_file_sync(file_id, out_path):
-                return out_path
-        return None
-
-    def hydrate_audio_and_math_from_vault(self, social_url: str, destination_dir: str) -> Tuple[Optional[str], Optional[Dict[str, Any]]]:
-        """
-        Phase 1 Audio & Math Accelerator:
-        Checks Column 2 of master_vault_index.json for extracted_audio_file_id and audio_math.
-        Downloads extracted audio WAV and returns cached beat DSP math.
-        """
-        hit = self.lookup_downloaded_source(social_url)
-        if not hit:
-            c2 = self.vault_index.get("column_2_downloaded_sources", {}).get("by_social_media_id", {})
-            for u, entry in c2.items():
-                if any(part in u for part in social_url.split("/") if len(part) > 6):
-                    hit = entry
-                    break
-
-        audio_path = None
-        audio_math = None
-        if hit:
-            audio_math = hit.get("audio_math")
-            file_id = hit.get("extracted_audio_file_id")
-            if file_id:
-                wav_path = os.path.join(destination_dir, "video_extracted.wav")
-                if os.path.exists(wav_path) and os.path.getsize(wav_path) > 1024:
-                    audio_path = wav_path
-                else:
-                    logger.info(f"📥 [VAULT HYDRATE] Fetching extracted audio from Telegram Storage Group for {social_url[:60]}...")
-                    if self.download_telegram_file_sync(file_id, wav_path):
-                        audio_path = wav_path
-        return audio_path, audio_math
-
-    def get_vault_audio_pool(self) -> Dict[str, Dict[str, Any]]:
-        """
-        BGM Selection Primary Index:
-        Gathers all candidate audio tracks, beat math, and semantic intelligence
-        indexed across master_vault_index.json (from both column_1_processed_reels and column_2_downloaded_sources).
-        Returns a mapping of track_filename -> metadata dict (bpm, dominant_emotion, vibe_tags, lyrics, tension_arc, file_id, etc.).
-        """
-        pool = {}
-        # 1. From Column 1 processed reels (contains rich lyric_intel + pool_metadata)
-        c1 = self.vault_index.get("column_1_processed_reels", {}).get("by_session_id", {})
-        for sess_id, rdata in c1.items():
-            adata = rdata.get("audio_data") or {}
-            lyric_intel = adata.get("lyric_intel") or {}
-            pool_meta = adata.get("pool_metadata") or {}
-            track_name = pool_meta.get("selected_audio_track") or pool_meta.get("selected_bgm_track")
-            if track_name:
-                fname = os.path.basename(track_name)
-                pool[fname] = {
-                    "filename": fname,
-                    "bpm": float(pool_meta.get("tempo_bpm") or pool_meta.get("bpm") or lyric_intel.get("tempo_bpm", 120.0)),
-                    "energy": float(pool_meta.get("energy", 0.5)),
-                    "dominant_emotion": str(lyric_intel.get("dominant_emotion") or pool_meta.get("dominant_emotion", "hype")),
-                    "vibe_tags": list(lyric_intel.get("vibe_tags") or pool_meta.get("vibe_tags", [])),
-                    "energy_profile": str(lyric_intel.get("energy_profile") or pool_meta.get("energy_profile", "medium")),
-                    "has_vocals": bool(lyric_intel.get("has_vocals", pool_meta.get("has_vocals", False))),
-                    "language": str(lyric_intel.get("language") or pool_meta.get("language", "unknown")),
-                    "lyrics": lyric_intel.get("lyrics", []),
-                    "shot_directives": lyric_intel.get("shot_directives", []),
-                    "tension_arc": lyric_intel.get("tension_arc", []),
-                    "emotional_peak_moments": lyric_intel.get("emotional_peak_moments", []),
-                    "source": "vault_column_1",
-                    "file_id": adata.get("audio_file_id") or pool_meta.get("file_id")
-                }
-
-        # 2. From Column 2 downloaded sources (harvested audio with math and semantic context)
-        c2 = self.vault_index.get("column_2_downloaded_sources", {}).get("by_social_media_id", {})
-        for url, sdata in c2.items():
-            math_data = sdata.get("audio_math") or {}
-            sem_data = math_data.get("semantic_context") or {}
-            audio_file_id = sdata.get("extracted_audio_file_id")
-            sess_id = sdata.get("session_id", "source")
-            fname = f"{sess_id}_extracted.wav"
-
-            # Strict candidate gate: Must be genuine musical audio with >= 12 beats, NOT speech-only, NOT unusable
-            beat_cnt = int(math_data.get("beat_count", 0))
-            is_speech_only = bool(math_data.get("is_speech_only", False) or sem_data.get("is_speech_only", False))
-            is_unusable = bool(math_data.get("is_unusable", False) or sem_data.get("is_unusable", False))
-
-            if beat_cnt >= 12 and not is_speech_only and not is_unusable and audio_file_id:
-                pool[fname] = {
-                    "filename": fname,
-                    "bpm": float(math_data.get("tempo_bpm", 120.0)),
-                    "energy": float(math_data.get("avg_energy", 0.5)),
-                    "dominant_emotion": str(sem_data.get("dominant_emotion") or math_data.get("vibe", "groove")),
-                    "vibe_tags": list(sem_data.get("vibe_tags") or [math_data.get("vibe", "groove")]),
-                    "energy_profile": str(sem_data.get("energy_profile", "medium")),
-                    "has_vocals": bool(sem_data.get("has_vocals", False)),
-                    "language": str(sem_data.get("language", "unknown")),
-                    "is_unusable": False,
-                    "is_speech_only": False,
-                    "source": "vault_column_2",
-                    "file_id": audio_file_id
-                }
-
-        return pool
-
-    def hydrate_bgm_track_from_vault(self, track_filename: str, destination_dir: str) -> Optional[str]:
-        """
-        Hydrates a selected BGM track directly from Telegram Storage Group Vault
-        if it's not already on local disk.
-        """
-        target_path = os.path.join(destination_dir, track_filename)
-        if os.path.exists(target_path) and os.path.getsize(target_path) > 1024:
-            return target_path
-
-        pool = self.get_vault_audio_pool()
-        track_info = pool.get(track_filename) or pool.get(os.path.basename(track_filename))
-        if track_info and track_info.get("file_id"):
-            file_id = track_info["file_id"]
-            logger.info(f"📥 [VAULT BGM HYDRATE] Downloading '{track_filename}' from Telegram Storage Vault (file_id: {file_id[:16]}...)...")
-            if self.download_telegram_file_sync(file_id, target_path):
-                return target_path
-        return None
+    # ── TELEGRAM SYNC & PIN ──────────────────────────────────────────────────
 
     async def sync_vault_index_from_telegram(self, bot) -> bool:
         """
@@ -429,7 +353,6 @@ class TelegramVaultIndexer:
         from the downloaded master_vault_index.json.
         """
         try:
-            # 1. Hydrate pool_metadata.json
             c1_reels = self.vault_index.get("column_1_processed_reels", {}).get("by_session_id", {})
             if c1_reels:
                 from Audio_Modules.audio_pool_manager import AudioPoolManager
@@ -448,6 +371,126 @@ class TelegramVaultIndexer:
 
     # ── RECORDING APIS ───────────────────────────────────────────────────────
 
+    def record_ingested_clip_source(
+        self,
+        social_url: str,
+        raw_video_path: str,
+        upload_fn,
+        existing_raw_file_id: Optional[str] = None,
+        extracted_audio_path: Optional[str] = None,
+        audio_math: Optional[Dict[str, Any]] = None,
+        whisper_transcript: Optional[Dict[str, Any]] = None,
+        gemini_semantic: Optional[Dict[str, Any]] = None,
+        file_size: Optional[int] = None,
+        sha256: Optional[str] = None,
+        user_id: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """
+        Unified Storage Authority Entry Point:
+        1. Uses existing_raw_file_id or uploads raw video to Storage Group ONCE via upload_fn -> gets raw_file_id.
+        2. Uploads extracted audio WAV to Storage Group ONCE via upload_fn -> gets audio_file_id.
+        3. Updates metadata_pool.json (clip_source_math) with file_ids, audio_math, whisper_transcript, gemini_semantic.
+        4. Updates Column 2 of Master Vault Index.
+        """
+        storage_group_id = os.getenv("TELEGRAM_STORAGE_GROUP_ID") or os.getenv("TELEGRAM_CHAT_ID")
+        filename = os.path.basename(raw_video_path)
+        ext = os.path.splitext(filename)[1].lower()
+        
+        method = "sendVideo"
+        file_param = "video"
+        if ext in [".mp3", ".m4a", ".aac", ".flac", ".wav"]:
+            method = "sendAudio"
+            file_param = "audio"
+        elif ext in [".jpg", ".jpeg", ".png", ".webp"]:
+            method = "sendPhoto"
+            file_param = "photo"
+        elif ext not in [".mp4", ".mkv", ".mov", ".webm", ".avi"]:
+            method = "sendDocument"
+            file_param = "document"
+
+        caption = f"🎬 {filename}\n🔗 `{social_url}`" + (f"\n👤 User: `{user_id}`" if user_id else "")
+        
+        raw_file_id = existing_raw_file_id
+        extracted_audio_file_id = None
+
+        if storage_group_id and upload_fn:
+            try:
+                if not raw_file_id and os.path.exists(raw_video_path):
+                    logger.info("📦 [STORAGE MANAGER] Uploading raw media clip (%s) to Storage Group (%s)...", filename, storage_group_id)
+                    upload_res = upload_fn(method, storage_group_id, file_param, raw_video_path, caption=caption)
+                    if upload_res and isinstance(upload_res, dict):
+                        raw_file_id = upload_res.get(file_param, {}).get("file_id") or (upload_res.get("document", {}).get("file_id") if upload_res.get("document") else None)
+                
+                if extracted_audio_path and os.path.exists(extracted_audio_path):
+                    audio_filename = os.path.basename(extracted_audio_path)
+                    audio_caption = f"🎵 [EXTRACTED AUDIO] `{audio_filename}`\n🔗 `{social_url}`"
+                    logger.info("🎙️ [STORAGE MANAGER] Uploading extracted audio (%s) to Storage Group...", audio_filename)
+                    audio_upload_res = upload_fn("sendAudio", storage_group_id, "audio", extracted_audio_path, caption=audio_caption)
+                    if audio_upload_res and isinstance(audio_upload_res, dict):
+                        extracted_audio_file_id = audio_upload_res.get("audio", {}).get("file_id") or (audio_upload_res.get("document", {}).get("file_id") if audio_upload_res.get("document") else None)
+                        logger.info("✅ [STORAGE MANAGER] Captured extracted_audio_file_id: %s", extracted_audio_file_id)
+            except Exception as _up_err:
+                logger.warning("⚠️ Storage Group upload warning: %s", _up_err)
+
+        clip_entry = {
+            "raw_video_file_id": raw_file_id,
+            "extracted_audio_file_id": extracted_audio_file_id,
+            "file_name": filename,
+            "file_size": file_size or (os.path.getsize(raw_video_path) if os.path.exists(raw_video_path) else 0),
+            "sha256": sha256 or "",
+            "downloaded_at": time.time(),
+            "user_id": user_id,
+            "audio_math": audio_math or {},
+            "whisper_transcript": whisper_transcript or {},
+            "gemini_semantic_intelligence": gemini_semantic or {}
+        }
+
+        try:
+            from Audio_Modules.audio_pool_manager import AudioPoolManager
+            pm = AudioPoolManager()
+            csm = pm.metadata.setdefault("clip_source_math", {})
+            csm[social_url] = clip_entry
+            pm._save_metadata()
+            logger.info("📦 [STORAGE MANAGER] Indexed clip_source_math entry for %s in metadata_pool.json", social_url)
+
+            if storage_group_id and upload_fn and os.path.exists(pm.meta_path):
+                pool_upload_res = upload_fn("sendDocument", storage_group_id, "document", pm.meta_path, caption=f"📦 **[VAULT BACKUP]** `metadata_pool.json` (Updated {time.strftime('%H:%M:%S')})")
+                if pool_upload_res and isinstance(pool_upload_res, dict):
+                    pool_doc_id = pool_upload_res.get("document", {}).get("file_id")
+                    self.vault_index["metadata_pool_file_id"] = pool_doc_id
+                    logger.info("✅ [STORAGE MANAGER] Uploaded updated metadata_pool.json to Storage Group (file_id: %s)", pool_doc_id)
+
+            try:
+                from Publishing_Modules.telegram_user_manager import USERS_JSON_PATH
+                if storage_group_id and upload_fn and os.path.exists(USERS_JSON_PATH):
+                    users_upload_res = upload_fn("sendDocument", storage_group_id, "document", USERS_JSON_PATH, caption=f"👤 **[VAULT BACKUP]** `telegram_users.json` (Updated {time.strftime('%H:%M:%S')})")
+                    if users_upload_res and isinstance(users_upload_res, dict):
+                        users_doc_id = users_upload_res.get("document", {}).get("file_id")
+                        self.vault_index["telegram_users_file_id"] = users_doc_id
+                        logger.info("✅ [STORAGE MANAGER] Uploaded updated telegram_users.json to Storage Group (file_id: %s)", users_doc_id)
+            except Exception as _users_err:
+                logger.warning("⚠️ Could not upload telegram_users.json: %s", _users_err)
+        except Exception as _pool_err:
+            logger.warning("⚠️ Could not save/upload metadata_pool.json: %s", _pool_err)
+
+        session_id = f"sess_{int(time.time())}"
+        c2 = self.vault_index.setdefault("column_2_downloaded_sources", {})
+        c2.setdefault("by_social_media_id", {})[social_url] = clip_entry
+        c2.setdefault("by_session_id", {})[session_id] = clip_entry
+        if user_id:
+            c2.setdefault("by_user_id", {}).setdefault(user_id, {})[session_id] = clip_entry
+
+        self._save_local_index()
+
+        if upload_fn and storage_group_id:
+            self.upload_and_pin_vault_index_sync(upload_fn=upload_fn)
+        return {
+            "raw_file_id": raw_file_id,
+            "method": method,
+            "file_param": file_param,
+            "clip_entry": clip_entry
+        }
+
     async def record_downloaded_source(
         self,
         bot,
@@ -457,15 +500,10 @@ class TelegramVaultIndexer:
         audio_path: Optional[str] = None,
         beat_math: Optional[Dict[str, Any]] = None,
         user_id: Optional[str] = None,
-        pin_now: bool = True,
     ) -> Dict[str, Any]:
         """
         Column 2 Record: Uploads raw source video and extracted audio to TELEGRAM_STORAGE_GROUP_ID,
         saves file_ids under column_2_downloaded_sources, and re-pins master_vault_index.json.
-        
-        Args:
-            user_id: Optional user ID for user-scoped storage
-            pin_now: If False, skips re-uploading and pinning the index (useful when chained with record_processed_reel)
         """
         storage_group_id = os.getenv("TELEGRAM_STORAGE_GROUP_ID") or os.getenv("TELEGRAM_CHAT_ID")
         raw_file_id = None
@@ -478,9 +516,7 @@ class TelegramVaultIndexer:
                         rmsg = await bot.send_video(
                             chat_id=int(storage_group_id),
                             video=rf,
-                            caption=f"📥 **[VAULT RAW SOURCE]** `{os.path.basename(raw_video_path)}`\n🔗 `{social_url}`\n🆔 `{session_id}`" + (f"\n👤 User: `{user_id}`" if user_id else ""),
-                            read_timeout=600.0,
-                            write_timeout=600.0
+                            caption=f"📥 **[VAULT RAW SOURCE]** `{os.path.basename(raw_video_path)}`\n🔗 `{social_url}`\n🆔 `{session_id}`" + (f"\n👤 User: `{user_id}`" if user_id else "")
                         )
                         if rmsg and rmsg.video:
                             raw_file_id = rmsg.video.file_id
@@ -493,9 +529,7 @@ class TelegramVaultIndexer:
                                 chat_id=int(storage_group_id),
                                 document=af,
                                 filename=os.path.basename(audio_path),
-                                caption=f"🎵 **[VAULT AUDIO EXTRACT]** `{os.path.basename(audio_path)}`\n🆔 `{session_id}`" + (f"\n👤 User: `{user_id}`" if user_id else ""),
-                                read_timeout=600.0,
-                                write_timeout=600.0
+                                caption=f"🎵 **[VAULT AUDIO EXTRACT]** `{os.path.basename(audio_path)}`\n🆔 `{session_id}`" + (f"\n👤 User: `{user_id}`" if user_id else "")
                             )
                             if amsg:
                                 audio_file_id = amsg.document.file_id if amsg.document else (amsg.audio.file_id if amsg.audio else None)
@@ -519,13 +553,11 @@ class TelegramVaultIndexer:
         c2.setdefault("by_social_media_id", {})[social_url] = entry
         c2.setdefault("by_session_id", {})[session_id] = entry
         
-        # User-scoped indexing
         if user_id:
             c2.setdefault("by_user_id", {}).setdefault(user_id, {})[session_id] = entry
 
         self._save_local_index()
-        if pin_now:
-            await self._upload_and_pin_index(bot, storage_group_id)
+        await self._upload_and_pin_index(bot, storage_group_id)
         logger.info(f"📦 [VAULT RECORD] Recorded Column 2 source for URL: {social_url[:60]}" + (f" (User: {user_id})" if user_id else ""))
         return entry
 
@@ -544,9 +576,6 @@ class TelegramVaultIndexer:
         """
         Column 1 Record: Saves rendered master reel intelligence and file_id into
         column_1_processed_reels, updates local index, and re-pins master_vault_index.json.
-        
-        Args:
-            user_id: Optional user ID for user-scoped storage
         """
         storage_group_id = os.getenv("TELEGRAM_STORAGE_GROUP_ID") or os.getenv("TELEGRAM_CHAT_ID")
 
@@ -561,7 +590,7 @@ class TelegramVaultIndexer:
                 "lyric_intel": lyric_intel or {},
             },
             "visual_data": clip_intel or {},
-            "editing_plan_history": [],  # Sorted list of attempts & user approval status for RAG Creator Behavior
+            "editing_plan_history": [],
             "pipeline_execution_trajectory": {
                 "stage_0_intent_classification": {},
                 "stage_1_visual_forensics": clip_intel or {},
@@ -584,7 +613,6 @@ class TelegramVaultIndexer:
         if social_url:
             c1.setdefault("by_social_media_id", {})[social_url] = session_id
         
-        # User-scoped indexing
         if user_id:
             c1.setdefault("by_user_id", {}).setdefault(user_id, {})[session_id] = entry
 
@@ -603,12 +631,6 @@ class TelegramVaultIndexer:
         """
         AI Trajectory Store: Records structured, un-mixed pipeline stage logs into
         column_1_processed_reels -> pipeline_execution_trajectory.
-        Stages:
-          - 'stage_0_intent'  : IntentVector classification & confidence
-          - 'stage_1_visual'  : Keyframe sampling, faces, watermark detection
-          - 'stage_2_audio'   : Beat math, Whisper transcript, Gemini lyric directives
-          - 'stage_3_attempts': Rendering attempts, FFmpeg filtergraph, user verdict
-          - 'stage_4_verdict' : Final outcome (APPROVED/REJECTED), total time, winning attempt
         """
         c1 = self.vault_index.setdefault("column_1_processed_reels", {})
         session_entry = c1.setdefault("by_session_id", {}).setdefault(session_id, {
@@ -646,7 +668,6 @@ class TelegramVaultIndexer:
         logger.info(f"🧠 [TRAJECTORY RECORD] Updated {stage_key} for Session: {session_id}")
         return trajectory
 
-
     async def record_plan_attempt(
         self,
         bot,
@@ -659,7 +680,6 @@ class TelegramVaultIndexer:
         """
         RAG Creator Behavior Store: Appends an editing plan attempt (and user approval/feedback)
         to column_1_processed_reels -> editing_plan_history.
-        Stores both approved (positive RAG) and rejected (negative RAG) attempts for AI learning.
         """
         c1 = self.vault_index.get("column_1_processed_reels", {}).get("by_session_id", {})
         session_entry = c1.get(session_id)
@@ -676,7 +696,6 @@ class TelegramVaultIndexer:
             "editing_plan": editing_plan or {},
         }
         history.append(attempt_record)
-        # Keep sorted by attempt_number
         session_entry["editing_plan_history"] = sorted(history, key=lambda x: int(x.get("attempt_number", 0)))
 
         self._save_local_index()
@@ -685,36 +704,26 @@ class TelegramVaultIndexer:
         logger.info(f"🧠 [RAG PLAN RECORD] Recorded Attempt {attempt_number} (approved={user_approved}) for Session: {session_id}")
         return attempt_record
 
-
     async def _upload_and_pin_index(self, bot, storage_group_id: Optional[str]):
         """Uploads updated master_vault_index.json to TELEGRAM_STORAGE_GROUP_ID and pins it."""
         if not storage_group_id or not bot or not os.path.exists(self.index_file):
             return
 
-        for attempt in range(1, 4):
-            try:
-                with open(self.index_file, "rb") as idf:
-                    doc_msg = await bot.send_document(
+        try:
+            with open(self.index_file, "rb") as idf:
+                doc_msg = await bot.send_document(
+                    chat_id=int(storage_group_id),
+                    document=idf,
+                    filename="master_vault_index.json",
+                    caption=f"📌 **[VAULT MASTER INDEX]** Auto-Synced\n🕒 `{time.strftime('%Y-%m-%d %H:%M:%S')}`\n📊 Reels: `{len(self.vault_index.get('column_1_processed_reels', {}).get('by_session_id', {}))}` | Sources: `{len(self.vault_index.get('column_2_downloaded_sources', {}).get('by_social_media_id', {}))}`"
+                )
+                if doc_msg and doc_msg.message_id:
+                    await bot.pin_chat_message(
                         chat_id=int(storage_group_id),
-                        document=idf,
-                        filename="master_vault_index.json",
-                        caption=f"📌 **[VAULT MASTER INDEX]** Auto-Synced\n🕒 `{time.strftime('%Y-%m-%d %H:%M:%S')}`\n📊 Reels: `{len(self.vault_index.get('column_1_processed_reels', {}).get('by_session_id', {}))}` | Sources: `{len(self.vault_index.get('column_2_downloaded_sources', {}).get('by_social_media_id', {}))}`",
-                        read_timeout=600.0,
-                        write_timeout=600.0
+                        message_id=doc_msg.message_id,
+                        disable_notification=True
                     )
-                    if doc_msg and doc_msg.message_id:
-                        await bot.pin_chat_message(
-                            chat_id=int(storage_group_id),
-                            message_id=doc_msg.message_id,
-                            disable_notification=True,
-                            read_timeout=60.0,
-                            write_timeout=60.0
-                        )
-                        self.vault_index["pinned_message_id"] = doc_msg.message_id
-                        logger.info(f"📌 [VAULT PIN] Pinned updated master_vault_index.json (Message ID: {doc_msg.message_id})")
-                        return
-            except Exception as e:
-                logger.warning(f"⚠️ Vault index upload/pin notice (attempt {attempt}/3): {e}")
-                if attempt < 3:
-                    import asyncio
-                    await asyncio.sleep(2)
+                    self.vault_index["pinned_message_id"] = doc_msg.message_id
+                    logger.info(f"📌 [VAULT PIN] Pinned updated master_vault_index.json (Message ID: {doc_msg.message_id})")
+        except Exception as e:
+            logger.warning(f"⚠️ Vault index upload/pin notice: {e}")
