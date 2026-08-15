@@ -588,18 +588,25 @@ async def handle_telegram_start(update, context):
 
     keyboard = build_platform_selection_keyboard()
     await msg.reply_text(
-        "👋 **Welcome to Master AI Video Factory Bot!**\n\n"
-        "📋 **1. Manage Creator Accounts (IDs) via Telegram Chat:**\n"
-        "• ➕ **Add Account**: `/addaccount @handle`\n"
+        "🤖 **Master AI Video Factory Bot Guide & Instructions**\n\n"
+        "📌 **1. How to Add Creator Accounts (IDs) to Scrape:**\n"
+        "• ➕ **Add Account**: `/addaccount @creator_handle`  \n"
         "  *(Example: `/addaccount @indiancelebspot` or `/addaccount 9x_bollywood`)*\n"
         "• 📜 **See Active Accounts**: `/listaccounts`\n"
-        "• 🗑️ **Remove Account**: `/removeaccount @handle`\n\n"
-        "🌐 **2. Instant Processing (Any Link or File):**\n"
-        "• Paste any Instagram Reel, YouTube Short, or TikTok URL\n"
-        "• Upload a video file directly to edit immediately\n\n"
-        "🔑 **3. Personal API Keys (Bypass Queues & Unlimited Usage):**\n"
-        "• 🔑 `/setapify <your_apify_token>`\n"
-        "• 🤖 `/setgemini <your_gemini_key>`\n\n"
+        "• 🗑️ **Remove Account**: `/removeaccount @creator_handle`\n"
+        "*(Added accounts are automatically saved to Telegram Storage Cloud!)*\n\n"
+        "⏰ **2. Scheduled Scraping & Social Media Posting:**\n"
+        "• **Scraping Times** (`SCRAPING_AUTO_INPUT_TIMES` in `.env`):\n"
+        "  Runs at `07:00,19:00` daily -> pulls accounts from Telegram Vault, scrapes 2 clips & renders reels.\n"
+        "• **Posting Times** (`PUBLISH_STATIC_TIMES` in `.env`):\n"
+        "  Broadcasts rendered reels at `07:30,19:30` to YouTube, Meta (Instagram), & TikTok.\n\n"
+        "☁️ **3. Telegram Storage Cloud Vault:**\n"
+        "• `master_vault_index.json` is **PINNED** in your Storage Group.\n"
+        "• On startup, all target accounts and JSONs are fetched in **0.5s**.\n"
+        "• Rendered `.mp4` reels and `.wav` audio are backed up to Storage Group automatically.\n\n"
+        "⚡ **4. Instant Processing & Personal Keys:**\n"
+        "• Paste any Instagram Reel, YouTube Short, or TikTok link to edit immediately.\n"
+        "• Set personal API keys to bypass queues: `/setapify <token>` | `/setgemini <key>`\n\n"
         "👇 **Select your target platform below to begin:**",
         reply_markup=keyboard
     )
@@ -1338,6 +1345,7 @@ def start_telegram_bot_service():
 
         app = ApplicationBuilder().token(token).request(request).post_init(_on_startup).build()
         app.add_handler(CommandHandler("start", handle_telegram_start))
+        app.add_handler(CommandHandler("help", handle_telegram_start))
         app.add_handler(CommandHandler("ytcode", cmd_ytcode))
         app.add_handler(CallbackQueryHandler(handle_telegram_callback))
         app.add_handler(MessageHandler(filters.TEXT | filters.VIDEO | filters.Document.ALL, handle_telegram_incoming_msg))
