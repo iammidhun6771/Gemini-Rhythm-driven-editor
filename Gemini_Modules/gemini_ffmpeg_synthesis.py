@@ -771,13 +771,17 @@ class FFmpegCommandGenerator:
             except (TypeError, ValueError):
                 pass
 
-        env_brand = os.getenv("BRAND_WATERMARK_TEXT", "").strip()
+        env_brand = (
+            os.getenv("BRAND_WATERMARK_TEXT", "").strip()
+            or os.getenv("WATERMARK_TEXT", "").strip()
+            or os.getenv("BRAND_NAME", "").strip()
+        )
         if env_brand:
             brand_text = env_brand
         elif dt_op and dt_op.get("text"):
             brand_text = dt_op.get("text")
         elif not brand_text:
-            brand_text = os.getenv("BRAND_WATERMARK_TEXT", "").strip() or None
+            brand_text = env_brand or None
 
         # ── Step A: Trim segments ────────────────────────────────────────────────
         shots = micro_shots or []
@@ -2013,7 +2017,11 @@ class GeminiFFmpegEngine:
         micro_shots   = extra_inputs.get("micro_shots") or []
         wm_boxes      = extra_inputs.get("watermark_boxes") or []
         bgm_path      = extra_inputs.get("music") or extra_inputs.get("bgm") or ""
-        brand_text    = os.getenv("BRAND_WATERMARK_TEXT", "")
+        brand_text    = (
+            os.getenv("BRAND_WATERMARK_TEXT", "").strip()
+            or os.getenv("WATERMARK_TEXT", "").strip()
+            or os.getenv("BRAND_NAME", "").strip()
+        )
         encoding_cfg  = gemini_json.get("global_encoding")
 
         _single_pass_ok = False

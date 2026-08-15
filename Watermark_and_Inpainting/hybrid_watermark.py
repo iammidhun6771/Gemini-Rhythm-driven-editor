@@ -487,7 +487,11 @@ class HybridWatermarkDetector:
 
             is_brand_match = False
             if is_master_video:
-                brand_text_env = os.getenv("BRAND_WATERMARK_TEXT", "").strip().lower()
+                brand_text_env = (
+                    os.getenv("BRAND_WATERMARK_TEXT", "").strip().lower()
+                    or os.getenv("WATERMARK_TEXT", "").strip().lower()
+                    or os.getenv("BRAND_NAME", "").strip().lower()
+                )
                 box_text = str(box.get("text", "")).strip().lower()
                 box_reason = str(box.get("reason", "")).strip().lower()
 

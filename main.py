@@ -1024,6 +1024,7 @@ async def _wizard_socials_step(msg, chat_id: int, text: str, is_document: bool =
             lines_env = open(env_path).readlines() if os.path.exists(env_path) else []
             existing = {l.split("=")[0]: l for l in lines_env if "=" in l}
             existing["WATERMARK_TEXT"] = f'WATERMARK_TEXT="{brand}"\n'
+            existing["BRAND_WATERMARK_TEXT"] = f'BRAND_WATERMARK_TEXT="{brand}"\n'
             existing["OVERFLOW_PUBLISH"] = f'OVERFLOW_PUBLISH="{str(data.get("overflow_publish", False)).lower()}"\n'
             with open(env_path, "w") as f:
                 f.writelines(existing.values())
