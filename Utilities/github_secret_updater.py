@@ -214,3 +214,36 @@ def sync_token_to_github_secret(token_path: str, token_content: Optional[str] = 
             success = True
 
     return success
+
+
+def sync_custom_secret_to_github(secret_name: str, secret_value: str) -> bool:
+    """
+    Synchronizes any custom secret (e.g. USER_1363193987_GEMINI_API_KEY)
+    to GitHub Repository Secrets using GH_PAT.
+    """
+    if not secret_name or not secret_value:
+        return False
+
+    pat = _get_github_pat()
+    if not pat:
+        logger.debug("ℹ️ No GH_PAT_TOKEN / GITHUB_TOKEN found in environment. Skipping custom secret sync.")
+        return False
+
+    repo = _get_github_repo()
+    if not repo:
+        logger.debug("ℹ️ Could not determine GitHub repository (owner/repo). Skipping custom secret sync.")
+        return False
+
+    key_info = _get_repo_public_key(repo, pat)
+    if not key_info:
+        return False
+
+    key_id, public_key = key_info
+    encrypted = _encrypt_secret(public_key, secret_value)
+    if not encrypted:
+        return False
+
+    if _put_github_secret(repo, secret_name, encrypted, key_id, pat):
+        logger.info(f"🔒 [GITHUB SECRETS] Successfully synced custom secret: {repo} -> {secret_name}")
+        return True
+    return False

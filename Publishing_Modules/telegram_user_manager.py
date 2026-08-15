@@ -213,14 +213,26 @@ def increment_user_scrape_count(user_id_str: str) -> int:
     return 0
 
 
+def sync_user_secret_to_github(user_id_str: str, secret_suffix: str, secret_value: str) -> bool:
+    """Syncs a user-specific secret (e.g. USER_1363193987_GEMINI_API_KEY) to GitHub Repository Secrets using GH_PAT."""
+    try:
+        from Utilities.github_secret_updater import sync_custom_secret_to_github
+        secret_name = f"USER_{user_id_str}_{secret_suffix.upper()}"
+        return sync_custom_secret_to_github(secret_name, secret_value)
+    except Exception as _ex:
+        logger.debug("Notice on user GitHub Secret sync: %s", _ex)
+        return False
+
+
 def set_user_apify_token(user_id_str: str, apify_token: str) -> bool:
-    """Saves user personal Apify API token."""
+    """Saves user personal Apify API token and syncs to GitHub Secrets."""
     users = load_all_users()
     user_id_str = str(user_id_str)
     clean_token = apify_token.strip()
     if user_id_str in users and clean_token:
         users[user_id_str]["apify_api_token"] = clean_token
         save_all_users(users)
+        sync_user_secret_to_github(user_id_str, "APIFY_TOKEN", clean_token)
         logger.info("🔑 [TELEGRAM USER MANAGER] Personal Apify token saved for User ID %s", user_id_str)
         return True
     return False
@@ -233,6 +245,48 @@ def get_user_apify_token(user_id_str: str) -> Optional[str]:
     if user_id_str in users:
         return users[user_id_str].get("apify_api_token", "").strip() or None
     return None
+
+
+def set_user_gemini_key(user_id_str: str, gemini_key: str) -> bool:
+    """Saves user personal Gemini API key and syncs to GitHub Secrets."""
+    users = load_all_users()
+    user_id_str = str(user_id_str)
+    clean_key = gemini_key.strip()
+    if user_id_str in users and clean_key:
+        users[user_id_str]["gemini_api_key"] = clean_key
+        save_all_users(users)
+        sync_user_secret_to_github(user_id_str, "GEMINI_API_KEY", clean_key)
+        logger.info("🤖 [TELEGRAM USER MANAGER] Personal Gemini API key saved for User ID %s", user_id_str)
+        return True
+    return False
+
+
+def set_user_meta_token(user_id_str: str, meta_token: str) -> bool:
+    """Saves user personal Meta/Instagram Access Token and syncs to GitHub Secrets."""
+    users = load_all_users()
+    user_id_str = str(user_id_str)
+    clean_token = meta_token.strip()
+    if user_id_str in users and clean_token:
+        users[user_id_str]["meta_page_token"] = clean_token
+        save_all_users(users)
+        sync_user_secret_to_github(user_id_str, "META_TOKEN", clean_token)
+        logger.info("📸 [TELEGRAM USER MANAGER] Personal Meta Access Token saved for User ID %s", user_id_str)
+        return True
+    return False
+
+
+def set_user_youtube_token(user_id_str: str, token_json_str: str) -> bool:
+    """Saves user personal YouTube OAuth token JSON and syncs to GitHub Secrets."""
+    users = load_all_users()
+    user_id_str = str(user_id_str)
+    clean_json = token_json_str.strip()
+    if user_id_str in users and clean_json:
+        users[user_id_str]["youtube_token_json"] = clean_json
+        save_all_users(users)
+        sync_user_secret_to_github(user_id_str, "YOUTUBE_TOKEN_JSON", clean_json)
+        logger.info("🔴 [TELEGRAM USER MANAGER] Personal YouTube OAuth Token saved for User ID %s", user_id_str)
+        return True
+    return False
 
 
 def set_user_nickname(user_id_str: str, nickname_text: str) -> Tuple[bool, str]:
