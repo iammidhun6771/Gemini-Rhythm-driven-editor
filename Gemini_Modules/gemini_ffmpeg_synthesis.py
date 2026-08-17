@@ -783,29 +783,48 @@ class FFmpegCommandGenerator:
         elif not brand_text:
             brand_text = env_brand or None
 
+        # Check if input video has an audio stream
+        has_input_audio = self._has_audio_stream(input_path)
+
         # ── Step A: Trim segments ────────────────────────────────────────────────
         shots = micro_shots or []
+        audio_shot_labels: List[str] = []
         if shots:
             for i, s in enumerate(shots):
                 st = float(s.get("start", s.get("start_time", 0.0)))
                 en = float(s.get("end", s.get("end_time", st + 3.0)))
                 dur = max(0.1, en - st)
-                label = f"v{i}"
+                v_label = f"v{i}"
                 filter_parts.append(
-                    f"[0:v]trim=start={st:.4f}:duration={dur:.4f},setpts=PTS-STARTPTS[{label}]"
+                    f"[0:v]trim=start={st:.4f}:duration={dur:.4f},setpts=PTS-STARTPTS[{v_label}]"
                 )
-                shot_labels.append(f"[{label}]")
+                shot_labels.append(f"[{v_label}]")
+                if has_input_audio:
+                    a_label = f"a{i}"
+                    filter_parts.append(
+                        f"[0:a]atrim=start={st:.4f}:duration={dur:.4f},asetpts=PTS-STARTPTS[{a_label}]"
+                    )
+                    audio_shot_labels.append(f"[{a_label}]")
         else:
             filter_parts.append("[0:v]setpts=PTS-STARTPTS[v0]")
             shot_labels = ["[v0]"]
+            if has_input_audio:
+                filter_parts.append("[0:a]asetpts=PTS-STARTPTS[a0]")
+                audio_shot_labels = ["[a0]"]
 
         # ── Step B: Concat all shot segments ─────────────────────────────────────
         n = len(shot_labels)
         if n > 1:
-            concat_inputs = "".join(shot_labels)
-            filter_parts.append(f"{concat_inputs}concat=n={n}:v=1:a=0[vc]")
+            if has_input_audio and len(audio_shot_labels) == n:
+                concat_pairs = "".join(f"{v}{a}" for v, a in zip(shot_labels, audio_shot_labels))
+                filter_parts.append(f"{concat_pairs}concat=n={n}:v=1:a=1[vc][ac]")
+            else:
+                concat_inputs = "".join(shot_labels)
+                filter_parts.append(f"{concat_inputs}concat=n={n}:v=1:a=0[vc]")
         else:
             filter_parts.append(f"{shot_labels[0]}copy[vc]")
+            if has_input_audio and audio_shot_labels:
+                filter_parts.append(f"{audio_shot_labels[0]}copy[ac]")
 
         current_label = "[vc]"
 
@@ -962,21 +981,31 @@ class FFmpegCommandGenerator:
             filter_parts.append(f"{current_label}copy[vout]")
             current_label = "[vout]"
 
-        # ── Step F: BGM audio ─────────────────────────────────────────────────────
+        # ── Step F: Audio Assembly ────────────────────────────────────────────────
         has_bgm = bgm_idx is not None
-        if has_bgm:
+        has_audio = has_bgm or has_input_audio
+
+        if has_bgm and has_input_audio:
+            filter_parts.append(
+                f"[ac]volume=0.80[ac_v];"
+                f"[{bgm_idx}:a]volume={music_volume:.2f}[bgm_v];"
+                f"[ac_v][bgm_v]amix=inputs=2:duration=first[aout]"
+            )
+        elif has_bgm:
             filter_parts.append(f"[{bgm_idx}:a]volume={music_volume:.2f}[aout]")
+        elif has_input_audio:
+            filter_parts.append(f"[ac]volume=1.00[aout]")
 
         # ── Assemble full filtergraph ─────────────────────────────────────────────
         filtergraph = ";".join(filter_parts)
         cmd.extend(["-filter_complex", filtergraph])
         cmd.extend(["-map", "[vout]"])
-        if has_bgm:
+        if has_audio:
             cmd.extend(["-map", "[aout]", "-shortest"])
 
         # ── Encoder flags ─────────────────────────────────────────────────────────
         cmd.extend(self._get_encoder_flags(encoding_cfg=encoding_cfg))
-        if has_bgm:
+        if has_audio:
             cmd.extend(["-c:a", "aac", "-b:a", "192k"])
         cmd.append(output_path)
 
@@ -1770,8 +1799,10 @@ class GeminiFFmpegEngine:
 
         # 3. Synthesize & Score Plan with Best-of-N Candidate Tracking & Up to 3 Retries
         extra_inputs = extra_inputs or {}
-        if audio_path and os.path.exists(audio_path) and "music" not in extra_inputs:
-            extra_inputs["music"] = audio_path
+        if audio_path and os.path.exists(audio_path):
+            extra_inputs.setdefault("music", audio_path)
+            extra_inputs.setdefault("bgm", audio_path)
+            extra_inputs.setdefault("audio", audio_path)
 
         # Thread audio beats and source duration from video_context for beat-snapped speed changes
         v_ctx = payload_data.get("video_context", {})
