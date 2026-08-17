@@ -766,11 +766,19 @@ class FFmpegCommandGenerator:
         dt_op = next((op for op in ops if op.get("operation_type") in ("drawtext", "brand_watermark")), None)
         mix_op = next((op for op in ops if op.get("operation_type") in ("bgm_mix", "audio_ducking_mix", "audio_mix")), None)
 
-        if mix_op and mix_op.get("music_volume") is not None:
-            try:
-                music_volume = float(mix_op.get("music_volume"))
-            except (TypeError, ValueError):
-                pass
+        is_preserve_input = bool(extra_inputs and extra_inputs.get("preserve_original_audio"))
+        video_volume = 0.80 if is_preserve_input else 0.00
+        if mix_op:
+            if mix_op.get("music_volume") is not None:
+                try:
+                    music_volume = float(mix_op.get("music_volume"))
+                except (TypeError, ValueError):
+                    pass
+            if mix_op.get("video_volume") is not None:
+                try:
+                    video_volume = float(mix_op.get("video_volume"))
+                except (TypeError, ValueError):
+                    pass
 
         env_brand = (
             os.getenv("BRAND_WATERMARK_TEXT", "").strip()
@@ -834,6 +842,7 @@ class FFmpegCommandGenerator:
                 filter_parts.append(f"{audio_shot_labels[0]}copy[ac]")
 
         current_label = "[vc]"
+
 
         # ── Step B2: Optional Gemini Speed Ramp / Speed Change ──────────────────
         if spd_op:
@@ -992,9 +1001,9 @@ class FFmpegCommandGenerator:
         has_bgm = bgm_idx is not None
         has_audio = has_bgm or has_input_audio
 
-        if has_bgm and has_input_audio:
+        if has_bgm and has_input_audio and video_volume > 0.01:
             filter_parts.append(
-                f"[ac]volume=0.80[ac_v];"
+                f"[ac]volume={video_volume:.2f}[ac_v];"
                 f"[{bgm_idx}:a]volume={music_volume:.2f}[bgm_v];"
                 f"[ac_v][bgm_v]amix=inputs=2:duration=first[aout]"
             )
