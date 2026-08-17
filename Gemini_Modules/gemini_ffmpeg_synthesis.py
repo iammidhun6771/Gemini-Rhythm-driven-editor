@@ -1040,7 +1040,7 @@ GEMINI_FFMPEG_SCHEMA = {
                         "type": "string",
                         "enum": ["trim", "scale_aspect", "speed_change", "speed_ramp", "watermark_overlay",
                                  "delogo_blur", "audio_ducking_mix", "audio_ducking", "bgm_mix", "audio_mix", "subtitle_burnin", "concat", "transition", "xfade",
-                                 "speed", "slowmo", "delogo", "crop"]
+                                 "speed", "slowmo", "delogo", "crop", "drawtext", "brand_watermark", "text_watermark"]
                     },
                     "gap_index": {"type": "integer", "minimum": 0},
                     "from_shot_index": {"type": "integer", "minimum": 0},
@@ -1065,7 +1065,13 @@ GEMINI_FFMPEG_SCHEMA = {
                     "h": {"type": "integer", "minimum": 1},
                     "music_volume": {"type": "number", "minimum": 0.0, "maximum": 1.0},
                     "ducking_threshold": {"type": "number", "minimum": 0.0, "maximum": 1.0},
-                    "subtitle_file": {"type": "string"}
+                    "subtitle_file": {"type": "string"},
+                    "text": {"type": "string"},
+                    "fontcolor": {"type": "string"},
+                    "fontsize": {"type": "integer"},
+                    "position": {"type": "string"},
+                    "enable_box": {"type": "boolean"},
+                    "boxcolor": {"type": "string"}
                 },
                 "required": ["operation_type"]
             }
