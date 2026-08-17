@@ -145,7 +145,26 @@ def run_phase2_pipeline(
             clean_raw_path = os.path.join(clip_dir, "video_inpainted_clean.mp4")
             working_video_path = video_path
 
-            if _has_coord_boxes or _wm_count_int > 0:
+            # If cleaned inpainted video already exists on disk from run 1, reuse it instantly (guarantees inpainting on re-edits)
+            if os.path.exists(clean_raw_path) and os.path.getsize(clean_raw_path) > 1024:
+                working_video_path = clean_raw_path
+                forensic_res["inpainted_upfront"] = True
+                logger.info(f"⚡ [UPFRONT INPAINTING CACHE] Reusing clean inpainted raw video: {os.path.basename(working_video_path)}")
+                
+                # Load coordinates from sidecar file if available
+                coords_sidecar = clean_raw_path + ".coords.json"
+                if os.path.exists(coords_sidecar):
+                    try:
+                        with open(coords_sidecar, "r", encoding="utf-8") as _csf:
+                            _cdata = json.load(_csf)
+                        _wm_b = _cdata.get("watermark_boxes")
+                        if _wm_b:
+                            forensic_res["watermark_boxes"] = _wm_b
+                            logger.info(f"📍 [WATERMARK ALIGNMENT] Loaded {len(_wm_b)} inpaint coordinate box(es) from sidecar.")
+                    except Exception as _ce:
+                        logger.debug(f"Coords sidecar read notice: {_ce}")
+
+            elif _has_coord_boxes or _wm_count_int > 0:
                 try:
                     from Watermark_and_Inpainting.watermark_main import run_watermark_removal
                     logger.info(f"🧼 [UPFRONT INPAINTING] Running OpenCV watermark inpainting on raw input BEFORE synthesis: {os.path.basename(video_path)}")
