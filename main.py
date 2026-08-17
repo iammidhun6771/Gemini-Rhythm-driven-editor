@@ -702,25 +702,19 @@ async def handle_telegram_start(update, context):
 
     keyboard = build_platform_selection_keyboard()
     await msg.reply_text(
-        "🤖 **Master AI Video Factory Bot Guide & Instructions**\n\n"
-        "📌 **1. How to Add Creator Accounts (IDs) to Scrape:**\n"
+        "🎬 **Master AI Reel Editor & Publisher**\n\n"
+        "📌 **1. Manage Target Creator Accounts:**\n"
         "• ➕ **Add Account**: `/addaccount @creator_handle`  \n"
-        "  *(Example: `/addaccount @indiancelebspot` or `/addaccount 9x_bollywood`)*\n"
-        "• 📜 **See Active Accounts**: `/listaccounts`\n"
-        "• 🗑️ **Remove Account**: `/removeaccount @creator_handle`\n"
-        "*(Added accounts are automatically saved to Telegram Storage Cloud!)*\n\n"
-        "⏰ **2. Scheduled Scraping & Social Media Posting:**\n"
-        "• **Scraping Times** (`SCRAPING_AUTO_INPUT_TIMES` in `.env`):\n"
-        "  Runs at `07:00,19:00` daily -> pulls accounts from Telegram Vault, scrapes 2 clips & renders reels.\n"
-        "• **Posting Times** (`PUBLISH_STATIC_TIMES` in `.env`):\n"
-        "  Broadcasts rendered reels at `07:30,19:30` to YouTube, Meta (Instagram), & TikTok.\n\n"
-        "☁️ **3. Telegram Storage Cloud Vault:**\n"
-        "• `master_vault_index.json` is **PINNED** in your Storage Group.\n"
-        "• On startup, all target accounts and JSONs are fetched in **0.5s**.\n"
-        "• Rendered `.mp4` reels and `.wav` audio are backed up to Storage Group automatically.\n\n"
-        "⚡ **4. Instant Processing & Personal Keys:**\n"
-        "• Paste any Instagram Reel, YouTube Short, or TikTok link to edit immediately.\n"
-        "• Set personal API keys to bypass queues: `/setapify <token>` | `/setgemini <key>`\n\n"
+        "  *(Example: `/addaccount @indiancelebspot`)*\n"
+        "• 📜 **List Active Accounts**: `/listaccounts`\n"
+        "• 🗑️ **Remove Account**: `/removeaccount @creator_handle`\n\n"
+        "⚡ **2. Instant AI Reel Generation:**\n"
+        "• Paste any Instagram Reel, YouTube Short, or TikTok link to edit & render immediately.\n\n"
+        "⏰ **3. Automated Scheduling & Publishing:**\n"
+        "• Automated content scraping runs daily at `07:00` & `19:00`.\n"
+        "• Rendered reels are broadcast at `07:30` & `19:30` across YouTube, Instagram, & Facebook.\n\n"
+        "🔑 **4. Personal API Keys (Optional):**\n"
+        "• `/setapify <token>` | `/setgemini <key>`\n\n"
         "👇 **Select your target platform below to begin:**",
         reply_markup=keyboard
     )
