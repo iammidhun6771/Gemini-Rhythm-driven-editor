@@ -55,7 +55,7 @@ from Downloader_Modules.downloader_main import run_phase1_ingestion
 # Harvest top Instagram reels for account
 res = run_phase1_ingestion(
     mode="auto",
-    target_accounts=["indiancelebspot"],
+    target_accounts=["creator_handle"],
     platform="instagram"
 )
 ```

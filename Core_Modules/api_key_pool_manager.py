@@ -220,7 +220,7 @@ def get_next_api_key(key_type: str, requesting_user_id: Optional[str] = None) ->
     active_keys = get_active_keys(key_type)
     
     if not active_keys:
-        logger.warning(f"⚠️ [API POOL] No active keys available for {key_type}")
+        logger.debug(f"ℹ️ [API POOL] No active pooled keys available for {key_type} (falling back to local .env token)")
         return None
     
     # If requesting user has their own key in pool, prefer it (minimal usage strategy)

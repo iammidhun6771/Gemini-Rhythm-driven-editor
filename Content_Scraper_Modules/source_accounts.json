@@ -4,10 +4,14 @@
   "account_mode_enabled": true,
   "_paparazzi": {
     "source_accounts": [
-      "disha_patani13"
+      "disha_patani13",
+      "indiancelebspot"
     ],
     "nsfw_accounts": [],
     "female_name_tokens": [],
-    "male_name_tokens": []
+    "male_name_tokens": [],
+    "account_timestamps": {
+      "indiancelebspot": 1787006017.026177
+    }
   }
 }

@@ -20,11 +20,82 @@ _REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ACCOUNTS_JSON = os.path.join(_REPO_ROOT, "Content_Scraper_Modules", "source_accounts.json")
 
 
+THIRTY_DAYS_SECONDS = 30 * 86400  # 30 Days in Seconds
+
+
+def purge_expired_accounts() -> List[str]:
+    """
+    Checks all configured source accounts and purges any account older than 30 days.
+    Returns list of removed handles.
+    """
+    if not os.path.exists(ACCOUNTS_JSON):
+        return []
+
+    try:
+        with open(ACCOUNTS_JSON, "r", encoding="utf-8") as f:
+            data = json.load(f)
+
+        pap = data.setdefault("_paparazzi", {})
+        accs = pap.get("source_accounts", [])
+        timestamps = pap.setdefault("account_timestamps", {})
+        now = time.time()
+
+        expired = []
+        for handle in list(accs):
+            added_at = timestamps.get(handle)
+            if added_at and (now - added_at) > THIRTY_DAYS_SECONDS:
+                expired.append(handle)
+                accs.remove(handle)
+                timestamps.pop(handle, None)
+
+        if expired:
+            with open(ACCOUNTS_JSON, "w", encoding="utf-8") as wf:
+                json.dump(data, wf, indent=2)
+            sync_source_accounts_to_telegram_vault()
+            logger.info("⏰ [EXPIRATION] Purged %d expired account(s) after 30 days: %s", len(expired), expired)
+
+        return expired
+    except Exception as e:
+        logger.error("❌ Error during account expiration check: %s", e)
+        return []
+
+
+def get_active_accounts_metadata() -> List[Dict[str, Any]]:
+    """Returns list of active target accounts with creation timestamps and days remaining until 30-day limit."""
+    purge_expired_accounts()
+    if not os.path.exists(ACCOUNTS_JSON):
+        return []
+    try:
+        with open(ACCOUNTS_JSON, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        pap = data.get("_paparazzi", {})
+        accs = pap.get("source_accounts", [])
+        timestamps = pap.get("account_timestamps", {})
+        now = time.time()
+
+        res = []
+        for h in accs:
+            added_at = timestamps.get(h, now)
+            elapsed_days = int((now - added_at) / 86400)
+            days_left = max(0, 30 - elapsed_days)
+            res.append({
+                "handle": h,
+                "added_at": added_at,
+                "days_elapsed": elapsed_days,
+                "days_left": days_left
+            })
+        return res
+    except Exception as e:
+        logger.error("Error loading account metadata: %s", e)
+        return []
+
+
 def get_rotated_max_two_accounts(max_accounts: int = 2) -> List[str]:
     """
     Reads source_accounts.json, selects max_accounts (2) using round-robin index,
-    and updates the active target list.
+    and updates the active target list. Automatically purges accounts >30 days old.
     """
+    purge_expired_accounts()
     if not os.path.exists(ACCOUNTS_JSON):
         logger.warning(f"⚠️ {ACCOUNTS_JSON} not found. Please add target source accounts via Telegram Chat /addaccount.")
         return []
@@ -82,21 +153,31 @@ def run_scheduled_scraper_batch(max_accounts: int = 2) -> List[str]:
     from Downloader_Modules.downloader_main import run_phase1_ingestion
     from Main_Modules.phase2_main import run_phase2_orchestration
 
+    clips_per_run = 5
+    try:
+        clips_per_run = int(os.getenv("CLIPS_PER_ACCOUNT_PER_RUN", "5"))
+    except ValueError:
+        clips_per_run = 5
+
     # Run ingestion for selected accounts
-    ingest_res = run_phase1_ingestion(mode="auto", limit_per_account=3)
-    if not ingest_res.get("success") or not ingest_res.get("downloaded_files"):
+    ingest_res = run_phase1_ingestion(mode="auto", limit_per_account=clips_per_run)
+    downloaded_files = ingest_res.get("downloaded_files", [])
+    if not ingest_res.get("success") or not downloaded_files:
         logger.warning("⚠️ [SCHEDULED BATCH] Ingestion returned 0 new clips.")
         return []
 
-    # Run AI Master Editor
-    phase2_res = run_phase2_orchestration()
+    # Target ONLY the newly downloaded clip directories
+    target_dirs = list(set(os.path.dirname(f) for f in downloaded_files if os.path.exists(f)))
+
+    # Run AI Master Editor on ONLY the target downloaded clips
+    phase2_res = run_phase2_orchestration(target_dirs=target_dirs, limit=len(target_dirs))
     rendered_reels = phase2_res.get("rendered_files", [])
     logger.info(f"🎬 [SCHEDULED BATCH COMPLETE] Rendered {len(rendered_reels)} reel(s).")
     return rendered_reels
 
 
 def add_source_account(account_handle: str, platform: str = "instagram") -> bool:
-    """Adds a new target account handle to source_accounts.json and syncs to Telegram Vault."""
+    """Adds a new target account handle with creation timestamp to source_accounts.json and syncs to Telegram Vault."""
     clean_handle = account_handle.strip().lstrip("@")
     if not clean_handle:
         return False
@@ -108,12 +189,21 @@ def add_source_account(account_handle: str, platform: str = "instagram") -> bool
         
         pap = data.setdefault("_paparazzi", {})
         accs = pap.setdefault("source_accounts", [])
+        timestamps = pap.setdefault("account_timestamps", {})
+
         if clean_handle not in accs:
             accs.append(clean_handle)
+            timestamps[clean_handle] = time.time()
             with open(ACCOUNTS_JSON, "w", encoding="utf-8") as wf:
                 json.dump(data, wf, indent=2)
             sync_source_accounts_to_telegram_vault()
-            logger.info("➕ [SOURCE ACCOUNTS] Added @%s (%s) to source_accounts.json & synced to Telegram Vault", clean_handle, platform)
+            logger.info("➕ [SOURCE ACCOUNTS] Added @%s (%s) with 30-day limit to source_accounts.json & synced to Telegram Vault", clean_handle, platform)
+            return True
+        else:
+            # Refresh timestamp on re-adding
+            timestamps[clean_handle] = time.time()
+            with open(ACCOUNTS_JSON, "w", encoding="utf-8") as wf:
+                json.dump(data, wf, indent=2)
             return True
     except Exception as e:
         logger.error("❌ Failed to add source account @%s: %s", clean_handle, e)
@@ -131,8 +221,11 @@ def remove_source_account(account_handle: str) -> bool:
                 data = json.load(f)
             pap = data.get("_paparazzi", {})
             accs = pap.get("source_accounts", [])
+            timestamps = pap.get("account_timestamps", {})
+
             if clean_handle in accs:
                 accs.remove(clean_handle)
+                timestamps.pop(clean_handle, None)
                 with open(ACCOUNTS_JSON, "w", encoding="utf-8") as wf:
                     json.dump(data, wf, indent=2)
                 sync_source_accounts_to_telegram_vault()

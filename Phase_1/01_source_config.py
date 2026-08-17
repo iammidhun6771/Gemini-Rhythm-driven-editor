@@ -30,7 +30,11 @@ def resolve_target_accounts(
     if callback:
         callback("step_01", "running", {"message": "Resolving target account pool..."})
 
-    resolved_sources: List[str] = []
+    try:
+        from Downloader_Modules.scheduled_scraper_manager import purge_expired_accounts
+        purge_expired_accounts()
+    except Exception:
+        pass
 
     if target_accounts and isinstance(target_accounts, list):
         resolved_sources = [a.strip().lstrip("@") for a in target_accounts if a and a.strip()]

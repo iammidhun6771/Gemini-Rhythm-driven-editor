@@ -68,7 +68,7 @@ Traps `Ctrl + C` signals across Telegram long-polling and CLI pipeline runs, pri
 .\venv\Scripts\python.exe main.py
 
 # Ingest single handle directly
-.\venv\Scripts\python.exe main.py indiancelebspot --mode auto
+.\venv\Scripts\python.exe main.py creator_handle --mode auto
 
 # Ingest direct video URL
 .\venv\Scripts\python.exe main.py https://instagram.com/reel/C_example/ --mode manual

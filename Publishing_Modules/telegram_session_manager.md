@@ -58,7 +58,7 @@ from Publishing_Modules.telegram_session_manager import TelegramSessionManager
 session_manager = TelegramSessionManager()
 
 # Create session for rendered reel
-session_id = session_manager.create_session("Processed Shorts/reel_master.mp4", creator="indiancelebspot")
+session_id = session_manager.create_session("Processed Shorts/reel_master.mp4", creator="creator_handle")
 
 # Mark awaiting title
 session_manager.set_awaiting_title(session_id)

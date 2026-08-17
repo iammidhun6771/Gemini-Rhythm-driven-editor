@@ -140,9 +140,11 @@ def build_best_attempt_comparison_keyboard(session_id: str, total_attempts: int 
 
 def build_platform_selection_keyboard():
     """
-    Builds the Main Menu 4-button keyboard:
+    Builds the Main Menu 6-button keyboard:
       - [ ⚙️ Auto Input Setup ]        callback_data="menu_auto_setup"
-      - [ 📱 Add Multiple Socials ]    callback_data="menu_add_socials"
+      - [ 📜 Active Accounts ]          callback_data="menu_list_accounts"
+      - [ 🚀 Run Scraper Batch Now ]    callback_data="menu_run_batch_now"
+      - [ 📱 Add Socials ]              callback_data="menu_add_socials"
       - [ 🔑 Assign Credentials ]      callback_data="menu_credentials"
       - [ 🔗 Direct URL / Manual ]     callback_data="menu_direct_url"
     """
@@ -151,7 +153,11 @@ def build_platform_selection_keyboard():
         keyboard = [
             [
                 InlineKeyboardButton("⚙️ Auto Input Setup", callback_data="menu_auto_setup"),
-                InlineKeyboardButton("📱 Add Multiple Socials", callback_data="menu_add_socials"),
+                InlineKeyboardButton("📜 Active Accounts", callback_data="menu_list_accounts"),
+            ],
+            [
+                InlineKeyboardButton("🚀 Run Scraper Batch Now", callback_data="menu_run_batch_now"),
+                InlineKeyboardButton("📱 Add Socials", callback_data="menu_add_socials"),
             ],
             [
                 InlineKeyboardButton("🔑 Assign Credentials", callback_data="menu_credentials"),
@@ -161,6 +167,91 @@ def build_platform_selection_keyboard():
         return InlineKeyboardMarkup(keyboard)
     except ImportError:
         return None
+
+
+def build_active_accounts_keyboard_and_text():
+    """Builds text summary and inline buttons for active accounts list with 30-day expiration info."""
+    from Downloader_Modules.scheduled_scraper_manager import get_active_accounts_metadata
+    from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+
+    meta = get_active_accounts_metadata()
+    if not meta:
+        text = (
+            "📋 **Active Target Accounts (0):**\n\n"
+            "No active target accounts configured.\n\n"
+            "Use ⚙️ Auto Input Setup or `/addaccount @handle` to add creator handles to scrape."
+        )
+        kbd = InlineKeyboardMarkup([
+            [InlineKeyboardButton("⚙️ Auto Input Setup", callback_data="menu_auto_setup")],
+            [InlineKeyboardButton("↩️ Main Menu", callback_data="menu_main")]
+        ])
+        return text, kbd
+
+    lines = []
+    keyboard_rows = []
+    for a in meta:
+        h = a["handle"]
+        d_left = a["days_left"]
+        lines.append(f"• `@{h}` — ⏳ **{d_left} days remaining** (out of 30)")
+        keyboard_rows.append([InlineKeyboardButton(f"🗑️ Remove @{h}", callback_data=f"remove_acc_{h}")])
+
+    keyboard_rows.append([InlineKeyboardButton("🚀 Run Scraper Batch Now", callback_data="menu_run_batch_now")])
+    keyboard_rows.append([
+        InlineKeyboardButton("⚙️ Auto Input Setup", callback_data="menu_auto_setup"),
+        InlineKeyboardButton("↩️ Main Menu", callback_data="menu_main")
+    ])
+
+    text = f"📋 **Active Target Accounts ({len(meta)}):**\n\n" + "\n".join(lines) + "\n\n*Accounts automatically expire and are purged after 30 days.*"
+    return text, InlineKeyboardMarkup(keyboard_rows)
+
+
+_global_bot_instance = None
+
+
+async def _async_trigger_immediate_batch(bot, chat_id: int):
+    """Triggers an immediate background scraper batch and notifies Telegram chat."""
+    import asyncio
+    from Downloader_Modules.scheduled_scraper_manager import run_scheduled_scraper_batch, get_rotated_max_two_accounts
+    try:
+        global _global_bot_instance
+        effective_bot = bot if (bot and hasattr(bot, "send_message")) else _global_bot_instance
+        if not effective_bot:
+            logger.error("❌ No active Telegram Bot instance available for immediate batch.")
+            return
+
+        targets = get_rotated_max_two_accounts(max_accounts=2)
+        if not targets:
+            await effective_bot.send_message(chat_id=chat_id, text="⚠️ No active accounts configured for scraping.")
+            return
+
+        await effective_bot.send_message(
+            chat_id=chat_id,
+            text=f"🚀 **Initial Scrape & Edit Batch Started!**\n\nScraping top reels for: `{', '.join(['@' + t for t in targets])}`...\n*(You will receive master reel review cards here shortly)*"
+        )
+        
+        loop = asyncio.get_running_loop()
+        rendered = await loop.run_in_executor(None, lambda: run_scheduled_scraper_batch(max_accounts=2))
+        
+        if rendered:
+            for r_file in rendered:
+                try:
+                    sess_id = session_manager.create_session(video_path=r_file)
+                    keyboard = build_telegram_session_keyboard(session_id=sess_id)
+                    with open(r_file, "rb") as vf:
+                        sent_msg = await effective_bot.send_video(
+                            chat_id=chat_id,
+                            video=vf,
+                            caption=f"🎬 **Master Edit Complete!**\n📁 `{os.path.basename(r_file)}`\n🆔 `Session: {sess_id}`",
+                            reply_markup=keyboard
+                        )
+                        if sent_msg:
+                            session_manager.update_message_id(sess_id, sent_msg.message_id)
+                except Exception as _e:
+                    logger.warning(f"Error sending batch video: {_e}")
+        else:
+            await effective_bot.send_message(chat_id=chat_id, text="ℹ️ Batch cycle complete: 0 new clips downloaded.")
+    except Exception as e:
+        logger.error(f"Error executing immediate batch: {e}")
 
 
 def build_back_button_keyboard():
@@ -234,6 +325,28 @@ async def handle_telegram_callback(update, context):
         )
         return
 
+    if data == "menu_list_accounts":
+        text, kbd = build_active_accounts_keyboard_and_text()
+        await query.edit_message_text(text=text, reply_markup=kbd)
+        return
+
+    if data.startswith("remove_acc_"):
+        handle = data.replace("remove_acc_", "").strip()
+        from Downloader_Modules.scheduled_scraper_manager import remove_source_account
+        remove_source_account(handle)
+        text, kbd = build_active_accounts_keyboard_and_text()
+        await query.edit_message_text(text=f"🗑️ Removed `@{handle}`!\n\n" + text, reply_markup=kbd)
+        return
+
+    if data == "menu_run_batch_now":
+        import asyncio
+        asyncio.create_task(_async_trigger_immediate_batch(context.bot, chat_id))
+        await query.edit_message_text(
+            text="🚀 **Scraper Batch Triggered!**\n\nProcessing top reels for active accounts now...\nYou will receive master reel review cards here shortly.",
+            reply_markup=build_platform_selection_keyboard()
+        )
+        return
+
     # ── ⚙️ Auto Input Setup Wizard ────────────────────────────────────────────
     if data == "menu_auto_setup":
         _wizard_sessions[chat_id] = {"wizard": "auto_setup", "step": 1, "data": {}}
@@ -243,7 +356,7 @@ async def handle_telegram_callback(update, context):
                 "⚙️ **Auto Input Setup — Step 1/6: Source Account IDs**\n\n"
                 "Send the platform handles you want to scrape.\n\n"
                 "📌 **Format** (one per line or all together):\n"
-                "  `/instagram @indiancelebspot`\n"
+                "  `/instagram @creator_handle`\n"
                 "  `/youtube @ChannelName`\n"
                 "  `/tiktok @tiktokuser`\n\n"
                 "You can add up to **2 accounts total** across any mix of platforms.\n"
@@ -397,7 +510,7 @@ async def handle_telegram_callback(update, context):
             return
         back_kbd = build_back_button_keyboard()
         prompts = {
-            "instagram": "📸 **Instagram Mode**\n\nSend the creator handle (e.g. `@indiancelebspot`):",
+            "instagram": "📸 **Instagram Mode**\n\nSend the creator handle (e.g. `@creator_handle`):",
             "youtube": "🔴 **YouTube Mode**\n\nSend the channel handle (e.g. `@ChannelName`):",
             "tiktok": "🎵 **TikTok Mode**\n\nSend the creator handle (e.g. `@tiktokuser`):",
             "direct": "🌐 **Direct URL Mode**\n\nPaste any video URL or upload a video file:"
@@ -705,7 +818,7 @@ async def handle_telegram_start(update, context):
         "🎬 **Master AI Reel Editor & Publisher**\n\n"
         "📌 **1. Manage Target Creator Accounts:**\n"
         "• ➕ **Add Account**: `/addaccount @creator_handle`  \n"
-        "  *(Example: `/addaccount @indiancelebspot`)*\n"
+        "  *(Example: `/addaccount @creator_handle`)*\n"
         "• 📜 **List Active Accounts**: `/listaccounts`\n"
         "• 🗑️ **Remove Account**: `/removeaccount @creator_handle`\n\n"
         "⚡ **2. Instant AI Reel Generation:**\n"
@@ -827,7 +940,7 @@ def _dispatch_pipeline_in_background(**kwargs):
     t.start()
 
 
-async def _wizard_auto_setup_step(msg, chat_id: int, text: str):
+async def _wizard_auto_setup_step(msg, chat_id: int, text: str, bot=None):
     """Advances the Auto Input Setup wizard through steps 1-6."""
     sess = _wizard_sessions.get(chat_id)
     if not sess or sess.get("wizard") != "auto_setup":
@@ -868,7 +981,9 @@ async def _wizard_auto_setup_step(msg, chat_id: int, text: str):
         return True
 
     if step == 2:
-        data["scrape_times"] = text.strip()
+        raw_parts = text.strip().split(",")
+        norm_parts = [normalize_time_slot(p) or p.strip() for p in raw_parts if p.strip()]
+        data["scrape_times"] = ",".join(norm_parts) or text.strip()
         sess["step"] = 3
         await msg.reply_text(
             f"✅ **Scraping times set**: `{data['scrape_times']}`\n\n"
@@ -881,7 +996,9 @@ async def _wizard_auto_setup_step(msg, chat_id: int, text: str):
         return True
 
     if step == 3:
-        data["publish_times"] = text.strip()
+        raw_parts = text.strip().split(",")
+        norm_parts = [normalize_time_slot(p) or p.strip() for p in raw_parts if p.strip()]
+        data["publish_times"] = ",".join(norm_parts) or text.strip()
         sess["step"] = 4
         await msg.reply_text(
             f"✅ **Publishing times set**: `{data['publish_times']}`\n\n"
@@ -953,6 +1070,14 @@ async def _wizard_auto_setup_step(msg, chat_id: int, text: str):
             logger.debug(f"add_source_account error: {_sa_err}")
         _wizard_sessions.pop(chat_id, None)
         accs = "\n".join([f"  • `{a['platform'].title()}`: `@{a['handle']}`" for a in data.get("accounts", [])])
+        
+        from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+        completion_kbd = InlineKeyboardMarkup([
+            [InlineKeyboardButton("🚀 Run Scraper Batch Now", callback_data="menu_run_batch_now")],
+            [InlineKeyboardButton("📜 View Active Accounts", callback_data="menu_list_accounts")],
+            [InlineKeyboardButton("↩️ Main Menu", callback_data="menu_main")]
+        ])
+
         await msg.reply_text(
             f"🎉 **Auto Input Setup Complete!**\n\n"
             f"📋 **Summary:**\n"
@@ -962,10 +1087,19 @@ async def _wizard_auto_setup_step(msg, chat_id: int, text: str):
             f"🎬 **Clips per account per run**: `{data['clips_per_account']}`\n"
             f"📅 **Daily publish limit**: `{data['max_publish_per_day']}` reels/day\n"
             f"🗓️ **Active days per week**: `{data['days_per_week']}` days\n\n"
-            f"✅ All settings saved to `.env` & Telegram Storage Vault!\n"
-            f"The bot will now automatically run on your schedule.",
-            reply_markup=build_platform_selection_keyboard()
+            f"⏳ **30-Day Limit**: Added account(s) will run for 30 days before auto-expiring.\n"
+            f"🚀 **Starting initial scrape batch immediately...**",
+            reply_markup=completion_kbd
         )
+
+        try:
+            import asyncio
+            effective_b = bot or _global_bot_instance
+            if effective_b:
+                asyncio.create_task(_async_trigger_immediate_batch(effective_b, chat_id))
+        except Exception as _trig_err:
+            logger.warning(f"Notice triggering immediate batch: {_trig_err}")
+
         return True
 
     return False
@@ -1126,7 +1260,7 @@ async def handle_telegram_incoming_msg(update, context):
         is_doc = bool(msg.document or msg.video)
         text_in = msg.text.strip() if msg.text else ""
         if active_wizard == "auto_setup":
-            if await _wizard_auto_setup_step(msg, chat_id, text_in):
+            if await _wizard_auto_setup_step(msg, chat_id, text_in, bot=context.bot):
                 return
         elif active_wizard == "add_socials":
             sess = _wizard_sessions.get(chat_id, {})
@@ -1596,13 +1730,28 @@ def run_master_pipeline(
 
 # ── Dual Pipeline Schedulers (Scraping vs Publishing) ────────────────────────
 
+def normalize_time_slot(slot_str: str) -> Optional[str]:
+    """Normalizes time string into standard HH:MM 24-hour format."""
+    try:
+        parts = slot_str.strip().split(":")
+        if len(parts) == 2 and parts[0].isdigit() and parts[1].isdigit():
+            return f"{int(parts[0]):02d}:{int(parts[1]):02d}"
+    except Exception:
+        pass
+    return None
+
+
 def parse_scraping_auto_input_times() -> List[str]:
     """
     Parses SCRAPING_AUTO_INPUT_TIMES from .env (e.g., '07:00,12:00,19:00').
     Defaults to ['07:00', '12:00', '19:00'].
     """
     raw = os.getenv("SCRAPING_AUTO_INPUT_TIMES", "07:00,12:00,19:00")
-    slots = [s.strip() for s in raw.split(",") if ":" in s.strip()]
+    slots = []
+    for piece in raw.split(","):
+        norm = normalize_time_slot(piece)
+        if norm:
+            slots.append(norm)
     return slots or ["07:00", "12:00", "19:00"]
 
 
@@ -1612,7 +1761,11 @@ def parse_static_publish_times() -> List[str]:
     Defaults to ['07:30', '12:30', '19:30'].
     """
     raw = os.getenv("PUBLISH_STATIC_TIMES", "07:30,12:30,19:30")
-    slots = [s.strip() for s in raw.split(",") if ":" in s.strip()]
+    slots = []
+    for piece in raw.split(","):
+        norm = normalize_time_slot(piece)
+        if norm:
+            slots.append(norm)
     return slots or ["07:30", "12:30", "19:30"]
 
 
@@ -1649,12 +1802,13 @@ def run_scheduled_pipeline_loop():
     Blocking CLI Loop for Static Time Scheduler.
     Rotates max 2 source accounts and runs master pipeline automatically at each configured slot.
     """
-    slots = parse_scraping_auto_input_times()
     logger.info("==================================================================")
-    logger.info(f"⏰ [SCRAPING SCHEDULER] Active auto-input slots: {slots}")
+    logger.info("⏰ [SCRAPING SCHEDULER] Active auto-input slots loop starting...")
     logger.info("==================================================================")
 
     while True:
+        # Dynamically reload slots from .env on every check
+        slots = parse_scraping_auto_input_times()
         next_slot, delay_s = get_seconds_until_next_slot(slots)
         hours_left = delay_s / 3600.0
         logger.info(f"⏳ [SCHEDULER] Next scheduled run at {next_slot} (in {hours_left:.2f} hours / {delay_s:.0f}s)...")
@@ -1674,10 +1828,11 @@ async def _async_static_scheduler_task(bot_app=None):
     Rotates max 2 accounts per scheduled slot, renders reels, creates sessions, and sends to Telegram.
     """
     import asyncio
-    slots = parse_scraping_auto_input_times()
-    logger.info(f"⏰ [ASYNC SCRAPER SCHEDULER] Scraping auto-input times active: {slots}")
+    logger.info("⏰ [ASYNC SCRAPER SCHEDULER] Async scraper scheduler task active...")
 
     while True:
+        # Dynamically reload slots from .env on every check
+        slots = parse_scraping_auto_input_times()
         next_slot, delay_s = get_seconds_until_next_slot(slots)
         hours_left = delay_s / 3600.0
         logger.info(f"⏳ [ASYNC SCHEDULER] Next run scheduled at {next_slot} (in {hours_left:.2f} hours)...")
@@ -1737,6 +1892,8 @@ def start_telegram_bot_service():
 
         async def _on_startup(application):
             try:
+                global _global_bot_instance
+                _global_bot_instance = application.bot
                 # Hydrate all vault JSON databases (master index, users, audio pool) from Telegram Storage Group
                 logger.info("📦 [VAULT CLOUD HYDRATION] Hydrating vault index, user sessions, and pool metadata from Telegram...")
                 vault_indexer.hydrate_all_vault_jsons_on_startup()
@@ -1814,14 +1971,8 @@ def start_telegram_bot_service():
                 await update.message.reply_text(f"⚠️ Could not remove `@{handle}`: {_e}")
         async def _cmd_listaccounts(update, context):
             try:
-                import json as _json
-                accs_path = os.path.join(_REPO_ROOT, "Content_Scraper_Modules", "source_accounts.json")
-                accs = _json.loads(open(accs_path).read()) if os.path.exists(accs_path) else []
-                if accs:
-                    lines = "\n".join([f"• `@{a.get('handle', a) if isinstance(a, dict) else a}`" for a in accs])
-                    await update.message.reply_text(f"📋 **Active Source Accounts ({len(accs)}):**\n\n{lines}")
-                else:
-                    await update.message.reply_text("📋 No accounts added yet.\n\nUse ⚙️ Auto Input Setup from the menu or `/addaccount @handle`.")
+                text, kbd = build_active_accounts_keyboard_and_text()
+                await update.message.reply_text(text=text, reply_markup=kbd)
             except Exception as _e:
                 await update.message.reply_text(f"⚠️ Could not list accounts: {_e}")
         async def _cmd_setapify(update, context):
@@ -1892,7 +2043,7 @@ if __name__ == "__main__":
                 elif os.path.exists(clean_in):
                     target_file = clean_in
                 else:
-                    # Treat positional input argument as target Instagram handle (e.g., python main.py indiancelebspot)
+                    # Treat positional input argument as target Instagram handle (e.g., python main.py creator_handle)
                     target_accs = [clean_in.lstrip("@")]
 
             mode_to_use = args.mode or ("manual" if (target_url or target_file) else "auto")
