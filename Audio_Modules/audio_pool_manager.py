@@ -58,8 +58,6 @@ class AudioPoolManager:
         self._sync_root_to_active()
         # Ensure all files in active/ are registered in metadata so they are not skipped.
         self._sync_active_to_metadata()
-        # Sync and upload any un-indexed active audios to Telegram Storage Group
-        self.sync_all_active_audios_to_telegram_vault()
 
     def _load_metadata(self) -> Dict:
         """Loads metadata safely with Telegram Vault cloud hydration fallback."""
