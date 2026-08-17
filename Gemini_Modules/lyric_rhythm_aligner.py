@@ -664,17 +664,23 @@ def select_best_audio_for_clip(
             disqualified_tracks.add(ef.lower())
             disqualified_tracks.add(os.path.basename(ef).lower())
 
-    # Build candidate list from merged pool index
+    # Build candidate list from merged pool index (EXCLUDE raw pipeline artifacts like sess_*.wav, video.wav)
+    try:
+        from Audio_Modules.audio_pool_manager import _is_pipeline_artifact
+    except ImportError:
+        def _is_pipeline_artifact(f): return f.lower().startswith("sess_") or "extracted" in f.lower() or "video" in f.lower()
+
     all_candidates = [
         fname for fname, meta in pool_files.items()
         if isinstance(meta, dict)
         and not meta.get("is_unusable", False)
         and not meta.get("is_speech_only", False)
+        and not _is_pipeline_artifact(fname)
         and fname.lower().endswith((".mp3", ".wav", ".m4a"))
     ]
 
     if not all_candidates:
-        logger.warning("🎶 [BGM Selector] No valid musical candidates found in merged pool index.")
+        logger.warning("🎶 [BGM Selector] No valid musical candidates found in merged pool index (pipeline artifacts excluded).")
         return {"selected_audio_track": None, "alignment_score": 0.0, "reasoning": "No valid BGM tracks in pool."}
 
     # Filter out previous BGM track if alternatives exist
@@ -698,10 +704,11 @@ def select_best_audio_for_clip(
         u_count = meta.get("usage_count", 0)
 
         # BPM / emotion / vibe data — merged from _lyric.json via merge_lyric_into_pool()
-        # Falls back to the basic bpm/energy fields if lyric intel hasn't been merged yet
         c_bpm = float(meta.get("tempo_bpm") or meta.get("bpm") or 120.0)
         c_emotion = str(meta.get("dominant_emotion", "hype")).lower()
-        c_vibe = str(meta.get("energy_profile", "medium")).lower()
+        c_genre = str(meta.get("gemini_genre") or "music").lower()
+        vibes = meta.get("vibe_tags") or [meta.get("energy_profile", "medium")]
+        c_vibe = ", ".join(vibes) if isinstance(vibes, list) else str(vibes)
         c_vocals = bool(meta.get("has_vocals", False))
         c_lang = str(meta.get("language", "unknown"))
 
@@ -716,15 +723,15 @@ def select_best_audio_for_clip(
 
         candidate_scores.append((math_score, c_file))
         candidate_lines[c_file] = (
-            f"- '{c_file}': bpm={c_bpm:.1f}, emotion='{c_emotion}', energy='{c_vibe}', "
+            f"- '{c_file}': genre='{c_genre}', bpm={c_bpm:.1f}, emotion='{c_emotion}', vibe='{c_vibe}', "
             f"vocals={c_vocals}, lang='{c_lang}', last_used={hrs_since_used:.1f}h_ago, usage_count={u_count}"
         )
 
     candidate_scores.sort(key=lambda x: x[0], reverse=True)
     best_math_candidate = candidate_scores[0][1] if candidate_scores else available_candidates[0]
-    best_math_score = candidate_scores[0][0] if candidate_scores else 0.75
-
-    # Send only top-10 by math score to Gemini — prevents equal-score hallucination
+    selected_track = best_math_candidate
+    reasoning = f"Smart Mathematical & Semantic Audio Match (score={candidate_scores[0][0]:.2f})."
+    # Send top-10 candidates to Gemini
     top_candidates = candidate_scores[:10]
     top_lines = []
     for rank, (sc, fname) in enumerate(top_candidates, start=1):
@@ -733,14 +740,13 @@ def select_best_audio_for_clip(
     candidates_str = "\n".join(top_lines)
     forbidden_str = ", ".join([f"'{t}'" for t in disqualified_tracks]) or "None"
 
-    prompt = f"""You are a BGM Music Selector for short-form video clips.
+    prompt = f"""You are an Expert BGM Music Selector for short-form video reels.
 
 Rules:
 - NEVER pick a track from FORBIDDEN list
-- You are given the top-10 pre-scored candidates, ranked #1 (best math fit) to #10
-- The math pre-scorer already weighted BPM match, emotional tone, and recency — your job is to confirm or override with semantic reasoning
-- If no better semantic match exists, confirm the #1 math pick
-- Do NOT reference any RAG history or past clips — judge only on the clip context and track metadata below
+- Pick the single BEST candidate from the TOP-10 list below that best matches the visual intent, tone, and pacing of the clip
+- Prioritize musical style, emotional vibe, and BPM alignment with the video
+- Do NOT reference past clips — judge purely on the clip context and track metadata below
 
 [FORBIDDEN TRACKS — DO NOT SELECT]
 {forbidden_str}
@@ -749,14 +755,11 @@ Rules:
 - Intent: '{visual_ctx.get('intent', 'viral_reel')}'
 - Tone: '{visual_ctx.get('tone', 'aspirational')}'
 - Narrative: '{visual_ctx.get('recommended_narrative', 'lifestyle')}'
-- BPM: {clip_bpm}
+- Target BPM: {clip_bpm}
 - Speech mode: '{current_audio.get('context', {}).get('speech_mode', 'on_camera_dialogue')}'
 
-[TOP-10 CANDIDATE TRACKS (ranked by BPM+emotion+recency math score)]
+[TOP-10 CANDIDATE MUSIC TRACKS]
 {candidates_str}
-
-[MATH PRE-SELECTED WINNER]
-'{best_math_candidate}' — override only if you have a strong semantic reason.
 
 Return ONLY valid JSON:
 {{
@@ -765,10 +768,6 @@ Return ONLY valid JSON:
   "reasoning": "One sentence: why this specific track fits this clip's intent/tone."
 }}
 """
-
-    selected_track = best_math_candidate
-    reasoning = f"Smart Mathematical & Semantic Audio Match (score={candidate_scores[0][0]:.2f})."
-    alignment_score = min(0.95, round(candidate_scores[0][0], 2)) if candidate_scores else 0.75
 
     try:
         try:
