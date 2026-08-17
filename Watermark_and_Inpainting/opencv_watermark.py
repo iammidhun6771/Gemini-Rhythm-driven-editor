@@ -1026,30 +1026,6 @@ def _run_inpaint_pass(video_path, mask_paths, output_path, radius=3, alpha=1.0, 
                             roi_frame = cv2.inpaint(roi_frame, roi_mask, radius, cv2.INPAINT_NS)
                             roi_frame = cv2.GaussianBlur(roi_frame, (5, 5), 0)
 
-                            # --- BRAND LOGO OVERWRITE ENGINE ---
-                            if brand_logo_asset is not None and rw >= 20 and rh >= 20:
-                                try:
-                                    logo_h, logo_w = brand_logo_asset.shape[:2]
-                                    scale = min(rw / float(logo_w), rh / float(logo_h))
-                                    nw, nh = max(1, int(logo_w * scale)), max(1, int(logo_h * scale))
-                                    resized_logo = cv2.resize(brand_logo_asset, (nw, nh), interpolation=cv2.INTER_AREA)
-
-                                    ox = (rw - nw) // 2
-                                    oy = (rh - nh) // 2
-
-                                    if brand_logo_asset.shape[2] == 4:
-                                        # Transparent PNG alpha blend
-                                        alpha = (resized_logo[:, :, 3].astype(np.float32) / 255.0)[:, :, None]
-                                        bgr_logo = resized_logo[:, :, :3].astype(np.float32)
-                                        roi_bg = roi_frame[oy:oy+nh, ox:ox+nw].astype(np.float32)
-                                        blended_logo = (bgr_logo * alpha + roi_bg * (1.0 - alpha)).astype(np.uint8)
-                                        roi_frame[oy:oy+nh, ox:ox+nw] = blended_logo
-                                    else:
-                                        # BGR image overwrite (JPG/JPEG)
-                                        roi_frame[oy:oy+nh, ox:ox+nw] = resized_logo
-                                except Exception as _logo_err:
-                                    pass
-
                             frame[ry:ry+rh, rx:rx+rw] = roi_frame
     
                             if not logged_enhancements:

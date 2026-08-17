@@ -92,7 +92,7 @@ def _send_telegram_file_sync(method: str, chat_id: str, file_key: str, file_path
         headers={"Content-Type": f"multipart/form-data; boundary={boundary}"}
     )
     try:
-        with urllib.request.urlopen(req, timeout=60) as resp:
+        with urllib.request.urlopen(req, timeout=180) as resp:
             return json.loads(resp.read().decode("utf-8"))
     except Exception as err:
         logger.warning(f"⚠️ Telegram file upload failed for {filename}: {err}")
