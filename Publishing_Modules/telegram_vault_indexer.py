@@ -230,7 +230,7 @@ class TelegramVaultIndexer:
     def hydrate_bgm_track_from_vault(self, track_name: str, dest_dir: Optional[str] = None) -> Optional[str]:
         """
         Synchronously hydrates a BGM track from Telegram Storage Group using
-        extracted_audio_file_id stored in Column 2 of master_vault_index.json.
+        file_id stored in pool_metadata.json (the single source of truth for audio data).
         """
         if not track_name:
             return None
@@ -243,19 +243,28 @@ class TelegramVaultIndexer:
         if os.path.exists(local_path) and os.path.getsize(local_path) > 1024:
             return local_path
 
-        track_stem = os.path.splitext(filename.lower())[0]
-
-        c2 = self.vault_index.get("column_2_downloaded_sources", {}).get("by_social_media_id", {})
         file_id = None
-        for _url, entry in c2.items():
-            if entry.get("extracted_audio_file_id"):
-                s_id = str(entry.get("session_id", "")).lower()
-                u_str = str(_url).lower()
-                if track_stem in s_id or track_stem in u_str or filename.lower() in u_str:
-                    file_id = entry["extracted_audio_file_id"]
-                    break
+        # 1. Primary Lookup: pool_metadata.json
+        pm_path = os.path.join(_REPO_ROOT, "Original_audio", "pool_metadata.json")
+        if os.path.exists(pm_path):
+            try:
+                with open(pm_path, "r", encoding="utf-8") as f:
+                    pm_data = json.load(f)
+                files = pm_data.get("files", pm_data)
+                meta = files.get(filename) or {}
+                if not meta and os.path.splitext(filename)[0]:
+                    stem = os.path.splitext(filename.lower())[0]
+                    for k, v in files.items():
+                        if stem in k.lower() or k.lower() in filename.lower():
+                            meta = v
+                            break
+                file_id = meta.get("file_id")
+            except Exception as _pe:
+                logger.debug("Notice on pool_metadata BGM lookup: %s", _pe)
 
+        # 2. Secondary Fallback: Column 2 in master_vault_index.json
         if not file_id:
+            track_stem = os.path.splitext(filename.lower())[0]
             c2_sess = self.vault_index.get("column_2_downloaded_sources", {}).get("by_session_id", {})
             for sess_id, entry in c2_sess.items():
                 if entry.get("extracted_audio_file_id"):

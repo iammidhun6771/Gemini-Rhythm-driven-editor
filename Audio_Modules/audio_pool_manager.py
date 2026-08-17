@@ -290,10 +290,10 @@ class AudioPoolManager:
         except Exception as e:
             logger.debug(f"[POOL_SYNC] Active-to-metadata sync failed: {e}")
 
-    def sync_all_active_audios_to_telegram_vault(self) -> Dict[str, str]:
+    def sync_all_active_audios_to_telegram_vault(self, force: bool = False) -> Dict[str, str]:
         """
         Uploads all active audio files in Original_audio/active/ to Telegram Storage Group,
-        captures their file_id, and indexes them in pool_metadata.json and master_vault_index.json.
+        captures their file_id, and indexes them exclusively in pool_metadata.json (the audio single source of truth).
         """
         results = {}
         storage_group_id = os.getenv("TELEGRAM_STORAGE_GROUP_ID") or os.getenv("TELEGRAM_CHAT_ID")
@@ -304,10 +304,11 @@ class AudioPoolManager:
         try:
             from Publishing_Modules.telegram_vault_indexer import TelegramVaultIndexer, _send_telegram_file_sync
             indexer = TelegramVaultIndexer()
-            c2_by_sess = indexer.vault_index.setdefault("column_2_downloaded_sources", {}).setdefault("by_session_id", {})
 
             for filename in os.listdir(self.active_dir):
                 if not filename.lower().endswith((".mp3", ".wav")):
+                    continue
+                if _is_pipeline_artifact(filename):
                     continue
                 file_path = os.path.join(self.active_dir, filename)
                 if not os.path.isfile(file_path):
@@ -316,9 +317,7 @@ class AudioPoolManager:
                 meta = self._get_file_metadata(filename) or {}
                 file_id = meta.get("file_id")
 
-                stem = os.path.splitext(filename)[0]
-                vault_entry = c2_by_sess.get(stem, {})
-                if not file_id or not vault_entry.get("extracted_audio_file_id"):
+                if force or not file_id:
                     logger.info("🎙️ [AUDIO VAULT SYNC] Uploading active audio '%s' to Telegram Storage Group...", filename)
                     caption = f"🎵 [ACTIVE BGM POOL] `{filename}`"
                     upload_res = _send_telegram_file_sync("sendAudio", storage_group_id, "audio", file_path, caption=caption)
@@ -332,16 +331,11 @@ class AudioPoolManager:
                             logger.info("✅ [AUDIO VAULT SYNC] Captured file_id for '%s': %s", filename, file_id[:15])
                             meta["file_id"] = file_id
                             self._set_file_metadata(filename, meta)
-                            
-                            c2_by_sess.setdefault(stem, {})["extracted_audio_file_id"] = file_id
-                            c2_by_sess[stem]["session_id"] = stem
                             results[filename] = file_id
 
             if results:
                 self._save_metadata(sync_to_vault=True)
-                indexer._save_local_index()
-                indexer.upload_and_pin_vault_index_sync(_send_telegram_file_sync)
-                logger.info("📌 [AUDIO VAULT SYNC] Synced and pinned %d audio file(s) to Telegram Vault!", len(results))
+                logger.info("📌 [AUDIO VAULT SYNC] Synced %d audio file(s) into pool_metadata.json & Telegram Vault!", len(results))
         except Exception as err:
             logger.warning("⚠️ Error syncing active audios to Telegram vault: %s", err)
         return results
