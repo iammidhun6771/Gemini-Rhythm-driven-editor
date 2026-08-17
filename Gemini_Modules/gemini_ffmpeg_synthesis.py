@@ -740,6 +740,7 @@ class FFmpegCommandGenerator:
         music_volume: float = 0.5,
         encoding_cfg: Optional[Dict[str, Any]] = None,
         gemini_operations: Optional[List[Dict[str, Any]]] = None,
+        extra_inputs: Optional[Dict[str, Any]] = None,
     ) -> Dict[str, Any]:
         """
         🏆 TRUE SINGLE-PASS FFMPEG FILTERGRAPH (AI CREATIVE DIRECTIVE DRIVEN)
@@ -783,8 +784,14 @@ class FFmpegCommandGenerator:
         elif not brand_text:
             brand_text = env_brand or None
 
-        # Check if input video has an audio stream
-        has_input_audio = self._has_audio_stream(input_path)
+        # Check if input video has an audio stream AND whether we explicitly preserve original audio
+        preserve_orig = False
+        if extra_inputs and extra_inputs.get("preserve_original_audio"):
+            preserve_orig = True
+        elif not bgm_path:
+            preserve_orig = True
+
+        has_input_audio = self._has_audio_stream(input_path) and preserve_orig
 
         # ── Step A: Trim segments ────────────────────────────────────────────────
         shots = micro_shots or []
