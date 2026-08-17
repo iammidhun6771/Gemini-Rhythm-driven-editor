@@ -14,12 +14,14 @@ logger = logging.getLogger("audio_pool_manager")
 PIPELINE_BLOCKED_KWS = [
     "_reaction", "_textreaction", "first_shot", "first_shots",
     "general_intro", "watermark_clean", "intro_mixed_temp",
-    "final_compilation", "tmp", "extracted_"
+    "final_compilation", "tmp", "extracted_", "video", "sess_"
 ]
 
 def _is_pipeline_artifact(filename: str) -> bool:
     lower_name = filename.lower()
-    if lower_name.endswith(".wav") and ("tmp" in lower_name or "extracted" in lower_name):
+    if lower_name.startswith("sess_") or lower_name.startswith("video") or lower_name.startswith("tmp"):
+        return True
+    if lower_name.endswith(".wav") and ("tmp" in lower_name or "extracted" in lower_name or "video" in lower_name or "sess_" in lower_name):
         return True
     return any(kw in lower_name for kw in PIPELINE_BLOCKED_KWS)
 
