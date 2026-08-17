@@ -179,6 +179,8 @@ jobs:
         DISPATCH_PLATFORM: ${{ github.event.inputs.platform || 'all_available' }}
         DISPATCH_TARGET_ACCOUNTS: ${{ github.event.inputs.target_accounts || '' }}
         DISPATCH_TARGET_URL: ${{ github.event.inputs.target_url || '' }}
+        BRAND_WATERMARK_TEXT: ${{ secrets.BRAND_WATERMARK_TEXT || secrets.WATERMARK_TEXT }}
+        WATERMARK_TEXT: ${{ secrets.WATERMARK_TEXT || secrets.BRAND_WATERMARK_TEXT }}
       run: |
         # ── Scheduled-run fast-exit guard ────────────────────────────────────
         # If this is a cron/schedule trigger AND a valid bot_lock exists in the

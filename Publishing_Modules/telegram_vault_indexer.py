@@ -184,6 +184,84 @@ class TelegramVaultIndexer:
             logger.warning("⚠️ Vault JSON hydration notice: %s", _h_err)
         return results
 
+    def hydrate_bgm_track_from_vault(self, track_name: str, dest_dir: Optional[str] = None) -> Optional[str]:
+        """
+        Synchronously hydrates a BGM track from Telegram Storage Group using
+        extracted_audio_file_id stored in Column 2 of master_vault_index.json.
+        """
+        if not track_name:
+            return None
+        filename = os.path.basename(track_name)
+        if not dest_dir:
+            dest_dir = os.path.join(_REPO_ROOT, "Original_audio", "active")
+        os.makedirs(dest_dir, exist_ok=True)
+        local_path = os.path.join(dest_dir, filename)
+
+        if os.path.exists(local_path) and os.path.getsize(local_path) > 1024:
+            return local_path
+
+        c2 = self.vault_index.get("column_2_downloaded_sources", {}).get("by_social_media_id", {})
+        file_id = None
+        for _url, entry in c2.items():
+            if entry.get("extracted_audio_file_id") and (filename.lower() in str(_url).lower() or filename.lower() in str(entry.get("session_id", "")).lower()):
+                file_id = entry["extracted_audio_file_id"]
+                break
+
+        if not file_id:
+            c2_sess = self.vault_index.get("column_2_downloaded_sources", {}).get("by_session_id", {})
+            for sess_id, entry in c2_sess.items():
+                if entry.get("extracted_audio_file_id") and (filename.lower() in str(sess_id).lower() or filename.lower() in str(entry.get("social_media_id", "")).lower()):
+                    file_id = entry["extracted_audio_file_id"]
+                    break
+
+        if file_id:
+            logger.info("📥 [VAULT BGM HYDRATION] Fetching BGM '%s' from Telegram Storage Group (file_id: %s)...", filename, file_id[:15])
+            if self.download_vault_file_by_id(file_id, local_path):
+                return local_path
+
+        return None
+
+    def get_vault_audio_pool(self) -> Dict[str, Any]:
+        """
+        Returns dictionary of all audio track metadata indexed in Column 2 & Column 1
+        of master_vault_index.json plus pool_metadata.json if available.
+        """
+        pool = {}
+        # 1. Add tracks from Column 2 downloaded sources
+        c2 = self.vault_index.get("column_2_downloaded_sources", {}).get("by_social_media_id", {})
+        for _url, entry in c2.items():
+            file_id = entry.get("extracted_audio_file_id")
+            if file_id:
+                sess_id = entry.get("session_id", "audio_track")
+                fname = f"{sess_id}.wav"
+                audio_math = entry.get("audio_math") or {}
+                pool[fname] = {
+                    "file_id": file_id,
+                    "tempo_bpm": audio_math.get("tempo_bpm", 120.0),
+                    "dominant_emotion": audio_math.get("dominant_emotion", "hype"),
+                    "energy_profile": audio_math.get("energy_profile", "medium"),
+                    "has_vocals": audio_math.get("has_vocals", False),
+                    "language": audio_math.get("language", "unknown"),
+                    "last_used": entry.get("timestamp", 0),
+                    "usage_count": 0
+                }
+
+        # 2. Add tracks from local pool_metadata if present
+        pm_path = os.path.join(_REPO_ROOT, "Original_audio", "pool_metadata.json")
+        if os.path.exists(pm_path):
+            try:
+                with open(pm_path, "r", encoding="utf-8") as f:
+                    pm_data = json.load(f)
+                    files_dict = pm_data.get("files", pm_data) if isinstance(pm_data, dict) else {}
+                    if isinstance(files_dict, dict):
+                        for k, v in files_dict.items():
+                            if isinstance(v, dict):
+                                pool[k] = v
+            except Exception as _pme:
+                logger.debug("Local pool metadata read notice: %s", _pme)
+
+        return pool
+
     def upload_and_pin_vault_index_sync(self, upload_fn=None):
         """
         Synchronously uploads master_vault_index.json to TELEGRAM_STORAGE_GROUP_ID

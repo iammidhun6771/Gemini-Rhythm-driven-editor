@@ -51,7 +51,7 @@ models/*.bin
 models/*.weights
 
 # Graphify cache
-graphify-out/cache/
+graphify-out/
 
 # Logs & transient session data
 logs/

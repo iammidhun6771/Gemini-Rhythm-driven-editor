@@ -5,7 +5,11 @@ import time
 
 logger = logging.getLogger("font_manager")
 
-FONT_URL = "https://github.com/JulietaUla/Montserrat/raw/master/fonts/ttf/Montserrat-Bold.ttf"
+FONT_URLS = [
+    "https://raw.githubusercontent.com/JulietaUla/Montserrat/master/fonts/ttf/Montserrat-Bold.ttf",
+    "https://github.com/google/fonts/raw/main/ofl/montserrat/Montserrat-Bold.ttf",
+    "https://github.com/JulietaUla/Montserrat/raw/master/fonts/ttf/Montserrat-Bold.ttf"
+]
 # Anchor font dir to the project root (this file lives at Text_Modules/font_manager.py,
 # so the root is two levels up: Text_Modules -> project root)
 _PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
@@ -24,23 +28,24 @@ def ensure_montserrat_font():
         return os.path.abspath(LOCAL_FONT_PATH)
         
     logger.info("⬇️ Downloading Montserrat-Bold.ttf...")
-    for attempt in range(3):
-        try:
-            response = requests.get(FONT_URL, timeout=15)
-            response.raise_for_status()
-            
-            with open(LOCAL_FONT_PATH, "wb") as f:
-                f.write(response.content)
+    for url in FONT_URLS:
+        for attempt in range(2):
+            try:
+                response = requests.get(url, timeout=15, allow_redirects=True)
+                response.raise_for_status()
                 
-            if _validate_font():
-                logger.info("✅ Montserrat font downloaded and verified.")
-                return os.path.abspath(LOCAL_FONT_PATH)
-            else:
-                logger.error("❌ Downloaded font validation failed (file too small).")
-                
-        except Exception as e:
-            logger.warning(f"⚠️ Font download attempt {attempt + 1} failed: {e}")
-            time.sleep(1)
+                with open(LOCAL_FONT_PATH, "wb") as f:
+                    f.write(response.content)
+                    
+                if _validate_font():
+                    logger.info(f"✅ Montserrat font downloaded and verified from: {url}")
+                    return os.path.abspath(LOCAL_FONT_PATH)
+                else:
+                    logger.error(f"❌ Downloaded font validation failed (file too small) from: {url}")
+                    
+            except Exception as e:
+                logger.warning(f"⚠️ Font download attempt from {url} failed: {e}")
+                time.sleep(1)
             
     logger.error("❌ Failed to download Montserrat font. ASS subtitles may fallback or fail.")
     return None

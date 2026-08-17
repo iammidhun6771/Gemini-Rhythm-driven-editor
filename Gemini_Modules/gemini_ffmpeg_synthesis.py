@@ -575,13 +575,13 @@ class FFmpegCommandGenerator:
             except Exception:
                 font_path = None
 
-        font_arg = f"fontfile='{font_path.replace(os.sep, '/')}'" if font_path else ""
+        font_arg = f"fontfile='{font_path.replace(os.sep, '/')}':" if (font_path and os.path.exists(font_path)) else ""
         text_arg = text.replace("'", "'\\''")
 
         if x is not None and y is not None and w is not None and h is not None:
             # 2-Tier Shield: drawbox fill exact (w x h) rectangle + centered drawtext
             drawbox_str = f"drawbox=x={x}:y={y}:w={w}:h={h}:color={boxcolor}:t=fill"
-            drawtext_str = f"drawtext={font_arg}:text='{text_arg}':fontsize={fontsize}:fontcolor={fontcolor}:x={x}+({w}-tw)/2:y={y}+({h}-th)/2"
+            drawtext_str = f"drawtext={font_arg}text='{text_arg}':fontsize={fontsize}:fontcolor={fontcolor}:x={x}+({w}-tw)/2:y={y}+({h}-th)/2"
             vf_filter = f"{drawbox_str},{drawtext_str}"
         else:
             if x is not None and y is not None:
@@ -598,7 +598,7 @@ class FFmpegCommandGenerator:
                 coords = pos_map.get(position, pos_map["bottom_center"])
 
             box_arg = f":box=1:boxcolor={boxcolor}:boxborderw=6" if enable_box else ""
-            vf_filter = f"drawtext={font_arg}:text='{text_arg}':fontsize={fontsize}:fontcolor={fontcolor}{box_arg}:{coords}"
+            vf_filter = f"drawtext={font_arg}text='{text_arg}':fontsize={fontsize}:fontcolor={fontcolor}{box_arg}:{coords}"
 
         cmd = [self.ffmpeg_path, "-y", "-i", input_path, "-vf", vf_filter]
         cmd.extend(self._get_encoder_flags(encoding_cfg=encoding_cfg))
@@ -1815,6 +1815,29 @@ class GeminiFFmpegEngine:
                     "operation_type": "bgm_mix",
                     "music_volume": m_vol,
                     "video_volume": v_vol
+                })
+
+        # Automatically inject Brand Watermark drawtext step if BRAND_WATERMARK_TEXT / WATERMARK_TEXT is configured
+        env_brand_text = (
+            os.getenv("BRAND_WATERMARK_TEXT", "").strip()
+            or os.getenv("WATERMARK_TEXT", "").strip()
+            or os.getenv("BRAND_NAME", "").strip()
+        )
+        if env_brand_text:
+            has_brand_op = any(
+                op.get("operation_type") in ("drawtext", "brand_watermark", "text_watermark")
+                for op in gemini_plan_json.get("operations", [])
+            )
+            if not has_brand_op:
+                logger.info(f"🏷️ Auto-injecting brand watermark drawtext step for: '{env_brand_text}'")
+                gemini_plan_json.setdefault("operations", []).append({
+                    "operation_type": "drawtext",
+                    "text": env_brand_text,
+                    "position": os.getenv("BRAND_WATERMARK_POSITION", "bottom_center"),
+                    "fontsize": int(os.getenv("BRAND_WATERMARK_SIZE", "36")),
+                    "fontcolor": "white@0.85",
+                    "enable_box": True,
+                    "boxcolor": "black@0.4"
                 })
 
         candidates: List[Tuple[float, Dict[str, Any], Dict[str, Any]]] = []
