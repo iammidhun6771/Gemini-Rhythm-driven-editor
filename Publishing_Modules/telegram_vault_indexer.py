@@ -200,19 +200,27 @@ class TelegramVaultIndexer:
         if os.path.exists(local_path) and os.path.getsize(local_path) > 1024:
             return local_path
 
+        track_stem = os.path.splitext(filename.lower())[0]
+
         c2 = self.vault_index.get("column_2_downloaded_sources", {}).get("by_social_media_id", {})
         file_id = None
         for _url, entry in c2.items():
-            if entry.get("extracted_audio_file_id") and (filename.lower() in str(_url).lower() or filename.lower() in str(entry.get("session_id", "")).lower()):
-                file_id = entry["extracted_audio_file_id"]
-                break
+            if entry.get("extracted_audio_file_id"):
+                s_id = str(entry.get("session_id", "")).lower()
+                u_str = str(_url).lower()
+                if track_stem in s_id or track_stem in u_str or filename.lower() in u_str:
+                    file_id = entry["extracted_audio_file_id"]
+                    break
 
         if not file_id:
             c2_sess = self.vault_index.get("column_2_downloaded_sources", {}).get("by_session_id", {})
             for sess_id, entry in c2_sess.items():
-                if entry.get("extracted_audio_file_id") and (filename.lower() in str(sess_id).lower() or filename.lower() in str(entry.get("social_media_id", "")).lower()):
-                    file_id = entry["extracted_audio_file_id"]
-                    break
+                if entry.get("extracted_audio_file_id"):
+                    s_id = str(sess_id).lower()
+                    u_str = str(entry.get("social_media_id", "")).lower()
+                    if track_stem in s_id or track_stem in u_str or filename.lower() in u_str:
+                        file_id = entry["extracted_audio_file_id"]
+                        break
 
         if file_id:
             logger.info("📥 [VAULT BGM HYDRATION] Fetching BGM '%s' from Telegram Storage Group (file_id: %s)...", filename, file_id[:15])

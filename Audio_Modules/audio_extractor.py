@@ -300,6 +300,38 @@ def _ingest_clip_audio_to_pool(stem: str, wav_path: str, analysis: dict):
         except Exception as _up_err:
             logger.warning("⚠️ Upfront semantic audio enrichment notice for '%s': %s", stem, _up_err)
 
+        # Update pool_metadata.json (unified audio handler)
+        try:
+            from Audio_Modules.audio_pool_manager import AudioPoolManager
+            pm = AudioPoolManager()
+            track_name = f"{stem}.wav"
+            meta = pm.get_track_intelligence(track_name) or {}
+            meta.update({
+                "tempo_bpm": analysis.get("tempo_bpm", 0.0),
+                "bpm": analysis.get("tempo_bpm", 0.0),
+                "avg_energy": analysis.get("avg_energy", 0.0),
+                "energy": analysis.get("avg_energy", 0.5),
+                "vibe": analysis.get("vibe", "unknown"),
+                "beat_count": analysis.get("beat_count", 0),
+                "drop_count": analysis.get("drop_count", 0),
+                "beat_score": analysis.get("beat_score", 0.0),
+                "audio_hash": pm._calculate_hash(target_wav),
+                "version": pm.CURRENT_VERSION,
+            })
+            if "semantic_context" in analysis:
+                sem = analysis["semantic_context"]
+                meta["dominant_emotion"] = sem.get("dominant_emotion", "neutral")
+                meta["vibe_tags"] = sem.get("vibe_tags", [])
+                meta["energy_profile"] = sem.get("energy_profile", "medium")
+                meta["has_vocals"] = sem.get("has_vocals", False)
+                meta["language"] = sem.get("language", "Unknown")
+            
+            pm._set_file_metadata(track_name, meta)
+            pm._save_metadata()
+            logger.info("📦 [POOL METADATA UPDATED] Audio intelligence for '%s' saved to pool_metadata.json", track_name)
+        except Exception as _pm_err:
+            logger.warning("⚠️ Could not update pool_metadata.json for '%s': %s", stem, _pm_err)
+
         # Preserve extracted WAV for Telegram Storage Group Vault upload
         analysis["wav_path"] = wav_path if os.path.exists(wav_path) else target_wav
         logger.info("💾 [AUDIO PRESERVED] Extracted WAV preserved in clip dir for Telegram Vault upload: %s", os.path.basename(wav_path))

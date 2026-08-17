@@ -1902,6 +1902,12 @@ if __name__ == "__main__":
                     target_accs = [clean_in.lstrip("@")]
 
             mode_to_use = args.mode or ("manual" if (target_url or target_file) else "auto")
+            try:
+                from Publishing_Modules.telegram_vault_indexer import TelegramVaultIndexer
+                logger.info("📡 [STARTUP] Syncing master vault index & pool_metadata.json from Telegram Storage Group...")
+                TelegramVaultIndexer().hydrate_all_vault_jsons_on_startup()
+            except Exception as _h_err:
+                logger.debug(f"Startup vault hydration notice: {_h_err}")
             run_master_pipeline(mode=mode_to_use, url=target_url, input_path=target_file, target_accounts=target_accs)
 
     except KeyboardInterrupt:
