@@ -4,41 +4,47 @@
     "video.wav": {
       "usage_count": 4,
       "last_used": 1786912569.0695288,
-      "bpm": 120.0,
-      "energy": 0.5,
+      "bpm": 0.0,
+      "energy": 0.481,
       "created_at": 1786910177.2105505,
       "beat_data_path": null,
       "drop_times": [],
       "sample_rate": 44100,
-      "audio_hash": "415482_1786910154",
+      "audio_hash": "415482_1786986668",
       "version": 2,
-      "tempo_bpm": 120.0,
-      "dominant_emotion": "celebration",
+      "tempo_bpm": 0.0,
+      "dominant_emotion": "hype",
       "energy_profile": "high",
       "vibe_tags": [
-        "festive",
+        "hype",
         "dance",
         "bollywood",
         "high_energy",
-        "pop"
+        "festive"
       ],
       "has_vocals": true,
       "language": "Hindi",
       "sections_summary": [
         {
           "start": 0.0,
-          "end": 6.88,
+          "end": 6.0,
           "type": "intro",
-          "energy": 0.9
+          "energy": 0.8
         },
         {
-          "start": 6.88,
+          "start": 6.0,
           "end": 12.0,
-          "type": "verse",
-          "energy": 0.8
+          "type": "chorus",
+          "energy": 0.95
         }
       ],
-      "lyric_intel_merged": true
+      "lyric_intel_merged": true,
+      "file_id": "CQACAgUAAyEGAATgPI-iAAIGeWqDQQkyXa0g_5k9U9np0-0fSmUtAAKFIAACbj4hVD5Oy9uVi9uCPQQ",
+      "avg_energy": 0.481,
+      "vibe": "cinematic",
+      "beat_count": 64,
+      "drop_count": 2,
+      "beat_score": 74.81
     },
     "sess_1786942119_9044.wav": {
       "file_id": "BQACAgUAAyEGAATgPI-iAAIFZ2qCkrFc7oqsBKEWk9efRJE9mVg0AAJaJAACbj4ZVP7EHgSNp70DPQQ",
@@ -130,16 +136,450 @@
     },
     "sess_1786944163_8816.wav": {
       "file_id": "BQACAgUAAyEGAATgPI-iAAIFi2qCmrA1sI2hsNJBdGQ5io1_rpfBAAKCJAACbj4ZVNmTnPBl-3TtPQQ",
-      "tempo_bpm": 0.0,
-      "dominant_emotion": "hype",
-      "energy_profile": "medium",
+      "tempo_bpm": 120.0,
+      "dominant_emotion": "celebration",
+      "energy_profile": "high",
       "has_vocals": true,
-      "language": "unknown",
+      "language": "Hindi",
+      "last_used": 1786986918.0205002,
+      "usage_count": 1,
+      "bpm": 120.0,
+      "vibe_tags": [
+        "festive",
+        "dance",
+        "bollywood",
+        "high_energy",
+        "celebration"
+      ],
+      "sections_summary": [
+        {
+          "start": 0.0,
+          "end": 14.5,
+          "type": "chorus",
+          "energy": 0.9
+        }
+      ],
+      "lyric_intel_merged": true
+    },
+    "sess_1786944328_8816.wav": {
+      "usage_count": 0,
       "last_used": 0,
-      "usage_count": 0
+      "bpm": 120.0,
+      "energy": 0.5,
+      "created_at": 1786987836.3651078,
+      "beat_data_path": null,
+      "drop_times": [],
+      "sample_rate": 44100,
+      "audio_hash": "434800_1786987836",
+      "version": 2,
+      "file_id": "CQACAgUAAyEGAATgPI-iAAIGlmqDRUBat0m8WziplGAYKm3ZhIUwAAK5IAACbj4hVHepCvPSp28DPQQ",
+      "tempo_bpm": 120.0,
+      "dominant_emotion": "hype",
+      "energy_profile": "explosive",
+      "vibe_tags": [
+        "dance",
+        "hype",
+        "electronic",
+        "high_energy",
+        "club"
+      ],
+      "has_vocals": true,
+      "language": "English",
+      "sections_summary": [
+        {
+          "start": 0.0,
+          "end": 13.78,
+          "type": "intro",
+          "energy": 0.9
+        }
+      ],
+      "lyric_intel_merged": true
     }
   },
   "clips": {
+    "manual_DbYdDdNoobp": {
+      "clip_id": "manual_DbYdDdNoobp",
+      "clip_folder": "/home/runner/work/Gemini-Rhythm-driven-editor/Gemini-Rhythm-driven-editor/downloads/manual_DbYdDdNoobp",
+      "schema_version": 3,
+      "created_at": 1786987685.333243,
+      "phase1": {},
+      "visual_context": {
+        "_source": "gemini_call_1_forensic",
+        "_filled_at": 1786988217.2531083,
+        "intent": "fashion_lifestyle",
+        "tone": "aspirational",
+        "editing_style": "fashion_showcase",
+        "engagement_hook": "A stylish close-up of the celebrity on stage sets an exclusive tone for the event walkthrough.",
+        "detected_entities": [
+          "person:female",
+          "person:male",
+          "environment:indoor",
+          "signage:netflix_wednesday"
+        ],
+        "possible_narratives": [
+          "fashion_moment",
+          "celebrity_highlight",
+          "scenic_journey"
+        ],
+        "recommended_narrative": "celebrity_highlight",
+        "feature_flags": {
+          "enable_price_tags": false,
+          "enable_fashion_caption": true,
+          "enable_cinematic_zoom": true,
+          "enable_speed_ramps": false,
+          "enable_fast_pacing": true,
+          "enable_voiceover": false
+        },
+        "safety": {
+          "classification": "safe",
+          "monetization_safe": true
+        },
+        "creative_possibilities": [],
+        "speech_intelligence": {
+          "speech_mode": "music_broll",
+          "is_talking_visually": false,
+          "has_spoken_vocal": true,
+          "is_speech_vocal": false,
+          "recommended_audio_action": "audio_replace_full_bgm"
+        }
+      },
+      "audio_data": {
+        "_description": "Unified audio block. math fills first (Phase 1 DSP), context fills second (Gemini Call 1).",
+        "math": {
+          "_source": "phase1_dsp",
+          "_filled_at": "step1_before_gemini",
+          "tempo_bpm": 0.0,
+          "beat_timestamps": [
+            {
+              "time": 0.45,
+              "energy": 0.284
+            },
+            {
+              "time": 1.1500000000000001,
+              "energy": 0.305
+            },
+            {
+              "time": 2.1,
+              "energy": 0.342
+            },
+            {
+              "time": 4.1000000000000005,
+              "energy": 0.332
+            },
+            {
+              "time": 6.1000000000000005,
+              "energy": 0.326
+            },
+            {
+              "time": 6.800000000000001,
+              "energy": 0.323
+            },
+            {
+              "time": 8.8,
+              "energy": 0.285
+            },
+            {
+              "time": 10.4,
+              "energy": 0.448
+            },
+            {
+              "time": 11.0,
+              "energy": 0.432
+            },
+            {
+              "time": 11.450000000000001,
+              "energy": 0.562
+            },
+            {
+              "time": 12.600000000000001,
+              "energy": 0.424
+            },
+            {
+              "time": 14.3,
+              "energy": 0.52
+            },
+            {
+              "time": 16.5,
+              "energy": 0.391
+            },
+            {
+              "time": 17.95,
+              "energy": 0.424
+            },
+            {
+              "time": 18.35,
+              "energy": 0.659
+            },
+            {
+              "time": 19.6,
+              "energy": 0.313
+            },
+            {
+              "time": 20.1,
+              "energy": 0.28
+            },
+            {
+              "time": 23.3,
+              "energy": 0.455
+            },
+            {
+              "time": 25.5,
+              "energy": 0.604
+            },
+            {
+              "time": 26.0,
+              "energy": 0.598
+            },
+            {
+              "time": 26.85,
+              "energy": 0.667
+            },
+            {
+              "time": 27.3,
+              "energy": 0.724
+            },
+            {
+              "time": 28.05,
+              "energy": 0.621
+            },
+            {
+              "time": 28.5,
+              "energy": 0.597
+            },
+            {
+              "time": 28.950000000000003,
+              "energy": 0.669
+            },
+            {
+              "time": 29.450000000000003,
+              "energy": 0.668
+            },
+            {
+              "time": 30.0,
+              "energy": 0.766
+            },
+            {
+              "time": 30.6,
+              "energy": 0.589
+            },
+            {
+              "time": 31.05,
+              "energy": 0.478
+            },
+            {
+              "time": 31.85,
+              "energy": 0.426
+            },
+            {
+              "time": 32.45,
+              "energy": 0.505
+            },
+            {
+              "time": 33.45,
+              "energy": 0.581
+            },
+            {
+              "time": 34.050000000000004,
+              "energy": 0.531
+            },
+            {
+              "time": 35.050000000000004,
+              "energy": 0.539
+            },
+            {
+              "time": 35.6,
+              "energy": 0.503
+            },
+            {
+              "time": 36.35,
+              "energy": 0.438
+            },
+            {
+              "time": 37.15,
+              "energy": 0.473
+            },
+            {
+              "time": 37.6,
+              "energy": 0.507
+            },
+            {
+              "time": 38.2,
+              "energy": 0.448
+            },
+            {
+              "time": 41.900000000000006,
+              "energy": 0.478
+            },
+            {
+              "time": 42.35,
+              "energy": 0.509
+            },
+            {
+              "time": 43.0,
+              "energy": 0.585
+            },
+            {
+              "time": 43.7,
+              "energy": 0.86
+            },
+            {
+              "time": 44.150000000000006,
+              "energy": 0.955
+            },
+            {
+              "time": 44.650000000000006,
+              "energy": 0.902
+            },
+            {
+              "time": 45.650000000000006,
+              "energy": 0.841
+            },
+            {
+              "time": 47.1,
+              "energy": 0.55
+            },
+            {
+              "time": 48.550000000000004,
+              "energy": 0.54
+            },
+            {
+              "time": 49.050000000000004,
+              "energy": 0.673
+            },
+            {
+              "time": 49.5,
+              "energy": 0.651
+            },
+            {
+              "time": 50.75,
+              "energy": 0.408
+            },
+            {
+              "time": 51.150000000000006,
+              "energy": 0.407
+            },
+            {
+              "time": 52.25,
+              "energy": 0.231
+            },
+            {
+              "time": 53.1,
+              "energy": 0.274
+            },
+            {
+              "time": 53.800000000000004,
+              "energy": 0.292
+            },
+            {
+              "time": 54.300000000000004,
+              "energy": 0.339
+            },
+            {
+              "time": 55.5,
+              "energy": 0.405
+            },
+            {
+              "time": 56.1,
+              "energy": 0.27
+            },
+            {
+              "time": 57.150000000000006,
+              "energy": 0.351
+            },
+            {
+              "time": 57.6,
+              "energy": 0.343
+            },
+            {
+              "time": 58.650000000000006,
+              "energy": 0.259
+            },
+            {
+              "time": 59.35,
+              "energy": 0.246
+            },
+            {
+              "time": 59.800000000000004,
+              "energy": 0.208
+            },
+            {
+              "time": 61.0,
+              "energy": 0.165
+            }
+          ],
+          "drop_timestamps": [
+            17.95,
+            55.5
+          ],
+          "avg_energy": 0.481,
+          "vibe": "cinematic",
+          "beat_count": 64,
+          "drop_count": 2,
+          "wav_path": "/home/runner/work/Gemini-Rhythm-driven-editor/Gemini-Rhythm-driven-editor/downloads/manual_DbYdDdNoobp/video_extracted.wav"
+        },
+        "context": {
+          "_source": "gemini_call_1_forensic",
+          "_filled_at": 1786988217.2531133,
+          "has_vocals": true,
+          "speech_mode": "music_broll",
+          "recommended_audio_action": "audio_replace_full_bgm",
+          "dominant_emotion": "aspirational",
+          "vibe": "fashion_showcase"
+        },
+        "selected_bgm_track": "sess_1786944328_8816.wav",
+        "bgm_selection_reasoning": "The 'hype' energy and medium tempo provide the necessary rhythmic drive to elevate the aspirational nature of a celebrity highlight reel.",
+        "bgm_alignment_score": 0.95,
+        "_bgm_selected_at": 1786987832.37117
+      },
+      "visual_vectors": {
+        "_source": "gemini_call_1_forensic",
+        "_filled_at": 1786988217.253125,
+        "targeted_timestamps_sec": [
+          0.0,
+          1.0,
+          2.0,
+          3.0,
+          4.0,
+          5.0
+        ],
+        "scene_cut_timestamps": [
+          3.0,
+          4.0,
+          5.0
+        ],
+        "hook_zone_end_sec": 5.0,
+        "climax_zone_start_sec": 5.0
+      },
+      "editing_plan": {
+        "_source": "gemini_call_3_ffmpeg_synthesis",
+        "_filled_at": 1786987937.1329195,
+        "editing_intent": "High-energy fashion showcase edit for 'Wednesday Season 2' promotion, utilizing a rapid-fire jump-cut rhythm synced to 120 BPM hype audio.",
+        "creative_rationale": "Adapted the 'fashion_showcase' RAG pattern by implementing the authoritative RTB beat-snapped shot plan. Each 2.0s segment is trimmed and concatenated to maintain a high-energy, aspirational flow. The sequence prioritizes the celebrity highlights while ensuring the visual energy matches the 120 BPM hype track. The final audio mix is applied after the concat operation to ensure perfect sync and duration alignment.",
+        "strategy_name": "High-energy fashion showcase edit for 'Wednesday Season 2' promotion, utilizing a rapid-fire jump-cut rhythm synced to 120 BPM hype audio.",
+        "total_steps": 15,
+        "operations": []
+      },
+      "output": {
+        "_filled_at": 1786987937.1329226,
+        "master_reel_path": "/home/runner/work/Gemini-Rhythm-driven-editor/Gemini-Rhythm-driven-editor/Processed Shorts/manual_DbYdDdNoobp_master.mp4",
+        "render_success": true,
+        "duration_lock": {
+          "repaired": false,
+          "video_duration": 13.59,
+          "audio_duration_before": 13.59,
+          "source_duration": 61.28
+        },
+        "mode": "SINGLE_PASS",
+        "brand_overlay": {
+          "text": "fitsbysakshitha",
+          "x": 826,
+          "y": 67,
+          "w": 190,
+          "h": 79,
+          "opencv_vectors": {}
+        }
+      }
+    },
     "manual_DcGKBrclaiP": {
       "clip_id": "manual_DcGKBrclaiP",
       "clip_folder": "/home/runner/work/Gemini-Rhythm-driven-editor/Gemini-Rhythm-driven-editor/downloads/manual_DcGKBrclaiP",
@@ -972,6 +1412,212 @@
           "y": 1336,
           "w": 274,
           "h": 99,
+          "opencv_vectors": {}
+        }
+      }
+    },
+    "manual_DcJQ_XRRooh": {
+      "clip_id": "manual_DcJQ_XRRooh",
+      "clip_folder": "/home/runner/work/Gemini-Rhythm-driven-editor/Gemini-Rhythm-driven-editor/downloads/manual_DcJQ_XRRooh",
+      "schema_version": 3,
+      "created_at": 1786986893.8394911,
+      "phase1": {},
+      "visual_context": {
+        "_source": "gemini_call_1_forensic",
+        "_filled_at": 1786986893.839662,
+        "intent": "fashion_lifestyle",
+        "tone": "aspirational",
+        "editing_style": "fashion_showcase",
+        "engagement_hook": "Start with a slow-motion zoom into the intricate details of the pearl necklace and lace texture to establish a high-end aesthetic.",
+        "detected_entities": [
+          "person:female",
+          "clothing:lace_corset",
+          "jewelry:pearl_necklace",
+          "jewelry:pearl_earrings"
+        ],
+        "possible_narratives": [
+          "fashion_moment"
+        ],
+        "recommended_narrative": "fashion_moment",
+        "feature_flags": {
+          "enable_price_tags": false,
+          "enable_fashion_caption": true,
+          "enable_cinematic_zoom": true,
+          "enable_speed_ramps": false,
+          "enable_fast_pacing": false,
+          "enable_voiceover": false
+        },
+        "safety": {
+          "classification": "safe",
+          "monetization_safe": true
+        },
+        "creative_possibilities": [],
+        "speech_intelligence": {
+          "speech_mode": "music_broll",
+          "is_talking_visually": false,
+          "has_spoken_vocal": true,
+          "is_speech_vocal": false,
+          "recommended_audio_action": "audio_replace_full_bgm"
+        }
+      },
+      "audio_data": {
+        "_description": "Unified audio block. math fills first (Phase 1 DSP), context fills second (Gemini Call 1).",
+        "math": {
+          "_source": "phase1_dsp",
+          "_filled_at": "step1_before_gemini",
+          "tempo_bpm": 0.0,
+          "beat_timestamps": [
+            {
+              "time": 0.1,
+              "energy": 0.418
+            },
+            {
+              "time": 0.55,
+              "energy": 0.362
+            },
+            {
+              "time": 1.6,
+              "energy": 0.895
+            },
+            {
+              "time": 2.0500000000000003,
+              "energy": 0.953
+            },
+            {
+              "time": 2.5,
+              "energy": 0.893
+            },
+            {
+              "time": 3.0,
+              "energy": 1.0
+            },
+            {
+              "time": 3.45,
+              "energy": 0.848
+            },
+            {
+              "time": 3.9000000000000004,
+              "energy": 0.938
+            },
+            {
+              "time": 4.3500000000000005,
+              "energy": 0.866
+            },
+            {
+              "time": 4.800000000000001,
+              "energy": 0.955
+            },
+            {
+              "time": 5.300000000000001,
+              "energy": 0.922
+            },
+            {
+              "time": 5.75,
+              "energy": 0.972
+            },
+            {
+              "time": 6.2,
+              "energy": 0.803
+            },
+            {
+              "time": 6.65,
+              "energy": 0.888
+            },
+            {
+              "time": 7.15,
+              "energy": 0.933
+            },
+            {
+              "time": 7.6000000000000005,
+              "energy": 0.953
+            },
+            {
+              "time": 8.05,
+              "energy": 0.801
+            },
+            {
+              "time": 8.5,
+              "energy": 0.825
+            },
+            {
+              "time": 9.0,
+              "energy": 0.906
+            },
+            {
+              "time": 9.450000000000001,
+              "energy": 0.966
+            },
+            {
+              "time": 9.9,
+              "energy": 0.826
+            }
+          ],
+          "drop_timestamps": [],
+          "avg_energy": 0.853,
+          "vibe": "explosive",
+          "beat_count": 21,
+          "drop_count": 0,
+          "wav_path": "/home/runner/work/Gemini-Rhythm-driven-editor/Gemini-Rhythm-driven-editor/downloads/manual_DcJQ_XRRooh/video_extracted.wav"
+        },
+        "context": {
+          "_source": "gemini_call_1_forensic",
+          "_filled_at": 1786986893.8396652,
+          "has_vocals": true,
+          "speech_mode": "music_broll",
+          "recommended_audio_action": "audio_replace_full_bgm",
+          "dominant_emotion": "aspirational",
+          "vibe": "fashion_showcase"
+        },
+        "selected_bgm_track": "sess_1786944163_8816.wav",
+        "bgm_selection_reasoning": "The hype emotion and medium energy of the track provide a stylish, modern backdrop that perfectly elevates an aspirational fashion moment.",
+        "bgm_alignment_score": 0.95,
+        "_bgm_selected_at": 1786986918.0135233
+      },
+      "visual_vectors": {
+        "_source": "gemini_call_1_forensic",
+        "_filled_at": 1786986893.839676,
+        "targeted_timestamps_sec": [
+          0.0,
+          1.0,
+          2.0,
+          3.0,
+          4.0,
+          5.0
+        ],
+        "scene_cut_timestamps": [
+          3.0,
+          4.0,
+          5.0
+        ],
+        "hook_zone_end_sec": 5.0,
+        "climax_zone_start_sec": 5.0
+      },
+      "editing_plan": {
+        "_source": "gemini_call_3_ffmpeg_synthesis",
+        "_filled_at": 1786986955.2506332,
+        "editing_intent": "Fashion lifestyle showcase with high-energy beat-snapped cuts for a celebratory mood.",
+        "creative_rationale": "Adapted the fashion_showcase style by utilizing the authoritative RTB shot plan to create a rhythmic jump-cut sequence. Each trim is aligned to the 120 BPM beat grid to maximize the 'celebration' energy. The sequence is concatenated and then scaled to 9:16 with a blur-pad to maintain a premium aesthetic, followed by a full BGM mix.",
+        "strategy_name": "Fashion lifestyle showcase with high-energy beat-snapped cuts for a celebratory mood.",
+        "total_steps": 11,
+        "operations": []
+      },
+      "output": {
+        "_filled_at": 1786986955.250637,
+        "master_reel_path": "/home/runner/work/Gemini-Rhythm-driven-editor/Gemini-Rhythm-driven-editor/Processed Shorts/manual_DcJQ_XRRooh_master.mp4",
+        "render_success": true,
+        "duration_lock": {
+          "repaired": false,
+          "video_duration": 8.8,
+          "audio_duration_before": 8.8,
+          "source_duration": 10.24
+        },
+        "mode": "SINGLE_PASS",
+        "brand_overlay": {
+          "text": "fitsbysakshitha",
+          "x": 227,
+          "y": 1440,
+          "w": 180,
+          "h": 40,
           "opencv_vectors": {}
         }
       }
