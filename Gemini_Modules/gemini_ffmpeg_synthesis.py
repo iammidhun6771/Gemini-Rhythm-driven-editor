@@ -804,11 +804,13 @@ class FFmpegCommandGenerator:
         # ── Step A: Trim segments ────────────────────────────────────────────────
         shots = micro_shots or []
         audio_shot_labels: List[str] = []
+        total_visual_dur = 0.0
         if shots:
             for i, s in enumerate(shots):
                 st = float(s.get("start", s.get("start_time", 0.0)))
                 en = float(s.get("end", s.get("end_time", st + 3.0)))
                 dur = max(0.1, en - st)
+                total_visual_dur += dur
                 v_label = f"v{i}"
                 filter_parts.append(
                     f"[0:v]trim=start={st:.4f}:duration={dur:.4f},setpts=PTS-STARTPTS[{v_label}]"
@@ -823,6 +825,7 @@ class FFmpegCommandGenerator:
         else:
             filter_parts.append("[0:v]setpts=PTS-STARTPTS[v0]")
             shot_labels = ["[v0]"]
+            total_visual_dur = 15.0
             if has_input_audio:
                 filter_parts.append("[0:a]asetpts=PTS-STARTPTS[a0]")
                 audio_shot_labels = ["[a0]"]
@@ -1004,11 +1007,13 @@ class FFmpegCommandGenerator:
         if has_bgm and has_input_audio and video_volume > 0.01:
             filter_parts.append(
                 f"[ac]volume={video_volume:.2f}[ac_v];"
-                f"[{bgm_idx}:a]volume={music_volume:.2f}[bgm_v];"
+                f"[{bgm_idx}:a]atrim=start=0:duration={total_visual_dur:.4f},asetpts=PTS-STARTPTS,volume={music_volume:.2f}[bgm_v];"
                 f"[ac_v][bgm_v]amix=inputs=2:duration=first[aout]"
             )
         elif has_bgm:
-            filter_parts.append(f"[{bgm_idx}:a]volume={music_volume:.2f}[aout]")
+            filter_parts.append(
+                f"[{bgm_idx}:a]atrim=start=0:duration={total_visual_dur:.4f},asetpts=PTS-STARTPTS,volume={music_volume:.2f}[aout]"
+            )
         elif has_input_audio:
             filter_parts.append(f"[ac]volume=1.00[aout]")
 

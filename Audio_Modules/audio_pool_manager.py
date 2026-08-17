@@ -58,6 +58,8 @@ class AudioPoolManager:
         self._sync_root_to_active()
         # Ensure all files in active/ are registered in metadata so they are not skipped.
         self._sync_active_to_metadata()
+        # Sync and upload any un-indexed active audios to Telegram Storage Group
+        self.sync_all_active_audios_to_telegram_vault()
 
     def _load_metadata(self) -> Dict:
         """Loads metadata safely with Telegram Vault cloud hydration fallback."""
@@ -109,20 +111,20 @@ class AudioPoolManager:
             
             if storage_group_id and bot_token and os.path.exists(self.meta_path):
                 try:
-                    from Downloader_Modules.telegram_listener import _send_file_multipart
-                    res = _send_file_multipart(
+                    from Publishing_Modules.telegram_vault_indexer import _send_telegram_file_sync
+                    res = _send_telegram_file_sync(
                         "sendDocument",
                         storage_group_id,
                         "document",
                         self.meta_path,
                         caption=f"📦 **[VAULT BACKUP]** `pool_metadata.json` (Updated {time.strftime('%H:%M:%S')})"
                     )
-                    if res and isinstance(res, dict):
-                        doc_id = res.get("document", {}).get("file_id")
+                    if res and isinstance(res, dict) and res.get("ok"):
+                        doc_id = res.get("result", {}).get("document", {}).get("file_id")
                         if doc_id:
                             indexer.vault_index["metadata_pool_file_id"] = doc_id
                             indexer._save_local_index()
-                            indexer.upload_and_pin_vault_index_sync(_send_file_multipart)
+                            indexer.upload_and_pin_vault_index_sync(_send_telegram_file_sync)
                             logger.info("✅ [POOL METADATA VAULT BACKUP] Uploaded & PINNED updated pool_metadata.json to Storage Group (file_id: %s)", doc_id[:15])
                 except Exception as _up_err:
                     logger.debug("Notice uploading pool_metadata.json to Telegram vault: %s", _up_err)
@@ -287,6 +289,62 @@ class AudioPoolManager:
                 logger.info(f"[POOL_SYNC] Active audio pool metadata successfully synced.")
         except Exception as e:
             logger.debug(f"[POOL_SYNC] Active-to-metadata sync failed: {e}")
+
+    def sync_all_active_audios_to_telegram_vault(self) -> Dict[str, str]:
+        """
+        Uploads all active audio files in Original_audio/active/ to Telegram Storage Group,
+        captures their file_id, and indexes them in pool_metadata.json and master_vault_index.json.
+        """
+        results = {}
+        storage_group_id = os.getenv("TELEGRAM_STORAGE_GROUP_ID") or os.getenv("TELEGRAM_CHAT_ID")
+        bot_token = os.getenv("TELEGRAM_BOT_TOKEN", "").strip()
+        if not storage_group_id or not bot_token:
+            return results
+
+        try:
+            from Publishing_Modules.telegram_vault_indexer import TelegramVaultIndexer, _send_telegram_file_sync
+            indexer = TelegramVaultIndexer()
+            c2_by_sess = indexer.vault_index.setdefault("column_2_downloaded_sources", {}).setdefault("by_session_id", {})
+
+            for filename in os.listdir(self.active_dir):
+                if not filename.lower().endswith((".mp3", ".wav")):
+                    continue
+                file_path = os.path.join(self.active_dir, filename)
+                if not os.path.isfile(file_path):
+                    continue
+
+                meta = self._get_file_metadata(filename) or {}
+                file_id = meta.get("file_id")
+
+                stem = os.path.splitext(filename)[0]
+                vault_entry = c2_by_sess.get(stem, {})
+                if not file_id or not vault_entry.get("extracted_audio_file_id"):
+                    logger.info("🎙️ [AUDIO VAULT SYNC] Uploading active audio '%s' to Telegram Storage Group...", filename)
+                    caption = f"🎵 [ACTIVE BGM POOL] `{filename}`"
+                    upload_res = _send_telegram_file_sync("sendAudio", storage_group_id, "audio", file_path, caption=caption)
+                    if not upload_res or not isinstance(upload_res, dict) or not upload_res.get("ok"):
+                        upload_res = _send_telegram_file_sync("sendDocument", storage_group_id, "document", file_path, caption=caption)
+
+                    if upload_res and isinstance(upload_res, dict) and upload_res.get("ok"):
+                        res_doc = upload_res.get("result", {})
+                        file_id = res_doc.get("audio", {}).get("file_id") or res_doc.get("document", {}).get("file_id")
+                        if file_id:
+                            logger.info("✅ [AUDIO VAULT SYNC] Captured file_id for '%s': %s", filename, file_id[:15])
+                            meta["file_id"] = file_id
+                            self._set_file_metadata(filename, meta)
+                            
+                            c2_by_sess.setdefault(stem, {})["extracted_audio_file_id"] = file_id
+                            c2_by_sess[stem]["session_id"] = stem
+                            results[filename] = file_id
+
+            if results:
+                self._save_metadata(sync_to_vault=True)
+                indexer._save_local_index()
+                indexer.upload_and_pin_vault_index_sync(_send_telegram_file_sync)
+                logger.info("📌 [AUDIO VAULT SYNC] Synced and pinned %d audio file(s) to Telegram Vault!", len(results))
+        except Exception as err:
+            logger.warning("⚠️ Error syncing active audios to Telegram vault: %s", err)
+        return results
 
     # ──────────────────────────────────────────────────────────────────────────
     # GEMINI POOL ENRICHMENT (background, non-blocking, cached)

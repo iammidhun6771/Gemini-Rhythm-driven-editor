@@ -25,6 +25,8 @@ import os
 import sys
 import json
 import time
+import uuid
+import urllib.request
 import logging
 from typing import Dict, Any, Optional
 
@@ -54,6 +56,47 @@ def _empty_vault_index() -> Dict[str, Any]:
             "by_user_id": {},  # User-scoped indexing
         },
     }
+
+
+def _send_telegram_file_sync(method: str, chat_id: str, file_key: str, file_path: str, caption: Optional[str] = None) -> Optional[Dict[str, Any]]:
+    bot_token = os.getenv("TELEGRAM_BOT_TOKEN", "").strip()
+    if not bot_token or not chat_id or not os.path.exists(file_path):
+        return None
+
+    boundary = f"----WebKitFormBoundary{uuid.uuid4().hex}"
+    url = f"https://api.telegram.org/bot{bot_token}/{method}"
+    
+    body = bytearray()
+    
+    def add_field(name, value):
+        body.extend(f"--{boundary}\r\n".encode("utf-8"))
+        body.extend(f'Content-Disposition: form-data; name="{name}"\r\n\r\n'.encode("utf-8"))
+        body.extend(f"{value}\r\n".encode("utf-8"))
+
+    add_field("chat_id", chat_id)
+    if caption:
+        add_field("caption", caption)
+
+    filename = os.path.basename(file_path)
+    body.extend(f"--{boundary}\r\n".encode("utf-8"))
+    body.extend(f'Content-Disposition: form-data; name="{file_key}"; filename="{filename}"\r\n'.encode("utf-8"))
+    body.extend(b"Content-Type: application/octet-stream\r\n\r\n")
+    with open(file_path, "rb") as f:
+        body.extend(f.read())
+    body.extend(b"\r\n")
+    body.extend(f"--{boundary}--\r\n".encode("utf-8"))
+
+    req = urllib.request.Request(
+        url,
+        data=bytes(body),
+        headers={"Content-Type": f"multipart/form-data; boundary={boundary}"}
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=60) as resp:
+            return json.loads(resp.read().decode("utf-8"))
+    except Exception as err:
+        logger.warning(f"⚠️ Telegram file upload failed for {filename}: {err}")
+        return None
 
 
 class TelegramVaultIndexer:
