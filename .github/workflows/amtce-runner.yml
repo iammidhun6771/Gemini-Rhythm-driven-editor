@@ -88,8 +88,14 @@ jobs:
     # ── 3. System Dependencies (FFmpeg Setup) ─────────────────────────────────
     - name: Set up FFmpeg
       run: |
-        sudo apt-get update
-        sudo apt-get install -y ffmpeg
+        if command -v ffmpeg >/dev/null 2>&1; then
+          echo "✅ FFmpeg is already installed ($(ffmpeg -version | head -n 1)). Skipping apt-get."
+        else
+          echo "FFmpeg not found. Updating apt sources with mirror fallback..."
+          sudo sed -i 's/azure.archive.ubuntu.com/archive.ubuntu.com/g' /etc/apt/sources.list /etc/apt/sources.list.d/* 2>/dev/null || true
+          sudo apt-get update -o Acquire::Retries=3 -o Acquire::http::Timeout=10 || true
+          sudo apt-get install -y ffmpeg
+        fi
 
     # ── 4. Python Dependencies ────────────────────────────────────────────────
     - name: Install Python Dependencies
