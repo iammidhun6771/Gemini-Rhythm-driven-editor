@@ -5,39 +5,47 @@
       "usage_count": 4,
       "last_used": 1786912569.0695288,
       "bpm": 0.0,
-      "energy": 0.923,
+      "energy": 0.949,
       "created_at": 1786910177.2105505,
       "beat_data_path": null,
       "drop_times": [],
       "sample_rate": 44100,
-      "audio_hash": "415482_1787401710",
+      "audio_hash": "415482_1786988618",
       "version": 2,
       "tempo_bpm": 0.0,
-      "dominant_emotion": "hype",
-      "energy_profile": "explosive",
+      "dominant_emotion": "joy",
+      "energy_profile": "building",
       "vibe_tags": [
-        "hype",
+        "bollywood",
         "dance",
-        "high_energy",
-        "electronic"
+        "upbeat",
+        "romantic",
+        "celebration",
+        "joyful"
       ],
       "has_vocals": true,
       "language": "Hindi",
       "sections_summary": [
         {
           "start": 0.0,
-          "end": 6.78,
-          "type": "drop",
+          "end": 6.0,
+          "type": "intro",
+          "energy": 0.8
+        },
+        {
+          "start": 6.0,
+          "end": 12.0,
+          "type": "chorus",
           "energy": 0.95
         }
       ],
       "lyric_intel_merged": true,
       "file_id": "CQACAgUAAyEGAATgPI-iAAIGeWqDQQkyXa0g_5k9U9np0-0fSmUtAAKFIAACbj4hVD5Oy9uVi9uCPQQ",
-      "avg_energy": 0.923,
-      "vibe": "groove",
-      "beat_count": 8,
-      "drop_count": 0,
-      "beat_score": 17.23
+      "avg_energy": 0.949,
+      "vibe": "cinematic",
+      "beat_count": 5,
+      "drop_count": 1,
+      "beat_score": 17.490000000000002
     },
     "sess_1786942119_9044.wav": {
       "file_id": "BQACAgUAAyEGAATgPI-iAAIFZ2qCkrFc7oqsBKEWk9efRJE9mVg0AAJaJAACbj4ZVP7EHgSNp70DPQQ",
@@ -500,9 +508,9 @@
       "file_id": "CQACAgUAAyEGAATgPI-iAAIGt2qDSKZoTB-XIy5dOSx5KB8EWm8UAALgIAACbj4hVL-Hlw38wy7VPQQ"
     },
     "Fit_girl_2.mp3": {
-      "usage_count": 1,
-      "last_used": 1787414258.8661919,
-      "bpm": 120.0,
+      "usage_count": 0,
+      "last_used": 0,
+      "bpm": 0.0,
       "energy": 0.5,
       "created_at": 1786988663.8366418,
       "beat_data_path": null,
@@ -510,33 +518,7 @@
       "sample_rate": 44100,
       "audio_hash": "252798_1784331762",
       "version": 2,
-      "file_id": "CQACAgUAAyEGAATgPI-iAAIGuGqDSKlWyHvyyJrahREZn51v3ddsAALhIAACbj4hVKpeFZOek9i0PQQ",
-      "tempo_bpm": 120.0,
-      "dominant_emotion": "joy",
-      "energy_profile": "medium",
-      "vibe_tags": [
-        "festive",
-        "bollywood",
-        "dance",
-        "upbeat"
-      ],
-      "has_vocals": true,
-      "language": "Hindi",
-      "sections_summary": [
-        {
-          "start": 0.0,
-          "end": 3.75,
-          "type": "intro",
-          "energy": 0.4
-        },
-        {
-          "start": 3.75,
-          "end": 10.5,
-          "type": "verse",
-          "energy": 0.7
-        }
-      ],
-      "lyric_intel_merged": true
+      "file_id": "CQACAgUAAyEGAATgPI-iAAIGuGqDSKlWyHvyyJrahREZn51v3ddsAALhIAACbj4hVKpeFZOek9i0PQQ"
     },
     "Giorgia_1.mp3": {
       "usage_count": 1,
@@ -842,9 +824,9 @@
       "file_id": "CQACAgUAAyEGAATgPI-iAAIGxmqDSNOtK02VAxhB4YhIoLJnfiAZAALvIAACbj4hVCe64xpLNxxtPQQ"
     },
     "Pooja_hedge.mp3": {
-      "usage_count": 1,
-      "last_used": 1787408310.3671124,
-      "bpm": 120.0,
+      "usage_count": 0,
+      "last_used": 0,
+      "bpm": 0.0,
       "energy": 0.5,
       "created_at": 1786988663.8406422,
       "beat_data_path": null,
@@ -852,40 +834,7 @@
       "sample_rate": 44100,
       "audio_hash": "543699_1784331764",
       "version": 2,
-      "file_id": "CQACAgUAAyEGAATgPI-iAAIGx2qDSNblAAEvugpnHmwVEs1T2ikTrQAC8CAAAm4-IVQ1_jy4YYJJgz0E",
-      "tempo_bpm": 120.0,
-      "dominant_emotion": "celebration",
-      "energy_profile": "high",
-      "vibe_tags": [
-        "bollywood",
-        "bhangra",
-        "high_energy",
-        "dance",
-        "festive"
-      ],
-      "has_vocals": true,
-      "language": "Hindi",
-      "sections_summary": [
-        {
-          "start": 0.0,
-          "end": 2.4,
-          "type": "intro",
-          "energy": 0.6
-        },
-        {
-          "start": 2.4,
-          "end": 14.5,
-          "type": "chorus",
-          "energy": 0.9
-        },
-        {
-          "start": 14.5,
-          "end": 24.0,
-          "type": "instrumental",
-          "energy": 0.8
-        }
-      ],
-      "lyric_intel_merged": true
+      "file_id": "CQACAgUAAyEGAATgPI-iAAIGx2qDSNblAAEvugpnHmwVEs1T2ikTrQAC8CAAAm4-IVQ1_jy4YYJJgz0E"
     },
     "Rakul_preet_singh_1.mp3": {
       "usage_count": 1,
@@ -966,9 +915,9 @@
       "file_id": "CQACAgUAAyEGAATgPI-iAAIGy2qDSN--Kg4tLMuLfx57SxkNx1nnAAL0IAACbj4hVOyZXOB7XVQxPQQ"
     },
     "Roshniwalia_1.mp3": {
-      "usage_count": 1,
-      "last_used": 1787408641.104806,
-      "bpm": 120.0,
+      "usage_count": 0,
+      "last_used": 0,
+      "bpm": 0.0,
       "energy": 0.5,
       "created_at": 1786988663.8416412,
       "beat_data_path": null,
@@ -976,40 +925,7 @@
       "sample_rate": 44100,
       "audio_hash": "428341_1784331765",
       "version": 2,
-      "file_id": "CQACAgUAAyEGAATgPI-iAAIGzGqDSOItAAGX1uyCA19ICAu3UbyNAQAC9SAAAm4-IVScY9U9aUsqyj0E",
-      "tempo_bpm": 120.0,
-      "dominant_emotion": "joy",
-      "energy_profile": "medium",
-      "vibe_tags": [
-        "punjabi",
-        "dance",
-        "joyful",
-        "uptempo",
-        "colorful"
-      ],
-      "has_vocals": true,
-      "language": "Punjabi",
-      "sections_summary": [
-        {
-          "start": 0.0,
-          "end": 2.16,
-          "type": "intro",
-          "energy": 0.4
-        },
-        {
-          "start": 2.16,
-          "end": 10.42,
-          "type": "verse",
-          "energy": 0.6
-        },
-        {
-          "start": 10.42,
-          "end": 17.68,
-          "type": "chorus",
-          "energy": 0.8
-        }
-      ],
-      "lyric_intel_merged": true
+      "file_id": "CQACAgUAAyEGAATgPI-iAAIGzGqDSOItAAGX1uyCA19ICAu3UbyNAQAC9SAAAm4-IVScY9U9aUsqyj0E"
     },
     "Saiee.mp3": {
       "usage_count": 0,
@@ -1025,9 +941,9 @@
       "file_id": "CQACAgUAAyEGAATgPI-iAAIGzWqDSOaJOGmi_3c6JzBqBiWh7mwzAAL2IAACbj4hVAsYgj7-XlZGPQQ"
     },
     "Sakshi_malik.mp3": {
-      "usage_count": 1,
-      "last_used": 1787414687.0324864,
-      "bpm": 120.0,
+      "usage_count": 0,
+      "last_used": 0,
+      "bpm": 0.0,
       "energy": 0.5,
       "created_at": 1786988663.8416412,
       "beat_data_path": null,
@@ -1035,39 +951,12 @@
       "sample_rate": 44100,
       "audio_hash": "364398_1784331765",
       "version": 2,
-      "file_id": "CQACAgUAAyEGAATgPI-iAAIGzmqDSPBVXVHrI-1APhLM85uKMfZcAAL3IAACbj4hVMGEgLsDPM4rPQQ",
-      "tempo_bpm": 120.0,
-      "dominant_emotion": "joy",
-      "energy_profile": "high",
-      "vibe_tags": [
-        "bollywood",
-        "dance",
-        "upbeat",
-        "festive",
-        "high_energy"
-      ],
-      "has_vocals": true,
-      "language": "Hindi",
-      "sections_summary": [
-        {
-          "start": 0.0,
-          "end": 3.84,
-          "type": "intro",
-          "energy": 0.7
-        },
-        {
-          "start": 3.84,
-          "end": 16.0,
-          "type": "chorus",
-          "energy": 0.9
-        }
-      ],
-      "lyric_intel_merged": true
+      "file_id": "CQACAgUAAyEGAATgPI-iAAIGzmqDSPBVXVHrI-1APhLM85uKMfZcAAL3IAACbj4hVMGEgLsDPM4rPQQ"
     },
     "Sakshi_malik_1.mp3": {
-      "usage_count": 1,
-      "last_used": 1787415107.9656513,
-      "bpm": 120.0,
+      "usage_count": 0,
+      "last_used": 0,
+      "bpm": 0.0,
       "energy": 0.5,
       "created_at": 1786988663.8416412,
       "beat_data_path": null,
@@ -1075,45 +964,12 @@
       "sample_rate": 44100,
       "audio_hash": "422698_1784331765",
       "version": 2,
-      "file_id": "CQACAgUAAyEGAATgPI-iAAIGz2qDSPNo8-DJAAGVhEtO5om4PlyiggAC-CAAAm4-IVROq6X73EY_uj0E",
-      "tempo_bpm": 120.0,
-      "dominant_emotion": "hype",
-      "energy_profile": "high",
-      "vibe_tags": [
-        "urban",
-        "desi",
-        "dance",
-        "high_energy",
-        "hip_hop"
-      ],
-      "has_vocals": true,
-      "language": "Hindi",
-      "sections_summary": [
-        {
-          "start": 0.0,
-          "end": 2.35,
-          "type": "intro",
-          "energy": 0.6
-        },
-        {
-          "start": 2.35,
-          "end": 10.0,
-          "type": "verse",
-          "energy": 0.8
-        },
-        {
-          "start": 10.0,
-          "end": 18.0,
-          "type": "chorus",
-          "energy": 1.0
-        }
-      ],
-      "lyric_intel_merged": true
+      "file_id": "CQACAgUAAyEGAATgPI-iAAIGz2qDSPNo8-DJAAGVhEtO5om4PlyiggAC-CAAAm4-IVROq6X73EY_uj0E"
     },
     "Sakshi_malik_3.mp3": {
-      "usage_count": 1,
-      "last_used": 1787422761.5551205,
-      "bpm": 120.0,
+      "usage_count": 0,
+      "last_used": 0,
+      "bpm": 0.0,
       "energy": 0.5,
       "created_at": 1786988663.8416412,
       "beat_data_path": null,
@@ -1121,46 +977,7 @@
       "sample_rate": 44100,
       "audio_hash": "768142_1784331765",
       "version": 2,
-      "file_id": "CQACAgUAAyEGAATgPI-iAAIG0GqDSPerJwNpQYXuTVx6xwfBzECwAAL5IAACbj4hVPGVea0IxhYQPQQ",
-      "tempo_bpm": 120.0,
-      "dominant_emotion": "hype",
-      "energy_profile": "high",
-      "vibe_tags": [
-        "dance",
-        "house",
-        "nightclub",
-        "energetic",
-        "funky"
-      ],
-      "has_vocals": true,
-      "language": "English",
-      "sections_summary": [
-        {
-          "start": 0.0,
-          "end": 10.45,
-          "type": "intro",
-          "energy": 0.7
-        },
-        {
-          "start": 10.45,
-          "end": 17.6,
-          "type": "verse",
-          "energy": 0.8
-        },
-        {
-          "start": 17.6,
-          "end": 24.8,
-          "type": "chorus",
-          "energy": 1.0
-        },
-        {
-          "start": 24.8,
-          "end": 31.5,
-          "type": "outro",
-          "energy": 0.6
-        }
-      ],
-      "lyric_intel_merged": true
+      "file_id": "CQACAgUAAyEGAATgPI-iAAIG0GqDSPerJwNpQYXuTVx6xwfBzECwAAL5IAACbj4hVPGVea0IxhYQPQQ"
     },
     "sess_1785982704_9128_extracted.wav": {
       "usage_count": 0,
@@ -1776,477 +1593,6 @@
           "y": 798,
           "w": 180,
           "h": 40,
-          "opencv_vectors": {}
-        }
-      }
-    },
-    "manual_DaM1CUaMHwy": {
-      "clip_id": "manual_DaM1CUaMHwy",
-      "clip_folder": "/home/runner/work/Gemini-Rhythm-driven-editor/Gemini-Rhythm-driven-editor/downloads/manual_DaM1CUaMHwy",
-      "schema_version": 3,
-      "created_at": 1787422753.0696824,
-      "phase1": {},
-      "visual_context": {
-        "_source": "gemini_call_1_forensic",
-        "_filled_at": 1787422753.0698068,
-        "intent": "fashion_lifestyle",
-        "tone": "aspirational",
-        "editing_style": "fashion_showcase",
-        "engagement_hook": "Start with a close-up of the dress texture, then zoom out to reveal the full outfit and the subject's smile.",
-        "detected_entities": [
-          "person:female",
-          "environment:indoor"
-        ],
-        "possible_narratives": [
-          "fashion_moment"
-        ],
-        "recommended_narrative": "fashion_moment",
-        "feature_flags": {
-          "enable_price_tags": false,
-          "enable_fashion_caption": true,
-          "enable_cinematic_zoom": true,
-          "enable_speed_ramps": false,
-          "enable_fast_pacing": false,
-          "enable_voiceover": false
-        },
-        "safety": {
-          "classification": "safe",
-          "monetization_safe": true
-        },
-        "creative_possibilities": [],
-        "speech_intelligence": {
-          "speech_mode": "music_broll",
-          "is_talking_visually": false,
-          "has_spoken_vocal": true,
-          "is_speech_vocal": false,
-          "recommended_audio_action": "audio_replace_full_bgm"
-        }
-      },
-      "audio_data": {
-        "_description": "Unified audio block. math fills first (Phase 1 DSP), context fills second (Gemini Call 1).",
-        "math": {
-          "_source": "phase1_dsp",
-          "_filled_at": "step1_before_gemini",
-          "tempo_bpm": 0.0,
-          "beat_timestamps": [
-            {
-              "time": 0.8500000000000001,
-              "energy": 0.893
-            },
-            {
-              "time": 1.5,
-              "energy": 1.0
-            },
-            {
-              "time": 2.15,
-              "energy": 0.995
-            },
-            {
-              "time": 2.75,
-              "energy": 0.878
-            },
-            {
-              "time": 3.4000000000000004,
-              "energy": 0.958
-            },
-            {
-              "time": 4.05,
-              "energy": 0.755
-            },
-            {
-              "time": 4.7,
-              "energy": 0.962
-            },
-            {
-              "time": 5.3500000000000005,
-              "energy": 0.941
-            }
-          ],
-          "drop_timestamps": [],
-          "avg_energy": 0.923,
-          "vibe": "groove",
-          "beat_count": 8,
-          "drop_count": 0,
-          "wav_path": "/home/runner/work/Gemini-Rhythm-driven-editor/Gemini-Rhythm-driven-editor/downloads/manual_DaM1CUaMHwy/video_extracted.wav"
-        },
-        "context": {
-          "_source": "gemini_call_1_forensic",
-          "_filled_at": 1787422753.0698097,
-          "has_vocals": true,
-          "speech_mode": "music_broll",
-          "recommended_audio_action": "audio_replace_full_bgm",
-          "dominant_emotion": "aspirational",
-          "vibe": "fashion_showcase"
-        },
-        "selected_bgm_track": "Sakshi_malik_3.mp3",
-        "bgm_selection_reasoning": "The upbeat tempo and stylish medium vibe provide an aspirational, energetic backdrop perfectly suited for a high-end fashion moment.",
-        "bgm_alignment_score": 0.88,
-        "_bgm_selected_at": 1787422761.544991
-      },
-      "visual_vectors": {
-        "_source": "gemini_call_1_forensic",
-        "_filled_at": 1787422753.0698206,
-        "targeted_timestamps_sec": [
-          0.0,
-          1.0,
-          2.0,
-          3.0,
-          4.0,
-          5.0
-        ],
-        "scene_cut_timestamps": [
-          3.0,
-          4.0,
-          5.0
-        ],
-        "hook_zone_end_sec": 5.0,
-        "climax_zone_start_sec": 5.0
-      },
-      "editing_plan": {
-        "_source": "gemini_call_3_ffmpeg_synthesis",
-        "_filled_at": 1787422788.3370674,
-        "editing_intent": "Fashion lifestyle showcase with high-energy beat-synced cuts.",
-        "creative_rationale": "Adapted the fashion_showcase style by utilizing the authoritative RTB beat-snapped shot plan. I performed two precise trims at 2.2s intervals to match the 120 BPM hype rhythm, ensuring the visual energy aligns with the 'Sakshi_malik_3.mp3' track. The sequence is concatenated to maintain flow, followed by a 9:16 aspect ratio adjustment using blur-pad to maintain cinematic quality.",
-        "strategy_name": "Fashion lifestyle showcase with high-energy beat-synced cuts.",
-        "total_steps": 8,
-        "operations": []
-      },
-      "output": {
-        "_filled_at": 1787422788.33707,
-        "master_reel_path": "/home/runner/work/Gemini-Rhythm-driven-editor/Gemini-Rhythm-driven-editor/Processed Shorts/manual_DaM1CUaMHwy_master.mp4",
-        "render_success": true,
-        "duration_lock": {
-          "repaired": false,
-          "video_duration": 4.4,
-          "audio_duration_before": 4.4,
-          "source_duration": 6.07
-        },
-        "mode": "SINGLE_PASS",
-        "brand_overlay": {
-          "text": "fitsbysakshitha",
-          "x": 390,
-          "y": 1760,
-          "w": 320,
-          "h": 70
-        }
-      }
-    },
-    "manual_DanbnAazLEY": {
-      "clip_id": "manual_DanbnAazLEY",
-      "clip_folder": "/home/runner/work/Gemini-Rhythm-driven-editor/Gemini-Rhythm-driven-editor/downloads/manual_DanbnAazLEY",
-      "schema_version": 3,
-      "created_at": 1787414245.8553357,
-      "phase1": {},
-      "visual_context": {
-        "_source": "gemini_call_1_forensic",
-        "_filled_at": 1787414245.8554494,
-        "intent": "fashion_lifestyle",
-        "tone": "aspirational",
-        "editing_style": "fashion_showcase",
-        "engagement_hook": "Start with a close-up tracking shot of the subject walking confidently toward the camera in a public terminal.",
-        "detected_entities": [
-          "person:female",
-          "environment:indoor",
-          "clothing:apparel"
-        ],
-        "possible_narratives": [
-          "fashion_moment",
-          "celebrity_highlight"
-        ],
-        "recommended_narrative": "fashion_moment",
-        "feature_flags": {
-          "enable_price_tags": false,
-          "enable_fashion_caption": true,
-          "enable_cinematic_zoom": true,
-          "enable_speed_ramps": false,
-          "enable_fast_pacing": true,
-          "enable_voiceover": false
-        },
-        "safety": {
-          "classification": "safe",
-          "monetization_safe": true
-        },
-        "creative_possibilities": [],
-        "speech_intelligence": {
-          "speech_mode": "music_broll",
-          "is_talking_visually": false,
-          "has_spoken_vocal": true,
-          "is_speech_vocal": false,
-          "recommended_audio_action": "audio_replace_full_bgm"
-        }
-      },
-      "audio_data": {
-        "_description": "Unified audio block. math fills first (Phase 1 DSP), context fills second (Gemini Call 1).",
-        "math": {
-          "_source": "phase1_dsp",
-          "_filled_at": "step1_before_gemini",
-          "tempo_bpm": 0.0,
-          "beat_timestamps": [
-            {
-              "time": 1.0,
-              "energy": 0.768
-            },
-            {
-              "time": 1.6,
-              "energy": 0.872
-            },
-            {
-              "time": 2.0500000000000003,
-              "energy": 1.0
-            },
-            {
-              "time": 3.75,
-              "energy": 0.997
-            },
-            {
-              "time": 7.5,
-              "energy": 0.747
-            },
-            {
-              "time": 7.95,
-              "energy": 0.723
-            },
-            {
-              "time": 9.55,
-              "energy": 0.764
-            },
-            {
-              "time": 10.100000000000001,
-              "energy": 0.905
-            },
-            {
-              "time": 10.55,
-              "energy": 0.981
-            }
-          ],
-          "drop_timestamps": [],
-          "avg_energy": 0.862,
-          "vibe": "ambient",
-          "beat_count": 9,
-          "drop_count": 0,
-          "wav_path": "/home/runner/work/Gemini-Rhythm-driven-editor/Gemini-Rhythm-driven-editor/downloads/manual_DanbnAazLEY/video_extracted.wav"
-        },
-        "context": {
-          "_source": "gemini_call_1_forensic",
-          "_filled_at": 1787414245.8554513,
-          "has_vocals": true,
-          "speech_mode": "music_broll",
-          "recommended_audio_action": "audio_replace_full_bgm",
-          "dominant_emotion": "aspirational",
-          "vibe": "fashion_showcase"
-        },
-        "selected_bgm_track": "Fit_girl_2.mp3",
-        "bgm_selection_reasoning": "The 'Fit_girl_2.mp3' track provides an energetic, hype-driven tempo that perfectly complements the aspirational and fast-paced nature of a fashion lifestyle reveal.",
-        "bgm_alignment_score": 0.85,
-        "_bgm_selected_at": 1787414258.8557591
-      },
-      "visual_vectors": {
-        "_source": "gemini_call_1_forensic",
-        "_filled_at": 1787414245.85546,
-        "targeted_timestamps_sec": [
-          0.0,
-          1.0,
-          2.0,
-          3.0,
-          4.0,
-          5.0
-        ],
-        "scene_cut_timestamps": [
-          3.0,
-          4.0,
-          5.0
-        ],
-        "hook_zone_end_sec": 5.0,
-        "climax_zone_start_sec": 5.0
-      },
-      "editing_plan": {
-        "_source": "gemini_call_3_ffmpeg_synthesis",
-        "_filled_at": 1787414290.4821796,
-        "editing_intent": "Fashion lifestyle showcase with beat-snapped jump cuts for high-energy engagement.",
-        "creative_rationale": "Adapted the RTB shot plan to align with the 120 BPM 'Fit_girl_2' track. Used jump cuts at 2.0s intervals to maintain the 'fashion_showcase' pacing. The sequence order was optimized to build energy, placing the most dynamic movement in the middle of the reel to match the vocal hook intensity.",
-        "strategy_name": "Fashion lifestyle showcase with beat-snapped jump cuts for high-energy engagement.",
-        "total_steps": 11,
-        "operations": []
-      },
-      "output": {
-        "_filled_at": 1787414290.4821827,
-        "master_reel_path": "/home/runner/work/Gemini-Rhythm-driven-editor/Gemini-Rhythm-driven-editor/Processed Shorts/manual_DanbnAazLEY_master.mp4",
-        "render_success": true,
-        "duration_lock": {
-          "repaired": false,
-          "video_duration": 10.0,
-          "audio_duration_before": 10.0,
-          "source_duration": 11.22
-        },
-        "mode": "SINGLE_PASS",
-        "brand_overlay": {
-          "text": "fitsbysakshitha",
-          "x": 514,
-          "y": 704,
-          "w": 180,
-          "h": 68,
-          "opencv_vectors": {}
-        }
-      }
-    },
-    "manual_Dazf0jdsDqo": {
-      "clip_id": "manual_Dazf0jdsDqo",
-      "clip_folder": "/home/runner/work/Gemini-Rhythm-driven-editor/Gemini-Rhythm-driven-editor/downloads/manual_Dazf0jdsDqo",
-      "schema_version": 3,
-      "created_at": 1787414673.6290622,
-      "phase1": {},
-      "visual_context": {
-        "_source": "gemini_call_1_forensic",
-        "_filled_at": 1787414673.629191,
-        "intent": "fashion_lifestyle",
-        "tone": "aspirational",
-        "editing_style": "fashion_showcase",
-        "engagement_hook": "A stylish woman in a white dress makes a graceful entrance, immediately capturing the viewer's attention with a friendly wave.",
-        "detected_entities": [
-          "person:female",
-          "environment:indoor",
-          "vehicle:scooter"
-        ],
-        "possible_narratives": [
-          "fashion_moment",
-          "celebrity_highlight"
-        ],
-        "recommended_narrative": "fashion_moment",
-        "feature_flags": {
-          "enable_price_tags": false,
-          "enable_fashion_caption": true,
-          "enable_cinematic_zoom": true,
-          "enable_speed_ramps": false,
-          "enable_fast_pacing": true,
-          "enable_voiceover": false
-        },
-        "safety": {
-          "classification": "safe",
-          "monetization_safe": true
-        },
-        "creative_possibilities": [],
-        "speech_intelligence": {
-          "speech_mode": "music_broll",
-          "is_talking_visually": false,
-          "has_spoken_vocal": true,
-          "is_speech_vocal": false,
-          "recommended_audio_action": "audio_replace_full_bgm"
-        }
-      },
-      "audio_data": {
-        "_description": "Unified audio block. math fills first (Phase 1 DSP), context fills second (Gemini Call 1).",
-        "math": {
-          "_source": "phase1_dsp",
-          "_filled_at": "step1_before_gemini",
-          "tempo_bpm": 0.0,
-          "beat_timestamps": [
-            {
-              "time": 1.6,
-              "energy": 1.0
-            },
-            {
-              "time": 2.0500000000000003,
-              "energy": 0.791
-            },
-            {
-              "time": 2.9000000000000004,
-              "energy": 0.847
-            },
-            {
-              "time": 3.35,
-              "energy": 0.937
-            },
-            {
-              "time": 3.8000000000000003,
-              "energy": 0.954
-            },
-            {
-              "time": 5.050000000000001,
-              "energy": 0.96
-            },
-            {
-              "time": 6.3500000000000005,
-              "energy": 0.803
-            },
-            {
-              "time": 6.800000000000001,
-              "energy": 0.949
-            },
-            {
-              "time": 7.25,
-              "energy": 0.988
-            }
-          ],
-          "drop_timestamps": [
-            1.6,
-            2.9000000000000004,
-            6.3500000000000005
-          ],
-          "avg_energy": 0.914,
-          "vibe": "cinematic",
-          "beat_count": 9,
-          "drop_count": 3,
-          "wav_path": "/home/runner/work/Gemini-Rhythm-driven-editor/Gemini-Rhythm-driven-editor/downloads/manual_Dazf0jdsDqo/video_extracted.wav"
-        },
-        "context": {
-          "_source": "gemini_call_1_forensic",
-          "_filled_at": 1787414673.6291933,
-          "has_vocals": true,
-          "speech_mode": "music_broll",
-          "recommended_audio_action": "audio_replace_full_bgm",
-          "dominant_emotion": "aspirational",
-          "vibe": "fashion_showcase"
-        },
-        "selected_bgm_track": "Sakshi_malik.mp3",
-        "bgm_selection_reasoning": "The 'hype' emotion and medium vibe of this track provide the necessary energy and rhythmic drive to elevate a high-end fashion moment.",
-        "bgm_alignment_score": 0.85,
-        "_bgm_selected_at": 1787414687.022597
-      },
-      "visual_vectors": {
-        "_source": "gemini_call_1_forensic",
-        "_filled_at": 1787414673.6292021,
-        "targeted_timestamps_sec": [
-          0.0,
-          1.0,
-          2.0,
-          3.0,
-          4.0,
-          5.0
-        ],
-        "scene_cut_timestamps": [
-          3.0,
-          4.0,
-          5.0
-        ],
-        "hook_zone_end_sec": 5.0,
-        "climax_zone_start_sec": 5.0
-      },
-      "editing_plan": {
-        "_source": "gemini_call_3_ffmpeg_synthesis",
-        "_filled_at": 1787414712.666192,
-        "editing_intent": "Fashion lifestyle rhythm edit with beat-snapped jump cuts for high-energy engagement.",
-        "creative_rationale": "Adapted the fashion_showcase style by utilizing the provided RTB beat-snapped shot plan. I performed three precise trims to match the 120 BPM rhythm, followed by a concat operation to maintain visual flow. The aspect ratio is set to 9:16 with blur padding to ensure a professional, cinematic look suitable for Reels/Shorts. Audio is mixed to prioritize the 'Sakshi_malik' BGM, ensuring the final output duration is locked to the visual sequence.",
-        "strategy_name": "Fashion lifestyle rhythm edit with beat-snapped jump cuts for high-energy engagement.",
-        "total_steps": 9,
-        "operations": []
-      },
-      "output": {
-        "_filled_at": 1787414712.6661956,
-        "master_reel_path": "/home/runner/work/Gemini-Rhythm-driven-editor/Gemini-Rhythm-driven-editor/Processed Shorts/manual_Dazf0jdsDqo_master.mp4",
-        "render_success": true,
-        "duration_lock": {
-          "repaired": false,
-          "video_duration": 6.6,
-          "audio_duration_before": 6.6,
-          "source_duration": 8.2
-        },
-        "mode": "SINGLE_PASS",
-        "brand_overlay": {
-          "text": "fitsbysakshitha",
-          "x": 201,
-          "y": 1223,
-          "w": 243,
-          "h": 60,
           "opencv_vectors": {}
         }
       }
@@ -6213,714 +5559,6 @@
           "w": 309,
           "h": 43,
           "opencv_vectors": {}
-        }
-      }
-    },
-    "manual_DcSkhKOqUy3": {
-      "clip_id": "manual_DcSkhKOqUy3",
-      "clip_folder": "/home/runner/work/Gemini-Rhythm-driven-editor/Gemini-Rhythm-driven-editor/downloads/manual_DcSkhKOqUy3",
-      "schema_version": 3,
-      "created_at": 1787408290.9077194,
-      "phase1": {},
-      "visual_context": {
-        "_source": "gemini_call_1_forensic",
-        "_filled_at": 1787408290.9078667,
-        "intent": "fashion_lifestyle",
-        "tone": "aspirational",
-        "editing_style": "fashion_showcase",
-        "engagement_hook": "Start with a close-up tracking shot moving up from the designer heels to reveal the striking green red-carpet outfit.",
-        "detected_entities": [
-          "person:female",
-          "environment:indoor",
-          "apparel:dress"
-        ],
-        "possible_narratives": [
-          "fashion_moment",
-          "celebrity_highlight"
-        ],
-        "recommended_narrative": "fashion_moment",
-        "feature_flags": {
-          "enable_price_tags": false,
-          "enable_fashion_caption": true,
-          "enable_cinematic_zoom": true,
-          "enable_speed_ramps": false,
-          "enable_fast_pacing": false,
-          "enable_voiceover": false
-        },
-        "safety": {
-          "classification": "safe",
-          "monetization_safe": true
-        },
-        "creative_possibilities": [],
-        "speech_intelligence": {
-          "speech_mode": "music_broll",
-          "is_talking_visually": false,
-          "has_spoken_vocal": true,
-          "is_speech_vocal": false,
-          "recommended_audio_action": "audio_replace_full_bgm"
-        }
-      },
-      "audio_data": {
-        "_description": "Unified audio block. math fills first (Phase 1 DSP), context fills second (Gemini Call 1).",
-        "math": {
-          "_source": "phase1_dsp",
-          "_filled_at": "step1_before_gemini",
-          "tempo_bpm": 0.0,
-          "beat_timestamps": [
-            {
-              "time": 0.30000000000000004,
-              "energy": 0.655
-            },
-            {
-              "time": 1.0,
-              "energy": 0.567
-            },
-            {
-              "time": 1.6500000000000001,
-              "energy": 0.716
-            },
-            {
-              "time": 2.35,
-              "energy": 0.775
-            },
-            {
-              "time": 2.8000000000000003,
-              "energy": 0.825
-            },
-            {
-              "time": 4.1000000000000005,
-              "energy": 0.774
-            },
-            {
-              "time": 4.7,
-              "energy": 0.685
-            },
-            {
-              "time": 5.15,
-              "energy": 0.672
-            },
-            {
-              "time": 6.25,
-              "energy": 0.847
-            },
-            {
-              "time": 6.65,
-              "energy": 0.869
-            },
-            {
-              "time": 7.15,
-              "energy": 0.748
-            },
-            {
-              "time": 8.450000000000001,
-              "energy": 0.925
-            },
-            {
-              "time": 9.15,
-              "energy": 0.958
-            },
-            {
-              "time": 9.850000000000001,
-              "energy": 0.872
-            },
-            {
-              "time": 10.450000000000001,
-              "energy": 0.896
-            },
-            {
-              "time": 12.55,
-              "energy": 0.667
-            },
-            {
-              "time": 13.05,
-              "energy": 0.62
-            },
-            {
-              "time": 13.8,
-              "energy": 0.758
-            },
-            {
-              "time": 14.450000000000001,
-              "energy": 0.826
-            },
-            {
-              "time": 15.55,
-              "energy": 0.633
-            },
-            {
-              "time": 16.8,
-              "energy": 0.44
-            },
-            {
-              "time": 17.400000000000002,
-              "energy": 0.497
-            },
-            {
-              "time": 17.85,
-              "energy": 0.546
-            }
-          ],
-          "drop_timestamps": [
-            8.450000000000001,
-            16.8
-          ],
-          "avg_energy": 0.729,
-          "vibe": "cinematic",
-          "beat_count": 23,
-          "drop_count": 2,
-          "wav_path": "/home/runner/work/Gemini-Rhythm-driven-editor/Gemini-Rhythm-driven-editor/downloads/manual_DcSkhKOqUy3/video_extracted.wav"
-        },
-        "context": {
-          "_source": "gemini_call_1_forensic",
-          "_filled_at": 1787408290.9078686,
-          "has_vocals": true,
-          "speech_mode": "music_broll",
-          "recommended_audio_action": "audio_replace_full_bgm",
-          "dominant_emotion": "aspirational",
-          "vibe": "fashion_showcase"
-        },
-        "selected_bgm_track": "Pooja_hedge.mp3",
-        "bgm_selection_reasoning": "The 'hype' emotion and medium vibe of this track provide the necessary high-energy, aspirational backdrop required for a high-impact fashion moment.",
-        "bgm_alignment_score": 0.85,
-        "_bgm_selected_at": 1787408310.3580093
-      },
-      "visual_vectors": {
-        "_source": "gemini_call_1_forensic",
-        "_filled_at": 1787408290.9078784,
-        "targeted_timestamps_sec": [
-          0.0,
-          1.0,
-          2.0,
-          3.0,
-          4.0,
-          5.0
-        ],
-        "scene_cut_timestamps": [
-          3.0,
-          4.0,
-          5.0
-        ],
-        "hook_zone_end_sec": 5.0,
-        "climax_zone_start_sec": 5.0
-      },
-      "editing_plan": {
-        "_source": "gemini_call_3_ffmpeg_synthesis",
-        "_filled_at": 1787408347.6628344,
-        "editing_intent": "Create a high-energy beat-synced 9:16 fashion showcase reel aligned with the 120 BPM celebration BGM rhythm windows.",
-        "creative_rationale": "Applied the RTB beat-snapped shot plan to execute a rapid-fire jump-cut rhythm matching the high-energy Bollywood chorus. Used multiple trims followed by concatenation to build visual momentum, paired with 9:16 framing and custom background music mixing.",
-        "strategy_name": "Create a high-energy beat-synced 9:16 fashion showcase reel aligned with the 120 BPM celebration BGM rhythm windows.",
-        "total_steps": 12,
-        "operations": []
-      },
-      "output": {
-        "_filled_at": 1787408347.6628377,
-        "master_reel_path": "/home/runner/work/Gemini-Rhythm-driven-editor/Gemini-Rhythm-driven-editor/Processed Shorts/manual_DcSkhKOqUy3_master.mp4",
-        "render_success": true,
-        "duration_lock": {
-          "repaired": false,
-          "video_duration": 12.34,
-          "audio_duration_before": 12.34,
-          "source_duration": 17.9
-        },
-        "mode": "SINGLE_PASS",
-        "brand_overlay": {
-          "text": "fitsbysakshitha",
-          "x": 518,
-          "y": 887,
-          "w": 180,
-          "h": 54,
-          "opencv_vectors": {}
-        }
-      }
-    },
-    "manual_DcU-q69lPiG": {
-      "clip_id": "manual_DcU-q69lPiG",
-      "clip_folder": "/home/runner/work/Gemini-Rhythm-driven-editor/Gemini-Rhythm-driven-editor/downloads/manual_DcU-q69lPiG",
-      "schema_version": 3,
-      "created_at": 1787408617.1486242,
-      "phase1": {},
-      "visual_context": {
-        "_source": "gemini_call_1_forensic",
-        "_filled_at": 1787408617.1487577,
-        "intent": "fashion_lifestyle",
-        "tone": "aspirational",
-        "editing_style": "fashion_showcase",
-        "engagement_hook": "A stylish, candid walk-through at the airport captures the effortless 'off-duty' aesthetic.",
-        "detected_entities": [
-          "person:female",
-          "environment:airport"
-        ],
-        "possible_narratives": [
-          "fashion_moment",
-          "celebrity_highlight"
-        ],
-        "recommended_narrative": "fashion_moment",
-        "feature_flags": {
-          "enable_price_tags": false,
-          "enable_fashion_caption": true,
-          "enable_cinematic_zoom": true,
-          "enable_speed_ramps": false,
-          "enable_fast_pacing": false,
-          "enable_voiceover": false
-        },
-        "safety": {
-          "classification": "safe",
-          "monetization_safe": true
-        },
-        "creative_possibilities": [],
-        "speech_intelligence": {
-          "speech_mode": "music_broll",
-          "is_talking_visually": false,
-          "has_spoken_vocal": true,
-          "is_speech_vocal": false,
-          "recommended_audio_action": "audio_replace_full_bgm"
-        }
-      },
-      "audio_data": {
-        "_description": "Unified audio block. math fills first (Phase 1 DSP), context fills second (Gemini Call 1).",
-        "math": {
-          "_source": "phase1_dsp",
-          "_filled_at": "step1_before_gemini",
-          "tempo_bpm": 0.0,
-          "beat_timestamps": [
-            {
-              "time": 0.30000000000000004,
-              "energy": 0.462
-            },
-            {
-              "time": 2.35,
-              "energy": 0.911
-            },
-            {
-              "time": 2.8000000000000003,
-              "energy": 0.945
-            },
-            {
-              "time": 3.35,
-              "energy": 0.826
-            },
-            {
-              "time": 3.85,
-              "energy": 0.626
-            },
-            {
-              "time": 4.8500000000000005,
-              "energy": 0.586
-            },
-            {
-              "time": 5.6000000000000005,
-              "energy": 0.609
-            },
-            {
-              "time": 6.75,
-              "energy": 1.0
-            },
-            {
-              "time": 7.2,
-              "energy": 0.616
-            },
-            {
-              "time": 8.200000000000001,
-              "energy": 0.437
-            },
-            {
-              "time": 9.200000000000001,
-              "energy": 0.604
-            },
-            {
-              "time": 9.600000000000001,
-              "energy": 0.697
-            },
-            {
-              "time": 10.55,
-              "energy": 0.459
-            },
-            {
-              "time": 13.100000000000001,
-              "energy": 0.205
-            },
-            {
-              "time": 15.8,
-              "energy": 0.258
-            }
-          ],
-          "drop_timestamps": [],
-          "avg_energy": 0.616,
-          "vibe": "ambient",
-          "beat_count": 15,
-          "drop_count": 0,
-          "wav_path": "/home/runner/work/Gemini-Rhythm-driven-editor/Gemini-Rhythm-driven-editor/downloads/manual_DcU-q69lPiG/video_extracted.wav"
-        },
-        "context": {
-          "_source": "gemini_call_1_forensic",
-          "_filled_at": 1787408617.14876,
-          "has_vocals": true,
-          "speech_mode": "music_broll",
-          "recommended_audio_action": "audio_replace_full_bgm",
-          "dominant_emotion": "aspirational",
-          "vibe": "fashion_showcase"
-        },
-        "selected_bgm_track": "Roshniwalia_1.mp3",
-        "bgm_selection_reasoning": "The 'hype' emotion and medium vibe of this track provide the necessary high-energy backdrop to elevate an aspirational fashion moment.",
-        "bgm_alignment_score": 0.85,
-        "_bgm_selected_at": 1787408641.095458
-      },
-      "visual_vectors": {
-        "_source": "gemini_call_1_forensic",
-        "_filled_at": 1787408617.1487691,
-        "targeted_timestamps_sec": [
-          0.0,
-          1.0,
-          2.0,
-          3.0,
-          4.0,
-          5.0
-        ],
-        "scene_cut_timestamps": [
-          3.0,
-          4.0,
-          5.0
-        ],
-        "hook_zone_end_sec": 5.0,
-        "climax_zone_start_sec": 5.0
-      },
-      "editing_plan": {
-        "_source": "gemini_call_3_ffmpeg_synthesis",
-        "_filled_at": 1787408685.9642532,
-        "editing_intent": "Perform beat-driven jump-cut editing following the RTB shot plan, format to 9:16 vertical video with blur padding, apply fashion caption, and mix with upbeat BGM track.",
-        "creative_rationale": "Adapted the RAG fashion showcase pattern to the 120 BPM upbeat Punjabi track by applying multiple precise trim windows from the RTB shot plan. Concatenated these clips in rhythm with the musical beats, reframed to 9:16 vertical using blur_pad to fit modern short-form platforms, and layered the BGM with proper ducking to match the joyful aspirational tone.",
-        "strategy_name": "Perform beat-driven jump-cut editing following the RTB shot plan, format to 9:16 vertical video with blur padding, apply fashion caption, and mix with upbeat BGM track.",
-        "total_steps": 13,
-        "operations": []
-      },
-      "output": {
-        "_filled_at": 1787408685.9642563,
-        "master_reel_path": "/home/runner/work/Gemini-Rhythm-driven-editor/Gemini-Rhythm-driven-editor/Processed Shorts/manual_DcU-q69lPiG_master.mp4",
-        "render_success": true,
-        "duration_lock": {
-          "repaired": false,
-          "video_duration": 14.0,
-          "audio_duration_before": 13.98,
-          "source_duration": 16.05
-        },
-        "mode": "SINGLE_PASS",
-        "brand_overlay": {
-          "text": "fitsbysakshitha",
-          "x": 871,
-          "y": 1276,
-          "w": 180,
-          "h": 55,
-          "opencv_vectors": {}
-        }
-      }
-    },
-    "manual_DcV6jrYJOnZ": {
-      "clip_id": "manual_DcV6jrYJOnZ",
-      "clip_folder": "/home/runner/work/Gemini-Rhythm-driven-editor/Gemini-Rhythm-driven-editor/downloads/manual_DcV6jrYJOnZ",
-      "schema_version": 3,
-      "created_at": 1787415101.2838974,
-      "phase1": {},
-      "visual_context": {
-        "_source": "gemini_call_1_forensic",
-        "_filled_at": 1787415101.284055,
-        "intent": "fashion_lifestyle",
-        "tone": "aspirational",
-        "editing_style": "fashion_showcase",
-        "engagement_hook": "Start with a close-up of the subject's face as she turns into the wind to immediately establish the high-production, aesthetic tone.",
-        "detected_entities": [
-          "person:female",
-          "environment:beach",
-          "clothing:dress"
-        ],
-        "possible_narratives": [
-          "fashion_moment",
-          "scenic_journey"
-        ],
-        "recommended_narrative": "fashion_moment",
-        "feature_flags": {
-          "enable_price_tags": false,
-          "enable_fashion_caption": true,
-          "enable_cinematic_zoom": true,
-          "enable_speed_ramps": true,
-          "enable_fast_pacing": false,
-          "enable_voiceover": false
-        },
-        "safety": {
-          "classification": "safe",
-          "monetization_safe": true
-        },
-        "creative_possibilities": [],
-        "speech_intelligence": {
-          "speech_mode": "music_broll",
-          "is_talking_visually": false,
-          "has_spoken_vocal": true,
-          "is_speech_vocal": false,
-          "recommended_audio_action": "audio_replace_full_bgm"
-        }
-      },
-      "audio_data": {
-        "_description": "Unified audio block. math fills first (Phase 1 DSP), context fills second (Gemini Call 1).",
-        "math": {
-          "_source": "phase1_dsp",
-          "_filled_at": "step1_before_gemini",
-          "tempo_bpm": 0.0,
-          "beat_timestamps": [
-            {
-              "time": 0.5,
-              "energy": 0.684
-            },
-            {
-              "time": 1.05,
-              "energy": 0.611
-            },
-            {
-              "time": 1.55,
-              "energy": 0.875
-            },
-            {
-              "time": 3.5,
-              "energy": 0.298
-            },
-            {
-              "time": 3.9000000000000004,
-              "energy": 0.773
-            },
-            {
-              "time": 4.7,
-              "energy": 0.424
-            },
-            {
-              "time": 5.45,
-              "energy": 0.499
-            },
-            {
-              "time": 5.8500000000000005,
-              "energy": 0.596
-            },
-            {
-              "time": 6.65,
-              "energy": 0.617
-            },
-            {
-              "time": 7.25,
-              "energy": 0.775
-            },
-            {
-              "time": 7.9,
-              "energy": 0.634
-            },
-            {
-              "time": 8.3,
-              "energy": 0.619
-            },
-            {
-              "time": 9.0,
-              "energy": 0.544
-            },
-            {
-              "time": 9.600000000000001,
-              "energy": 0.667
-            },
-            {
-              "time": 10.200000000000001,
-              "energy": 0.606
-            },
-            {
-              "time": 10.65,
-              "energy": 0.635
-            },
-            {
-              "time": 12.15,
-              "energy": 0.766
-            },
-            {
-              "time": 12.55,
-              "energy": 0.78
-            },
-            {
-              "time": 13.600000000000001,
-              "energy": 0.786
-            },
-            {
-              "time": 14.05,
-              "energy": 0.809
-            },
-            {
-              "time": 14.65,
-              "energy": 0.679
-            },
-            {
-              "time": 15.05,
-              "energy": 0.597
-            },
-            {
-              "time": 15.75,
-              "energy": 0.554
-            },
-            {
-              "time": 16.35,
-              "energy": 0.656
-            },
-            {
-              "time": 16.85,
-              "energy": 0.725
-            },
-            {
-              "time": 17.3,
-              "energy": 0.768
-            },
-            {
-              "time": 18.650000000000002,
-              "energy": 0.284
-            },
-            {
-              "time": 20.25,
-              "energy": 0.375
-            },
-            {
-              "time": 20.75,
-              "energy": 0.808
-            },
-            {
-              "time": 21.400000000000002,
-              "energy": 0.617
-            },
-            {
-              "time": 22.05,
-              "energy": 0.467
-            },
-            {
-              "time": 23.1,
-              "energy": 0.407
-            },
-            {
-              "time": 23.55,
-              "energy": 0.503
-            },
-            {
-              "time": 23.950000000000003,
-              "energy": 0.579
-            },
-            {
-              "time": 25.5,
-              "energy": 0.539
-            },
-            {
-              "time": 26.05,
-              "energy": 0.629
-            },
-            {
-              "time": 27.1,
-              "energy": 0.59
-            },
-            {
-              "time": 27.55,
-              "energy": 0.638
-            },
-            {
-              "time": 28.200000000000003,
-              "energy": 0.691
-            },
-            {
-              "time": 28.650000000000002,
-              "energy": 0.77
-            },
-            {
-              "time": 29.85,
-              "energy": 0.56
-            },
-            {
-              "time": 30.3,
-              "energy": 0.684
-            },
-            {
-              "time": 30.8,
-              "energy": 0.665
-            },
-            {
-              "time": 31.75,
-              "energy": 0.585
-            },
-            {
-              "time": 32.800000000000004,
-              "energy": 0.642
-            },
-            {
-              "time": 33.45,
-              "energy": 0.401
-            }
-          ],
-          "drop_timestamps": [
-            0.5,
-            3.5,
-            20.25,
-            20.75
-          ],
-          "avg_energy": 0.618,
-          "vibe": "cinematic",
-          "beat_count": 46,
-          "drop_count": 4,
-          "wav_path": "/home/runner/work/Gemini-Rhythm-driven-editor/Gemini-Rhythm-driven-editor/downloads/manual_DcV6jrYJOnZ/video_extracted.wav"
-        },
-        "context": {
-          "_source": "gemini_call_1_forensic",
-          "_filled_at": 1787415101.2840576,
-          "has_vocals": true,
-          "speech_mode": "music_broll",
-          "recommended_audio_action": "audio_replace_full_bgm",
-          "dominant_emotion": "aspirational",
-          "vibe": "fashion_showcase"
-        },
-        "selected_bgm_track": "Sakshi_malik_1.mp3",
-        "bgm_selection_reasoning": "The energetic and medium-vibe instrumental drive of this track perfectly complements the confident, aspirational aesthetic of a high-end fashion moment.",
-        "bgm_alignment_score": 0.95,
-        "_bgm_selected_at": 1787415107.9537215
-      },
-      "visual_vectors": {
-        "_source": "gemini_call_1_forensic",
-        "_filled_at": 1787415101.2840672,
-        "targeted_timestamps_sec": [
-          0.0,
-          1.0,
-          2.0,
-          3.0,
-          4.0,
-          5.0
-        ],
-        "scene_cut_timestamps": [
-          3.0,
-          4.0,
-          5.0
-        ],
-        "hook_zone_end_sec": 5.0,
-        "climax_zone_start_sec": 5.0
-      },
-      "editing_plan": {
-        "_source": "gemini_call_3_ffmpeg_synthesis",
-        "_filled_at": 1787415171.9299715,
-        "editing_intent": "High-energy fashion showcase edit, beat-synced to 120 BPM hype track.",
-        "creative_rationale": "Adapted the RTB shot plan to create a rhythmic jump-cut sequence. Used 2.0s segments to maintain high visual energy, aligning cuts with the 120 BPM beat grid. Applied speed ramps to emphasize the 'fashion_moment' narrative, ensuring the final duration matches the 15s target while maintaining the 'hype' mood.",
-        "strategy_name": "High-energy fashion showcase edit, beat-synced to 120 BPM hype track.",
-        "total_steps": 14,
-        "operations": []
-      },
-      "output": {
-        "_filled_at": 1787415171.9299796,
-        "master_reel_path": "/home/runner/work/Gemini-Rhythm-driven-editor/Gemini-Rhythm-driven-editor/Processed Shorts/manual_DcV6jrYJOnZ_master.mp4",
-        "render_success": true,
-        "duration_lock": {
-          "repaired": false,
-          "video_duration": 13.17,
-          "audio_duration_before": 13.17,
-          "source_duration": 34.44
-        },
-        "mode": "SINGLE_PASS",
-        "brand_overlay": {
-          "text": "fitsbysakshitha",
-          "x": 390,
-          "y": 1760,
-          "w": 320,
-          "h": 70
         }
       }
     },
