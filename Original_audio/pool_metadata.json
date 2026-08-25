@@ -5,46 +5,47 @@
       "usage_count": 4,
       "last_used": 1786912569.0695288,
       "bpm": 0.0,
-      "energy": 0.707,
+      "energy": 0.949,
       "created_at": 1786910177.2105505,
       "beat_data_path": null,
       "drop_times": [],
       "sample_rate": 44100,
-      "audio_hash": "415482_1787596335",
+      "audio_hash": "415482_1786988618",
       "version": 2,
       "tempo_bpm": 0.0,
-      "dominant_emotion": "celebration",
-      "energy_profile": "high",
+      "dominant_emotion": "joy",
+      "energy_profile": "building",
       "vibe_tags": [
-        "festive",
         "bollywood",
         "dance",
-        "high_energy",
-        "celebration"
+        "upbeat",
+        "romantic",
+        "celebration",
+        "joyful"
       ],
       "has_vocals": true,
       "language": "Hindi",
       "sections_summary": [
         {
           "start": 0.0,
-          "end": 6.84,
+          "end": 6.0,
           "type": "intro",
           "energy": 0.8
         },
         {
-          "start": 6.84,
-          "end": 12.84,
+          "start": 6.0,
+          "end": 12.0,
           "type": "chorus",
           "energy": 0.95
         }
       ],
       "lyric_intel_merged": true,
       "file_id": "CQACAgUAAyEGAATgPI-iAAIGeWqDQQkyXa0g_5k9U9np0-0fSmUtAAKFIAACbj4hVD5Oy9uVi9uCPQQ",
-      "avg_energy": 0.707,
-      "vibe": "ambient",
-      "beat_count": 108,
-      "drop_count": 3,
-      "beat_score": 124.07
+      "avg_energy": 0.949,
+      "vibe": "cinematic",
+      "beat_count": 5,
+      "drop_count": 1,
+      "beat_score": 17.490000000000002
     },
     "sess_1786942119_9044.wav": {
       "file_id": "BQACAgUAAyEGAATgPI-iAAIFZ2qCkrFc7oqsBKEWk9efRJE9mVg0AAJaJAACbj4ZVP7EHgSNp70DPQQ",
@@ -494,9 +495,9 @@
       "file_id": "CQACAgUAAyEGAATgPI-iAAIGtmqDSKGLV8V4ngSmclqIeHEKDS4cAALfIAACbj4hVM_2UpW9TQvUPQQ"
     },
     "Fathima_sana.mp3": {
-      "usage_count": 1,
-      "last_used": 1787606330.606548,
-      "bpm": 120.0,
+      "usage_count": 0,
+      "last_used": 0,
+      "bpm": 0.0,
       "energy": 0.5,
       "created_at": 1786988663.8366418,
       "beat_data_path": null,
@@ -504,40 +505,7 @@
       "sample_rate": 44100,
       "audio_hash": "807012_1784331762",
       "version": 2,
-      "file_id": "CQACAgUAAyEGAATgPI-iAAIGt2qDSKZoTB-XIy5dOSx5KB8EWm8UAALgIAACbj4hVL-Hlw38wy7VPQQ",
-      "tempo_bpm": 120.0,
-      "dominant_emotion": "love",
-      "energy_profile": "medium",
-      "vibe_tags": [
-        "romantic",
-        "bollywood",
-        "dance",
-        "love",
-        "expressive"
-      ],
-      "has_vocals": true,
-      "language": "Hindi",
-      "sections_summary": [
-        {
-          "start": 0.0,
-          "end": 8.0,
-          "type": "intro",
-          "energy": 0.4
-        },
-        {
-          "start": 8.0,
-          "end": 20.0,
-          "type": "verse",
-          "energy": 0.6
-        },
-        {
-          "start": 20.0,
-          "end": 35.0,
-          "type": "chorus",
-          "energy": 0.8
-        }
-      ],
-      "lyric_intel_merged": true
+      "file_id": "CQACAgUAAyEGAATgPI-iAAIGt2qDSKZoTB-XIy5dOSx5KB8EWm8UAALgIAACbj4hVL-Hlw38wy7VPQQ"
     },
     "Fit_girl_2.mp3": {
       "usage_count": 0,
@@ -817,9 +785,9 @@
       "file_id": "CQACAgUAAyEGAATgPI-iAAIGw2qDSMxOFM4ReB3By9H4g3uN6GaIAALsIAACbj4hVP-O-ekOhwICPQQ"
     },
     "Monika_chaudhary.mp3": {
-      "usage_count": 1,
-      "last_used": 1787606315.392743,
-      "bpm": 120.0,
+      "usage_count": 0,
+      "last_used": 0,
+      "bpm": 0.0,
       "energy": 0.5,
       "created_at": 1786988663.839642,
       "beat_data_path": null,
@@ -827,36 +795,7 @@
       "sample_rate": 44100,
       "audio_hash": "177565_1784331764",
       "version": 2,
-      "file_id": "CQACAgUAAyEGAATgPI-iAAIGxGqDSM6oEEhlEVc4wFkxNdz__BH6AALtIAACbj4hVNXtfw-KJJ9mPQQ",
-      "tempo_bpm": 120.0,
-      "dominant_emotion": "joy",
-      "energy_profile": "high",
-      "vibe_tags": [
-        "bollywood",
-        "upbeat",
-        "romantic",
-        "dance",
-        "festive"
-      ],
-      "has_vocals": true,
-      "language": "Hindi",
-      "sections_summary": [
-        {
-          "start": 0.0,
-          "end": 2.5,
-          "type": "intro",
-          "energy": 0.6
-        },
-        {
-          "start": 2.5,
-          "end": 7.5,
-          "type": "chorus",
-          "energy": 0.9
-        }
-      ],
-      "lyric_intel_merged": true,
-      "is_unusable": true,
-      "unusable_reason": "Audio snippet too short (7.4s < 10s minimum)"
+      "file_id": "CQACAgUAAyEGAATgPI-iAAIGxGqDSM6oEEhlEVc4wFkxNdz__BH6AALtIAACbj4hVNXtfw-KJJ9mPQQ"
     },
     "Nora_fatehi.mp3": {
       "usage_count": 1,
@@ -872,9 +811,9 @@
       "file_id": "CQACAgUAAyEGAATgPI-iAAIGxWqDSNECKHPloZq2qQhlzNhew3iyAALuIAACbj4hVBui6bZm25ZcPQQ"
     },
     "Palak_agrawal.mp3": {
-      "usage_count": 1,
-      "last_used": 1787607446.5037122,
-      "bpm": 120.0,
+      "usage_count": 0,
+      "last_used": 0,
+      "bpm": 0.0,
       "energy": 0.5,
       "created_at": 1786988663.8406422,
       "beat_data_path": null,
@@ -882,44 +821,12 @@
       "sample_rate": 44100,
       "audio_hash": "250917_1784331764",
       "version": 2,
-      "file_id": "CQACAgUAAyEGAATgPI-iAAIGxmqDSNOtK02VAxhB4YhIoLJnfiAZAALvIAACbj4hVCe64xpLNxxtPQQ",
-      "tempo_bpm": 120.0,
-      "dominant_emotion": "hype",
-      "energy_profile": "high",
-      "vibe_tags": [
-        "electronic",
-        "hype",
-        "energetic",
-        "dance"
-      ],
-      "has_vocals": true,
-      "language": "English",
-      "sections_summary": [
-        {
-          "start": 0.0,
-          "end": 3.75,
-          "type": "intro",
-          "energy": 0.6
-        },
-        {
-          "start": 3.75,
-          "end": 7.5,
-          "type": "verse",
-          "energy": 0.8
-        },
-        {
-          "start": 7.5,
-          "end": 11.25,
-          "type": "drop",
-          "energy": 1.0
-        }
-      ],
-      "lyric_intel_merged": true
+      "file_id": "CQACAgUAAyEGAATgPI-iAAIGxmqDSNOtK02VAxhB4YhIoLJnfiAZAALvIAACbj4hVCe64xpLNxxtPQQ"
     },
     "Pooja_hedge.mp3": {
-      "usage_count": 1,
-      "last_used": 1787597881.1820743,
-      "bpm": 120.0,
+      "usage_count": 0,
+      "last_used": 0,
+      "bpm": 0.0,
       "energy": 0.5,
       "created_at": 1786988663.8406422,
       "beat_data_path": null,
@@ -927,40 +834,7 @@
       "sample_rate": 44100,
       "audio_hash": "543699_1784331764",
       "version": 2,
-      "file_id": "CQACAgUAAyEGAATgPI-iAAIGx2qDSNblAAEvugpnHmwVEs1T2ikTrQAC8CAAAm4-IVQ1_jy4YYJJgz0E",
-      "tempo_bpm": 120.0,
-      "dominant_emotion": "celebration",
-      "energy_profile": "high",
-      "vibe_tags": [
-        "festive",
-        "dance",
-        "bollywood",
-        "high_energy",
-        "celebration"
-      ],
-      "has_vocals": true,
-      "language": "Hindi",
-      "sections_summary": [
-        {
-          "start": 0.0,
-          "end": 3.75,
-          "type": "intro",
-          "energy": 0.6
-        },
-        {
-          "start": 3.75,
-          "end": 15.0,
-          "type": "chorus",
-          "energy": 0.9
-        },
-        {
-          "start": 15.0,
-          "end": 23.5,
-          "type": "drop",
-          "energy": 1.0
-        }
-      ],
-      "lyric_intel_merged": true
+      "file_id": "CQACAgUAAyEGAATgPI-iAAIGx2qDSNblAAEvugpnHmwVEs1T2ikTrQAC8CAAAm4-IVQ1_jy4YYJJgz0E"
     },
     "Rakul_preet_singh_1.mp3": {
       "usage_count": 1,
@@ -5688,24 +5562,24 @@
         }
       }
     },
-    "manual_DcaVvXCsrn-": {
-      "clip_id": "manual_DcaVvXCsrn-",
-      "clip_folder": "/home/runner/work/Gemini-Rhythm-driven-editor/Gemini-Rhythm-driven-editor/downloads/manual_DcaVvXCsrn-",
+    "video": {
+      "clip_id": "manual_DbqHv0Eoxq7",
+      "clip_folder": "D:\\AMTCE\\downloads\\manual_DbqHv0Eoxq7",
       "schema_version": 3,
-      "created_at": 1787597839.1259913,
+      "created_at": 1785982617.220048,
       "phase1": {},
       "visual_context": {
         "_source": "gemini_call_1_forensic",
-        "_filled_at": 1787597839.1261077,
+        "_filled_at": 1787006951.097481,
         "intent": "fashion_lifestyle",
         "tone": "aspirational",
         "editing_style": "fashion_showcase",
-        "engagement_hook": "Start with a sharp, full-body tracking shot of the subject walking, immediately cutting to a tight close-up of the designer earrings to establish the high-fashion tone.",
+        "engagement_hook": "Start with a close-up of the subject walking towards the camera, immediately establishing her stylish look and confident demeanor.",
         "detected_entities": [
           "person:female",
-          "clothing:blazer",
-          "accessory:sunglasses",
-          "accessory:earrings"
+          "clothing:skirt",
+          "clothing:jacket",
+          "accessory:sunglasses"
         ],
         "possible_narratives": [
           "fashion_moment",
@@ -5741,140 +5615,142 @@
           "tempo_bpm": 0.0,
           "beat_timestamps": [
             {
-              "time": 0.8,
-              "energy": 0.463
+              "time": 0.0,
+              "energy": 0.663
             },
             {
-              "time": 1.2000000000000002,
-              "energy": 0.404
+              "time": 0.5,
+              "energy": 0.716
             },
             {
-              "time": 6.2,
-              "energy": 0.448
+              "time": 1.1500000000000001,
+              "energy": 0.802
             },
             {
-              "time": 8.05,
-              "energy": 0.513
+              "time": 1.75,
+              "energy": 0.695
             },
             {
-              "time": 9.850000000000001,
-              "energy": 0.391
+              "time": 2.35,
+              "energy": 0.723
+            },
+            {
+              "time": 2.95,
+              "energy": 0.753
+            },
+            {
+              "time": 3.5500000000000003,
+              "energy": 0.721
+            },
+            {
+              "time": 4.15,
+              "energy": 0.684
+            },
+            {
+              "time": 4.800000000000001,
+              "energy": 0.715
+            },
+            {
+              "time": 5.4,
+              "energy": 0.706
+            },
+            {
+              "time": 6.0,
+              "energy": 0.734
+            },
+            {
+              "time": 7.2,
+              "energy": 0.74
+            },
+            {
+              "time": 7.800000000000001,
+              "energy": 0.743
+            },
+            {
+              "time": 8.4,
+              "energy": 0.777
+            },
+            {
+              "time": 9.9,
+              "energy": 0.975
             },
             {
               "time": 10.4,
-              "energy": 0.922
+              "energy": 0.507
             },
             {
-              "time": 11.0,
-              "energy": 0.649
+              "time": 11.3,
+              "energy": 0.418
             },
             {
-              "time": 11.9,
-              "energy": 0.862
-            },
-            {
-              "time": 12.8,
-              "energy": 0.887
-            },
-            {
-              "time": 13.4,
-              "energy": 0.591
-            },
-            {
-              "time": 14.3,
-              "energy": 0.847
-            },
-            {
-              "time": 15.200000000000001,
-              "energy": 0.906
-            },
-            {
-              "time": 15.8,
-              "energy": 0.645
-            },
-            {
-              "time": 16.7,
-              "energy": 0.666
-            },
-            {
-              "time": 17.6,
-              "energy": 0.986
-            },
-            {
-              "time": 18.2,
-              "energy": 0.632
-            },
-            {
-              "time": 19.450000000000003,
-              "energy": 0.444
-            },
-            {
-              "time": 20.0,
+              "time": 12.350000000000001,
               "energy": 1.0
             },
             {
-              "time": 20.6,
-              "energy": 0.636
+              "time": 13.75,
+              "energy": 0.45
             },
             {
-              "time": 21.5,
-              "energy": 0.88
+              "time": 14.75,
+              "energy": 0.946
             },
             {
-              "time": 22.400000000000002,
-              "energy": 0.92
+              "time": 15.55,
+              "energy": 0.519
             },
             {
-              "time": 23.0,
-              "energy": 0.559
+              "time": 16.150000000000002,
+              "energy": 0.44
             },
             {
-              "time": 23.900000000000002,
-              "energy": 0.84
+              "time": 17.2,
+              "energy": 0.399
             },
             {
-              "time": 24.8,
-              "energy": 0.979
+              "time": 18.1,
+              "energy": 0.48
             },
             {
-              "time": 25.400000000000002,
-              "energy": 0.651
+              "time": 19.75,
+              "energy": 0.467
             },
             {
-              "time": 26.3,
-              "energy": 0.832
+              "time": 21.150000000000002,
+              "energy": 0.475
             },
             {
-              "time": 28.55,
-              "energy": 0.387
+              "time": 22.950000000000003,
+              "energy": 0.48
             }
           ],
           "drop_timestamps": [
-            0.8
+            9.9,
+            12.350000000000001,
+            14.75
           ],
-          "avg_energy": 0.701,
-          "vibe": "ambient",
+          "avg_energy": 0.657,
+          "vibe": "cinematic",
           "beat_count": 27,
-          "drop_count": 1,
-          "wav_path": "/home/runner/work/Gemini-Rhythm-driven-editor/Gemini-Rhythm-driven-editor/downloads/manual_DcaVvXCsrn-/video_extracted.wav"
+          "drop_count": 3,
+          "wav_path": "D:\\AMTCE\\downloads\\manual_DbqHv0Eoxq7\\video_extracted.wav"
         },
         "context": {
           "_source": "gemini_call_1_forensic",
-          "_filled_at": 1787597839.1261103,
+          "_filled_at": 1787006951.097481,
           "has_vocals": true,
           "speech_mode": "music_broll",
           "recommended_audio_action": "audio_replace_full_bgm",
           "dominant_emotion": "aspirational",
           "vibe": "fashion_showcase"
         },
-        "selected_bgm_track": "Pooja_hedge.mp3",
-        "bgm_selection_reasoning": "The 'hype' emotion and medium vibe of this track provide the necessary high-energy, aspirational backdrop required for a fashion-forward lifestyle reel.",
-        "bgm_alignment_score": 0.85,
-        "_bgm_selected_at": 1787597881.1684687
+        "selected_bgm_track": "Manushi_chillar.mp3",
+        "bgm_selection_reasoning": "The energetic and stylish vibe of Manushi_chillar.mp3 perfectly complements an aspirational fashion moment reel.",
+        "bgm_alignment_score": 0.92,
+        "_bgm_selected_at": 1787007003.1960971
       },
       "visual_vectors": {
         "_source": "gemini_call_1_forensic",
-        "_filled_at": 1787597839.126119,
+        "_filled_at": 1787006951.097481,
         "targeted_timestamps_sec": [
           0.0,
           1.0,
@@ -5893,1125 +5769,32 @@
       },
       "editing_plan": {
         "_source": "gemini_call_3_ffmpeg_synthesis",
-        "_filled_at": 1787597940.591829,
-        "editing_intent": "Transform the single source clip into a high-energy 9:16 vertical fashion reel using a multi-trim beat-snapped shot plan aligned to the 120 BPM celebration track 'Pooja_hedge.mp3'.",
-        "creative_rationale": "Following the multi-trim rhythm rule, multiple beat-aligned trims from the RTB shot plan are extracted and concatenated in sequence before scaling and background music mixing, maintaining a fast-paced aspirational fashion showcase without using forbidden single-clip transitions.",
-        "strategy_name": "Transform the single source clip into a high-energy 9:16 vertical fashion reel using a multi-trim beat-snapped shot plan aligned to the 120 BPM celebration track 'Pooja_hedge.mp3'.",
-        "total_steps": 14,
+        "_filled_at": 1785982701.7049103,
+        "editing_intent": "Fashion lifestyle showcase reel featuring rhythmic beat-synced jump cuts and aspirational styling, accompanied by romantic BGM.",
+        "creative_rationale": "Following the RTB Beat-Snapped Shot Plan, multiple exact trim windows are extracted from the source clip and joined via concat. These are placed before any scaling or audio-mixing operations to satisfy the duration lock rule. The aspect ratio is adapted for 9:16 vertical delivery with a blurred background pad, and the selected romantic track is mixed at the end.",
+        "strategy_name": "Fashion lifestyle showcase reel featuring rhythmic beat-synced jump cuts and aspirational styling, accompanied by romantic BGM.",
+        "total_steps": 13,
         "operations": []
       },
       "output": {
-        "_filled_at": 1787597940.5918324,
-        "master_reel_path": "/home/runner/work/Gemini-Rhythm-driven-editor/Gemini-Rhythm-driven-editor/Processed Shorts/manual_DcaVvXCsrn-_master.mp4",
+        "_filled_at": 1785982701.7049103,
+        "master_reel_path": "D:\\AMTCE\\Processed Shorts\\manual_DbqHv0Eoxq7_master.mp4",
         "render_success": true,
         "duration_lock": {
           "repaired": false,
-          "video_duration": 16.0,
-          "audio_duration_before": 16.0,
-          "source_duration": 29.51
+          "video_duration": 7.32,
+          "audio_duration_before": 7.32,
+          "source_duration": 23.43
         },
         "mode": "SINGLE_PASS",
         "brand_overlay": {
           "text": "fitsbysakshitha",
-          "x": 147,
-          "y": 1082,
+          "x": 48,
+          "y": 746,
           "w": 180,
-          "h": 61,
+          "h": 40,
           "opencv_vectors": {}
         }
-      }
-    },
-    "manual_DcassaXsj8g": {
-      "clip_id": "manual_DcassaXsj8g",
-      "clip_folder": "/home/runner/work/Gemini-Rhythm-driven-editor/Gemini-Rhythm-driven-editor/downloads/manual_DcassaXsj8g",
-      "schema_version": 3,
-      "created_at": 1787606306.074976,
-      "phase1": {},
-      "visual_context": {
-        "_source": "gemini_call_1_forensic",
-        "_filled_at": 1787607441.4032555,
-        "intent": "music_performance",
-        "tone": "aspirational",
-        "editing_style": "music_showcase",
-        "engagement_hook": "The video opens with a wide shot of the performer in the desert, immediately transitioning into a close-up of her dance, establishing the high-energy, aesthetic vibe.",
-        "detected_entities": [
-          "person:female",
-          "environment:outdoor",
-          "clothing:embellished_top",
-          "clothing:fringe_pants"
-        ],
-        "possible_narratives": [
-          "music_showcase",
-          "fashion_moment"
-        ],
-        "recommended_narrative": "music_showcase",
-        "feature_flags": {
-          "enable_price_tags": false,
-          "enable_fashion_caption": true,
-          "enable_cinematic_zoom": true,
-          "enable_speed_ramps": true,
-          "enable_fast_pacing": false,
-          "enable_voiceover": false
-        },
-        "safety": {
-          "classification": "safe",
-          "monetization_safe": true
-        },
-        "creative_possibilities": [],
-        "speech_intelligence": {
-          "speech_mode": "music_broll",
-          "is_talking_visually": false,
-          "has_spoken_vocal": true,
-          "is_speech_vocal": false,
-          "recommended_audio_action": "audio_replace_full_bgm"
-        }
-      },
-      "audio_data": {
-        "_description": "Unified audio block. math fills first (Phase 1 DSP), context fills second (Gemini Call 1).",
-        "math": {
-          "_source": "phase1_dsp",
-          "_filled_at": "step1_before_gemini",
-          "tempo_bpm": 0.0,
-          "beat_timestamps": [
-            {
-              "time": 0.15000000000000002,
-              "energy": 0.561
-            },
-            {
-              "time": 1.55,
-              "energy": 0.538
-            },
-            {
-              "time": 5.550000000000001,
-              "energy": 0.607
-            },
-            {
-              "time": 8.55,
-              "energy": 0.352
-            },
-            {
-              "time": 9.05,
-              "energy": 0.386
-            },
-            {
-              "time": 10.700000000000001,
-              "energy": 0.501
-            },
-            {
-              "time": 12.350000000000001,
-              "energy": 0.574
-            },
-            {
-              "time": 13.350000000000001,
-              "energy": 0.554
-            },
-            {
-              "time": 14.600000000000001,
-              "energy": 0.458
-            },
-            {
-              "time": 15.950000000000001,
-              "energy": 0.63
-            },
-            {
-              "time": 18.5,
-              "energy": 0.505
-            },
-            {
-              "time": 20.35,
-              "energy": 0.508
-            },
-            {
-              "time": 21.5,
-              "energy": 0.657
-            },
-            {
-              "time": 22.0,
-              "energy": 0.645
-            },
-            {
-              "time": 22.5,
-              "energy": 0.703
-            },
-            {
-              "time": 23.75,
-              "energy": 0.71
-            },
-            {
-              "time": 24.75,
-              "energy": 0.695
-            },
-            {
-              "time": 31.700000000000003,
-              "energy": 0.542
-            },
-            {
-              "time": 33.95,
-              "energy": 0.601
-            },
-            {
-              "time": 34.45,
-              "energy": 0.698
-            },
-            {
-              "time": 34.95,
-              "energy": 0.703
-            },
-            {
-              "time": 39.2,
-              "energy": 0.614
-            },
-            {
-              "time": 39.800000000000004,
-              "energy": 0.501
-            },
-            {
-              "time": 41.050000000000004,
-              "energy": 0.506
-            },
-            {
-              "time": 41.7,
-              "energy": 0.816
-            },
-            {
-              "time": 42.35,
-              "energy": 0.524
-            },
-            {
-              "time": 42.95,
-              "energy": 0.464
-            },
-            {
-              "time": 43.5,
-              "energy": 0.709
-            },
-            {
-              "time": 43.95,
-              "energy": 0.612
-            },
-            {
-              "time": 44.900000000000006,
-              "energy": 0.718
-            },
-            {
-              "time": 50.650000000000006,
-              "energy": 0.71
-            },
-            {
-              "time": 51.75,
-              "energy": 0.728
-            },
-            {
-              "time": 52.7,
-              "energy": 0.782
-            },
-            {
-              "time": 53.150000000000006,
-              "energy": 0.728
-            },
-            {
-              "time": 53.650000000000006,
-              "energy": 0.616
-            },
-            {
-              "time": 54.5,
-              "energy": 0.642
-            },
-            {
-              "time": 56.0,
-              "energy": 0.726
-            },
-            {
-              "time": 56.5,
-              "energy": 0.742
-            },
-            {
-              "time": 59.95,
-              "energy": 0.711
-            },
-            {
-              "time": 63.1,
-              "energy": 0.73
-            },
-            {
-              "time": 63.75,
-              "energy": 0.695
-            },
-            {
-              "time": 64.3,
-              "energy": 0.767
-            },
-            {
-              "time": 72.3,
-              "energy": 0.682
-            },
-            {
-              "time": 73.35000000000001,
-              "energy": 0.989
-            },
-            {
-              "time": 73.8,
-              "energy": 0.774
-            },
-            {
-              "time": 74.25,
-              "energy": 0.635
-            },
-            {
-              "time": 74.8,
-              "energy": 0.703
-            },
-            {
-              "time": 75.35000000000001,
-              "energy": 0.739
-            },
-            {
-              "time": 75.9,
-              "energy": 0.914
-            },
-            {
-              "time": 82.25,
-              "energy": 0.715
-            },
-            {
-              "time": 83.05000000000001,
-              "energy": 0.921
-            },
-            {
-              "time": 83.7,
-              "energy": 0.605
-            },
-            {
-              "time": 84.30000000000001,
-              "energy": 0.727
-            },
-            {
-              "time": 84.95,
-              "energy": 0.747
-            },
-            {
-              "time": 85.35000000000001,
-              "energy": 0.73
-            },
-            {
-              "time": 85.85000000000001,
-              "energy": 0.738
-            },
-            {
-              "time": 86.9,
-              "energy": 0.916
-            },
-            {
-              "time": 87.55000000000001,
-              "energy": 0.896
-            },
-            {
-              "time": 88.15,
-              "energy": 0.757
-            },
-            {
-              "time": 88.85000000000001,
-              "energy": 0.759
-            },
-            {
-              "time": 89.5,
-              "energy": 0.883
-            },
-            {
-              "time": 90.15,
-              "energy": 0.82
-            },
-            {
-              "time": 90.95,
-              "energy": 0.794
-            },
-            {
-              "time": 91.95,
-              "energy": 0.765
-            },
-            {
-              "time": 93.35000000000001,
-              "energy": 0.877
-            },
-            {
-              "time": 94.0,
-              "energy": 0.728
-            },
-            {
-              "time": 94.60000000000001,
-              "energy": 0.791
-            },
-            {
-              "time": 95.30000000000001,
-              "energy": 0.726
-            },
-            {
-              "time": 95.85000000000001,
-              "energy": 0.665
-            },
-            {
-              "time": 97.25,
-              "energy": 0.847
-            },
-            {
-              "time": 97.85000000000001,
-              "energy": 0.825
-            },
-            {
-              "time": 98.45,
-              "energy": 0.839
-            },
-            {
-              "time": 99.15,
-              "energy": 0.679
-            },
-            {
-              "time": 99.80000000000001,
-              "energy": 0.772
-            },
-            {
-              "time": 100.60000000000001,
-              "energy": 0.746
-            },
-            {
-              "time": 101.05000000000001,
-              "energy": 0.776
-            },
-            {
-              "time": 101.75,
-              "energy": 0.828
-            },
-            {
-              "time": 103.65,
-              "energy": 1.0
-            },
-            {
-              "time": 104.30000000000001,
-              "energy": 0.895
-            },
-            {
-              "time": 104.9,
-              "energy": 0.902
-            },
-            {
-              "time": 105.55000000000001,
-              "energy": 0.721
-            },
-            {
-              "time": 106.2,
-              "energy": 0.773
-            },
-            {
-              "time": 106.75,
-              "energy": 0.752
-            },
-            {
-              "time": 107.55000000000001,
-              "energy": 0.852
-            },
-            {
-              "time": 108.15,
-              "energy": 0.899
-            },
-            {
-              "time": 108.75,
-              "energy": 0.784
-            },
-            {
-              "time": 109.45,
-              "energy": 0.718
-            },
-            {
-              "time": 110.10000000000001,
-              "energy": 0.911
-            },
-            {
-              "time": 110.75,
-              "energy": 0.778
-            },
-            {
-              "time": 111.55000000000001,
-              "energy": 0.82
-            },
-            {
-              "time": 112.65,
-              "energy": 0.766
-            },
-            {
-              "time": 113.95,
-              "energy": 0.876
-            },
-            {
-              "time": 114.60000000000001,
-              "energy": 0.768
-            },
-            {
-              "time": 115.2,
-              "energy": 0.792
-            },
-            {
-              "time": 115.9,
-              "energy": 0.755
-            },
-            {
-              "time": 116.45,
-              "energy": 0.704
-            },
-            {
-              "time": 116.85000000000001,
-              "energy": 0.805
-            },
-            {
-              "time": 117.9,
-              "energy": 0.765
-            },
-            {
-              "time": 118.7,
-              "energy": 0.739
-            },
-            {
-              "time": 119.10000000000001,
-              "energy": 0.728
-            },
-            {
-              "time": 119.80000000000001,
-              "energy": 0.676
-            },
-            {
-              "time": 120.4,
-              "energy": 0.784
-            },
-            {
-              "time": 121.10000000000001,
-              "energy": 0.755
-            },
-            {
-              "time": 121.55000000000001,
-              "energy": 0.778
-            },
-            {
-              "time": 122.85000000000001,
-              "energy": 0.777
-            },
-            {
-              "time": 125.5,
-              "energy": 0.283
-            },
-            {
-              "time": 126.5,
-              "energy": 0.2
-            },
-            {
-              "time": 127.2,
-              "energy": 0.135
-            }
-          ],
-          "drop_timestamps": [
-            0.15000000000000002,
-            20.35,
-            84.95
-          ],
-          "avg_energy": 0.707,
-          "vibe": "ambient",
-          "beat_count": 108,
-          "drop_count": 3,
-          "wav_path": "/home/runner/work/Gemini-Rhythm-driven-editor/Gemini-Rhythm-driven-editor/downloads/manual_DcassaXsj8g/video_extracted.wav"
-        },
-        "context": {
-          "_source": "gemini_call_1_forensic",
-          "_filled_at": 1787607441.4032598,
-          "has_vocals": true,
-          "speech_mode": "music_broll",
-          "recommended_audio_action": "audio_replace_full_bgm",
-          "dominant_emotion": "aspirational",
-          "vibe": "music_showcase"
-        },
-        "selected_bgm_track": "Palak_agrawal.mp3",
-        "bgm_selection_reasoning": "The hype emotion and medium vibe of this music track match the aspirational tone and energy of a music performance showcase.",
-        "bgm_alignment_score": 0.95,
-        "_bgm_selected_at": 1787607446.4881678
-      },
-      "visual_vectors": {
-        "_source": "gemini_call_1_forensic",
-        "_filled_at": 1787607441.4032693,
-        "targeted_timestamps_sec": [
-          0.0,
-          1.0,
-          2.0,
-          3.0,
-          4.0,
-          5.0
-        ],
-        "scene_cut_timestamps": [
-          3.0,
-          4.0,
-          5.0
-        ],
-        "hook_zone_end_sec": 5.0,
-        "climax_zone_start_sec": 5.0
-      },
-      "editing_plan": {
-        "_source": "gemini_call_3_ffmpeg_synthesis",
-        "_filled_at": 1787607500.5262902,
-        "editing_intent": "Create a 18s high-energy music performance vertical reel with beat-snapped jump cuts synchronized to 120 BPM.",
-        "creative_rationale": "Following the RTB Shot Plan, we extracted 9 distinct 2.0-second windows matching the 120 BPM bar structure, concatenated them sequentially for a dynamic rhythmic flow, scaled to 9:16 vertical format with blur padding, and mixed in the 'Palak_agrawal.mp3' track at 120 BPM with audio ducking to maintain a hype aesthetic.",
-        "strategy_name": "Create a 18s high-energy music performance vertical reel with beat-snapped jump cuts synchronized to 120 BPM.",
-        "total_steps": 15,
-        "operations": []
-      },
-      "output": {
-        "_filled_at": 1787607500.526294,
-        "master_reel_path": "/home/runner/work/Gemini-Rhythm-driven-editor/Gemini-Rhythm-driven-editor/Processed Shorts/manual_DcassaXsj8g_master.mp4",
-        "render_success": true,
-        "duration_lock": {
-          "repaired": false,
-          "video_duration": 10.38,
-          "audio_duration_before": 10.38,
-          "source_duration": 129.49
-        },
-        "mode": "SINGLE_PASS",
-        "brand_overlay": {
-          "text": "fitsbysakshitha",
-          "x": 390,
-          "y": 1760,
-          "w": 320,
-          "h": 70
-        }
-      }
-    },
-    "video": {
-      "clip_id": "manual_DcassaXsj8g",
-      "clip_folder": "/home/runner/work/Gemini-Rhythm-driven-editor/Gemini-Rhythm-driven-editor/downloads/manual_DcassaXsj8g",
-      "schema_version": 3,
-      "created_at": 1787606306.074976,
-      "phase1": {},
-      "visual_context": {
-        "_source": "gemini_call_1_forensic",
-        "_filled_at": 1787606306.0752494,
-        "intent": "music_performance",
-        "tone": "aspirational",
-        "editing_style": "cinematic",
-        "engagement_hook": "Start with a sweeping wide shot of the desert landscape before cutting sharply to a close-up of the artist striking a dramatic pose.",
-        "detected_entities": [
-          "person:female",
-          "environment:outdoor",
-          "landscape:desert"
-        ],
-        "possible_narratives": [
-          "music_showcase",
-          "fashion_moment"
-        ],
-        "recommended_narrative": "music_showcase",
-        "feature_flags": {
-          "enable_price_tags": false,
-          "enable_fashion_caption": true,
-          "enable_cinematic_zoom": true,
-          "enable_speed_ramps": true,
-          "enable_fast_pacing": false,
-          "enable_voiceover": false
-        },
-        "safety": {
-          "classification": "safe",
-          "monetization_safe": true
-        },
-        "creative_possibilities": [],
-        "speech_intelligence": {
-          "speech_mode": "music_broll",
-          "is_talking_visually": false,
-          "has_spoken_vocal": true,
-          "is_speech_vocal": false,
-          "recommended_audio_action": "audio_replace_full_bgm"
-        }
-      },
-      "audio_data": {
-        "_description": "Unified audio block. math fills first (Phase 1 DSP), context fills second (Gemini Call 1).",
-        "math": {
-          "_source": "phase1_dsp",
-          "_filled_at": "step1_before_gemini",
-          "tempo_bpm": 0.0,
-          "beat_timestamps": [
-            {
-              "time": 0.15000000000000002,
-              "energy": 0.561
-            },
-            {
-              "time": 1.55,
-              "energy": 0.538
-            },
-            {
-              "time": 5.550000000000001,
-              "energy": 0.607
-            },
-            {
-              "time": 8.55,
-              "energy": 0.352
-            },
-            {
-              "time": 9.05,
-              "energy": 0.386
-            },
-            {
-              "time": 10.700000000000001,
-              "energy": 0.501
-            },
-            {
-              "time": 12.350000000000001,
-              "energy": 0.574
-            },
-            {
-              "time": 13.350000000000001,
-              "energy": 0.554
-            },
-            {
-              "time": 14.600000000000001,
-              "energy": 0.458
-            },
-            {
-              "time": 15.950000000000001,
-              "energy": 0.63
-            },
-            {
-              "time": 18.5,
-              "energy": 0.505
-            },
-            {
-              "time": 20.35,
-              "energy": 0.508
-            },
-            {
-              "time": 21.5,
-              "energy": 0.657
-            },
-            {
-              "time": 22.0,
-              "energy": 0.645
-            },
-            {
-              "time": 22.5,
-              "energy": 0.703
-            },
-            {
-              "time": 23.75,
-              "energy": 0.71
-            },
-            {
-              "time": 24.75,
-              "energy": 0.695
-            },
-            {
-              "time": 31.700000000000003,
-              "energy": 0.542
-            },
-            {
-              "time": 33.95,
-              "energy": 0.601
-            },
-            {
-              "time": 34.45,
-              "energy": 0.698
-            },
-            {
-              "time": 34.95,
-              "energy": 0.703
-            },
-            {
-              "time": 39.2,
-              "energy": 0.614
-            },
-            {
-              "time": 39.800000000000004,
-              "energy": 0.501
-            },
-            {
-              "time": 41.050000000000004,
-              "energy": 0.506
-            },
-            {
-              "time": 41.7,
-              "energy": 0.816
-            },
-            {
-              "time": 42.35,
-              "energy": 0.524
-            },
-            {
-              "time": 42.95,
-              "energy": 0.464
-            },
-            {
-              "time": 43.5,
-              "energy": 0.709
-            },
-            {
-              "time": 43.95,
-              "energy": 0.612
-            },
-            {
-              "time": 44.900000000000006,
-              "energy": 0.718
-            },
-            {
-              "time": 50.650000000000006,
-              "energy": 0.71
-            },
-            {
-              "time": 51.75,
-              "energy": 0.728
-            },
-            {
-              "time": 52.7,
-              "energy": 0.782
-            },
-            {
-              "time": 53.150000000000006,
-              "energy": 0.728
-            },
-            {
-              "time": 53.650000000000006,
-              "energy": 0.616
-            },
-            {
-              "time": 54.5,
-              "energy": 0.642
-            },
-            {
-              "time": 56.0,
-              "energy": 0.726
-            },
-            {
-              "time": 56.5,
-              "energy": 0.742
-            },
-            {
-              "time": 59.95,
-              "energy": 0.711
-            },
-            {
-              "time": 63.1,
-              "energy": 0.73
-            },
-            {
-              "time": 63.75,
-              "energy": 0.695
-            },
-            {
-              "time": 64.3,
-              "energy": 0.767
-            },
-            {
-              "time": 72.3,
-              "energy": 0.682
-            },
-            {
-              "time": 73.35000000000001,
-              "energy": 0.989
-            },
-            {
-              "time": 73.8,
-              "energy": 0.774
-            },
-            {
-              "time": 74.25,
-              "energy": 0.635
-            },
-            {
-              "time": 74.8,
-              "energy": 0.703
-            },
-            {
-              "time": 75.35000000000001,
-              "energy": 0.739
-            },
-            {
-              "time": 75.9,
-              "energy": 0.914
-            },
-            {
-              "time": 82.25,
-              "energy": 0.715
-            },
-            {
-              "time": 83.05000000000001,
-              "energy": 0.921
-            },
-            {
-              "time": 83.7,
-              "energy": 0.605
-            },
-            {
-              "time": 84.30000000000001,
-              "energy": 0.727
-            },
-            {
-              "time": 84.95,
-              "energy": 0.747
-            },
-            {
-              "time": 85.35000000000001,
-              "energy": 0.73
-            },
-            {
-              "time": 85.85000000000001,
-              "energy": 0.738
-            },
-            {
-              "time": 86.9,
-              "energy": 0.916
-            },
-            {
-              "time": 87.55000000000001,
-              "energy": 0.896
-            },
-            {
-              "time": 88.15,
-              "energy": 0.757
-            },
-            {
-              "time": 88.85000000000001,
-              "energy": 0.759
-            },
-            {
-              "time": 89.5,
-              "energy": 0.883
-            },
-            {
-              "time": 90.15,
-              "energy": 0.82
-            },
-            {
-              "time": 90.95,
-              "energy": 0.794
-            },
-            {
-              "time": 91.95,
-              "energy": 0.765
-            },
-            {
-              "time": 93.35000000000001,
-              "energy": 0.877
-            },
-            {
-              "time": 94.0,
-              "energy": 0.728
-            },
-            {
-              "time": 94.60000000000001,
-              "energy": 0.791
-            },
-            {
-              "time": 95.30000000000001,
-              "energy": 0.726
-            },
-            {
-              "time": 95.85000000000001,
-              "energy": 0.665
-            },
-            {
-              "time": 97.25,
-              "energy": 0.847
-            },
-            {
-              "time": 97.85000000000001,
-              "energy": 0.825
-            },
-            {
-              "time": 98.45,
-              "energy": 0.839
-            },
-            {
-              "time": 99.15,
-              "energy": 0.679
-            },
-            {
-              "time": 99.80000000000001,
-              "energy": 0.772
-            },
-            {
-              "time": 100.60000000000001,
-              "energy": 0.746
-            },
-            {
-              "time": 101.05000000000001,
-              "energy": 0.776
-            },
-            {
-              "time": 101.75,
-              "energy": 0.828
-            },
-            {
-              "time": 103.65,
-              "energy": 1.0
-            },
-            {
-              "time": 104.30000000000001,
-              "energy": 0.895
-            },
-            {
-              "time": 104.9,
-              "energy": 0.902
-            },
-            {
-              "time": 105.55000000000001,
-              "energy": 0.721
-            },
-            {
-              "time": 106.2,
-              "energy": 0.773
-            },
-            {
-              "time": 106.75,
-              "energy": 0.752
-            },
-            {
-              "time": 107.55000000000001,
-              "energy": 0.852
-            },
-            {
-              "time": 108.15,
-              "energy": 0.899
-            },
-            {
-              "time": 108.75,
-              "energy": 0.784
-            },
-            {
-              "time": 109.45,
-              "energy": 0.718
-            },
-            {
-              "time": 110.10000000000001,
-              "energy": 0.911
-            },
-            {
-              "time": 110.75,
-              "energy": 0.778
-            },
-            {
-              "time": 111.55000000000001,
-              "energy": 0.82
-            },
-            {
-              "time": 112.65,
-              "energy": 0.766
-            },
-            {
-              "time": 113.95,
-              "energy": 0.876
-            },
-            {
-              "time": 114.60000000000001,
-              "energy": 0.768
-            },
-            {
-              "time": 115.2,
-              "energy": 0.792
-            },
-            {
-              "time": 115.9,
-              "energy": 0.755
-            },
-            {
-              "time": 116.45,
-              "energy": 0.704
-            },
-            {
-              "time": 116.85000000000001,
-              "energy": 0.805
-            },
-            {
-              "time": 117.9,
-              "energy": 0.765
-            },
-            {
-              "time": 118.7,
-              "energy": 0.739
-            },
-            {
-              "time": 119.10000000000001,
-              "energy": 0.728
-            },
-            {
-              "time": 119.80000000000001,
-              "energy": 0.676
-            },
-            {
-              "time": 120.4,
-              "energy": 0.784
-            },
-            {
-              "time": 121.10000000000001,
-              "energy": 0.755
-            },
-            {
-              "time": 121.55000000000001,
-              "energy": 0.778
-            },
-            {
-              "time": 122.85000000000001,
-              "energy": 0.777
-            },
-            {
-              "time": 125.5,
-              "energy": 0.283
-            },
-            {
-              "time": 126.5,
-              "energy": 0.2
-            },
-            {
-              "time": 127.2,
-              "energy": 0.135
-            }
-          ],
-          "drop_timestamps": [
-            0.15000000000000002,
-            20.35,
-            84.95
-          ],
-          "avg_energy": 0.707,
-          "vibe": "ambient",
-          "beat_count": 108,
-          "drop_count": 3,
-          "wav_path": "/home/runner/work/Gemini-Rhythm-driven-editor/Gemini-Rhythm-driven-editor/downloads/manual_DcassaXsj8g/video_extracted.wav"
-        },
-        "context": {
-          "_source": "gemini_call_1_forensic",
-          "_filled_at": 1787606306.0752528,
-          "has_vocals": true,
-          "speech_mode": "music_broll",
-          "recommended_audio_action": "audio_replace_full_bgm",
-          "dominant_emotion": "aspirational",
-          "vibe": "cinematic"
-        },
-        "selected_bgm_track": "Fathima_sana.mp3",
-        "bgm_selection_reasoning": "The 'hype' emotion and instrumental nature of this track provide the necessary energy to elevate a music showcase performance while maintaining an aspirational tone.",
-        "bgm_alignment_score": 0.85,
-        "_bgm_selected_at": 1787606330.5911453
-      },
-      "visual_vectors": {
-        "_source": "gemini_call_1_forensic",
-        "_filled_at": 1787606306.0752642,
-        "targeted_timestamps_sec": [
-          0.0,
-          1.0,
-          2.0,
-          3.0,
-          4.0,
-          5.0
-        ],
-        "scene_cut_timestamps": [
-          3.0,
-          4.0,
-          5.0
-        ],
-        "hook_zone_end_sec": 5.0,
-        "climax_zone_start_sec": 5.0
-      },
-      "editing_plan": {
-        "_source": "pending_gemini_call_3"
-      },
-      "output": {
-        "render_success": false
       }
     }
   }
