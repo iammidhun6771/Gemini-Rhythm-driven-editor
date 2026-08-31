@@ -5,46 +5,47 @@
       "usage_count": 4,
       "last_used": 1786912569.0695288,
       "bpm": 0.0,
-      "energy": 0.73,
+      "energy": 0.949,
       "created_at": 1786910177.2105505,
       "beat_data_path": null,
       "drop_times": [],
       "sample_rate": 44100,
-      "audio_hash": "415482_1788161049",
+      "audio_hash": "415482_1786988618",
       "version": 2,
       "tempo_bpm": 0.0,
-      "dominant_emotion": "celebration",
-      "energy_profile": "high",
+      "dominant_emotion": "joy",
+      "energy_profile": "building",
       "vibe_tags": [
-        "festive",
-        "dance",
         "bollywood",
-        "high_energy",
-        "celebration"
+        "dance",
+        "upbeat",
+        "romantic",
+        "celebration",
+        "joyful"
       ],
       "has_vocals": true,
       "language": "Hindi",
       "sections_summary": [
         {
           "start": 0.0,
-          "end": 6.7,
+          "end": 6.0,
           "type": "intro",
-          "energy": 0.7
+          "energy": 0.8
         },
         {
-          "start": 6.7,
-          "end": 12.8,
+          "start": 6.0,
+          "end": 12.0,
           "type": "chorus",
-          "energy": 0.9
+          "energy": 0.95
         }
       ],
       "lyric_intel_merged": true,
       "file_id": "CQACAgUAAyEGAATgPI-iAAIGeWqDQQkyXa0g_5k9U9np0-0fSmUtAAKFIAACbj4hVD5Oy9uVi9uCPQQ",
-      "avg_energy": 0.73,
-      "vibe": "groove",
-      "beat_count": 21,
-      "drop_count": 0,
-      "beat_score": 28.3
+      "avg_energy": 0.949,
+      "vibe": "cinematic",
+      "beat_count": 5,
+      "drop_count": 1,
+      "beat_score": 17.490000000000002
     },
     "sess_1786942119_9044.wav": {
       "file_id": "BQACAgUAAyEGAATgPI-iAAIFZ2qCkrFc7oqsBKEWk9efRJE9mVg0AAJaJAACbj4ZVP7EHgSNp70DPQQ",
@@ -823,9 +824,9 @@
       "file_id": "CQACAgUAAyEGAATgPI-iAAIGxmqDSNOtK02VAxhB4YhIoLJnfiAZAALvIAACbj4hVCe64xpLNxxtPQQ"
     },
     "Pooja_hedge.mp3": {
-      "usage_count": 1,
-      "last_used": 1788177487.305035,
-      "bpm": 120.0,
+      "usage_count": 0,
+      "last_used": 0,
+      "bpm": 0.0,
       "energy": 0.5,
       "created_at": 1786988663.8406422,
       "beat_data_path": null,
@@ -833,40 +834,7 @@
       "sample_rate": 44100,
       "audio_hash": "543699_1784331764",
       "version": 2,
-      "file_id": "CQACAgUAAyEGAATgPI-iAAIGx2qDSNblAAEvugpnHmwVEs1T2ikTrQAC8CAAAm4-IVQ1_jy4YYJJgz0E",
-      "tempo_bpm": 120.0,
-      "dominant_emotion": "celebration",
-      "energy_profile": "high",
-      "vibe_tags": [
-        "bollywood",
-        "dance",
-        "celebration",
-        "high_energy",
-        "desi"
-      ],
-      "has_vocals": true,
-      "language": "Hindi",
-      "sections_summary": [
-        {
-          "start": 0.0,
-          "end": 3.75,
-          "type": "intro",
-          "energy": 0.6
-        },
-        {
-          "start": 3.75,
-          "end": 15.0,
-          "type": "chorus",
-          "energy": 0.9
-        },
-        {
-          "start": 15.0,
-          "end": 22.0,
-          "type": "instrumental",
-          "energy": 0.8
-        }
-      ],
-      "lyric_intel_merged": true
+      "file_id": "CQACAgUAAyEGAATgPI-iAAIGx2qDSNblAAEvugpnHmwVEs1T2ikTrQAC8CAAAm4-IVQ1_jy4YYJJgz0E"
     },
     "Rakul_preet_singh_1.mp3": {
       "usage_count": 1,
@@ -5590,212 +5558,6 @@
           "y": 1188,
           "w": 309,
           "h": 43,
-          "opencv_vectors": {}
-        }
-      }
-    },
-    "manual_Dcs7oaTDUDB": {
-      "clip_id": "manual_Dcs7oaTDUDB",
-      "clip_folder": "/home/runner/work/Gemini-Rhythm-driven-editor/Gemini-Rhythm-driven-editor/downloads/manual_Dcs7oaTDUDB",
-      "schema_version": 3,
-      "created_at": 1788177391.1269834,
-      "phase1": {},
-      "visual_context": {
-        "_source": "gemini_call_1_forensic",
-        "_filled_at": 1788177391.1271045,
-        "intent": "fashion_lifestyle",
-        "tone": "aspirational",
-        "editing_style": "fashion_showcase",
-        "engagement_hook": "Capture the subject's confident pose and elegant walk as she steps into the frame.",
-        "detected_entities": [
-          "person:female",
-          "environment:indoor",
-          "backdrop:event_step_and_repeat"
-        ],
-        "possible_narratives": [
-          "fashion_moment",
-          "celebrity_highlight"
-        ],
-        "recommended_narrative": "fashion_moment",
-        "feature_flags": {
-          "enable_price_tags": false,
-          "enable_fashion_caption": true,
-          "enable_cinematic_zoom": true,
-          "enable_speed_ramps": false,
-          "enable_fast_pacing": false,
-          "enable_voiceover": false
-        },
-        "safety": {
-          "classification": "safe",
-          "monetization_safe": true
-        },
-        "creative_possibilities": [],
-        "speech_intelligence": {
-          "speech_mode": "music_broll",
-          "is_talking_visually": false,
-          "has_spoken_vocal": true,
-          "is_speech_vocal": false,
-          "recommended_audio_action": "audio_replace_full_bgm"
-        }
-      },
-      "audio_data": {
-        "_description": "Unified audio block. math fills first (Phase 1 DSP), context fills second (Gemini Call 1).",
-        "math": {
-          "_source": "phase1_dsp",
-          "_filled_at": "step1_before_gemini",
-          "tempo_bpm": 0.0,
-          "beat_timestamps": [
-            {
-              "time": 0.0,
-              "energy": 0.524
-            },
-            {
-              "time": 0.4,
-              "energy": 0.875
-            },
-            {
-              "time": 1.1,
-              "energy": 0.855
-            },
-            {
-              "time": 1.55,
-              "energy": 0.76
-            },
-            {
-              "time": 1.9500000000000002,
-              "energy": 0.97
-            },
-            {
-              "time": 2.4000000000000004,
-              "energy": 0.887
-            },
-            {
-              "time": 3.5500000000000003,
-              "energy": 1.0
-            },
-            {
-              "time": 4.0,
-              "energy": 0.891
-            },
-            {
-              "time": 5.15,
-              "energy": 0.748
-            },
-            {
-              "time": 5.550000000000001,
-              "energy": 0.681
-            },
-            {
-              "time": 6.25,
-              "energy": 0.575
-            },
-            {
-              "time": 6.7,
-              "energy": 0.805
-            },
-            {
-              "time": 7.550000000000001,
-              "energy": 0.935
-            },
-            {
-              "time": 8.35,
-              "energy": 0.841
-            },
-            {
-              "time": 9.25,
-              "energy": 0.681
-            },
-            {
-              "time": 9.65,
-              "energy": 0.511
-            },
-            {
-              "time": 10.05,
-              "energy": 0.495
-            },
-            {
-              "time": 10.450000000000001,
-              "energy": 0.548
-            },
-            {
-              "time": 10.850000000000001,
-              "energy": 0.562
-            },
-            {
-              "time": 11.3,
-              "energy": 0.497
-            },
-            {
-              "time": 11.700000000000001,
-              "energy": 0.679
-            }
-          ],
-          "drop_timestamps": [],
-          "avg_energy": 0.73,
-          "vibe": "groove",
-          "beat_count": 21,
-          "drop_count": 0,
-          "wav_path": "/home/runner/work/Gemini-Rhythm-driven-editor/Gemini-Rhythm-driven-editor/downloads/manual_Dcs7oaTDUDB/video_extracted.wav"
-        },
-        "context": {
-          "_source": "gemini_call_1_forensic",
-          "_filled_at": 1788177391.1271074,
-          "has_vocals": true,
-          "speech_mode": "music_broll",
-          "recommended_audio_action": "audio_replace_full_bgm",
-          "dominant_emotion": "aspirational",
-          "vibe": "fashion_showcase"
-        },
-        "selected_bgm_track": "Pooja_hedge.mp3",
-        "bgm_selection_reasoning": "The 'hype' emotion and medium vibe of this track provide the necessary energy to elevate a fashion-focused aspirational reel.",
-        "bgm_alignment_score": 0.85,
-        "_bgm_selected_at": 1788177487.2908833
-      },
-      "visual_vectors": {
-        "_source": "gemini_call_1_forensic",
-        "_filled_at": 1788177391.1271162,
-        "targeted_timestamps_sec": [
-          0.0,
-          1.0,
-          2.0,
-          3.0,
-          4.0,
-          5.0
-        ],
-        "scene_cut_timestamps": [
-          3.0,
-          4.0,
-          5.0
-        ],
-        "hook_zone_end_sec": 5.0,
-        "climax_zone_start_sec": 5.0
-      },
-      "editing_plan": {
-        "_source": "gemini_call_3_ffmpeg_synthesis",
-        "_filled_at": 1788177535.580155,
-        "editing_intent": "Fashion showcase rhythm edit for 'Pooja_hedge.mp3' (120 BPM) using beat-snapped jump cuts to match the aspirational celebration tone.",
-        "creative_rationale": "Adapted the fashion_showcase pattern by segmenting the source into 2.2s rhythmic blocks to align with the 120 BPM beat grid. The jump-cut sequence maintains high visual energy, while the scale_aspect operation ensures the 9:16 vertical format is optimized for social media engagement. Trims are executed first to ensure the final audio mix duration matches the visual timeline exactly.",
-        "strategy_name": "Fashion showcase rhythm edit for 'Pooja_hedge.mp3' (120 BPM) using beat-snapped jump cuts to match the aspirational celebration tone.",
-        "total_steps": 11,
-        "operations": []
-      },
-      "output": {
-        "_filled_at": 1788177535.5801594,
-        "master_reel_path": "/home/runner/work/Gemini-Rhythm-driven-editor/Gemini-Rhythm-driven-editor/Processed Shorts/manual_Dcs7oaTDUDB_master.mp4",
-        "render_success": true,
-        "duration_lock": {
-          "repaired": false,
-          "video_duration": 11.0,
-          "audio_duration_before": 11.0,
-          "source_duration": 11.91
-        },
-        "mode": "SINGLE_PASS",
-        "brand_overlay": {
-          "text": "fitsbysakshitha",
-          "x": 89,
-          "y": 1184,
-          "w": 321,
-          "h": 49,
           "opencv_vectors": {}
         }
       }
